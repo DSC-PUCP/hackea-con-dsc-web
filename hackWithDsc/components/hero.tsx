@@ -27,11 +27,11 @@ export function Hero() {
           {program.name}
         </h1>
         <p className="mt-4 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
-          Un programa de charlas y talleres del Developer Student Club para
+          Un proyecto de charlas y talleres del grupo estudiantil Developer Student Club para
           aprender, construir en equipo y conectar con la comunidad de
           estudiantes desarrolladores.
         </p>
-
+        
         <div className="mt-8 flex flex-wrap items-center gap-3 text-sm">
           <span className="inline-flex items-center gap-2 rounded-lg border border-border bg-card/70 px-3 py-2">
             <CalendarDays className="h-4 w-4 text-brand-blue" />

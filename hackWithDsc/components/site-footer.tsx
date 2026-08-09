@@ -16,10 +16,10 @@ export function SiteFooter() {
           <span className="font-display font-bold">{program.name}</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          {program.tagline} · {program.dateRange}
+          {program.tagline}
         </p>
         <p className="text-sm text-muted-foreground">
-          Developer Student Club · Hecho por y para estudiantes.
+          Developer Student Club PUCP · Hecho por y para estudiantes.
         </p>
       </div>
     </footer>

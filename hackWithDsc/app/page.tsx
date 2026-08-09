@@ -2,7 +2,7 @@ import { SiteHeader } from "@/components/site-header"
 import { Hero } from "@/components/hero"
 import { About } from "@/components/about"
 import { Agenda } from "@/components/agenda"
-import { Location } from "@/components/location"
+//import { Location } from "@/components/location"
 import { SiteFooter } from "@/components/site-footer"
 
 export default function Page() {
@@ -12,7 +12,7 @@ export default function Page() {
       <Hero />
       <About />
       <Agenda />
-      <Location />
+       
       <SiteFooter />
     </main>
   )

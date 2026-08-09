@@ -43,7 +43,7 @@ export function Agenda() {
             Agenda
           </p>
           <h2 className="mt-3 text-balance font-display text-3xl font-bold tracking-tight md:text-4xl">
-            Charlas y talleres del programa
+            Próxima charla del proyecto
           </h2>
           <p className="mt-4 text-pretty leading-relaxed text-muted-foreground">
             Estas son las sesiones que lanzaremos durante Hack with DSC. La
@@ -92,6 +92,7 @@ export function Agenda() {
                       <Clock className="h-4 w-4" />
                       {talk.time}
                     </span>
+                    
                     <span className="inline-flex items-center gap-1.5">
                       <MapPin className="h-4 w-4" />
                       {talk.room}

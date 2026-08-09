@@ -32,7 +32,7 @@ export function About() {
           Qué es Hack with DSC
         </p>
         <h2 className="mt-3 text-balance font-display text-3xl font-bold tracking-tight md:text-4xl">
-          Tres días para aprender, construir y crecer en comunidad
+          Eventos para aprender, construir y crecer en comunidad
         </h2>
         <p className="mt-4 text-pretty leading-relaxed text-muted-foreground">
           Hack with DSC reúne una serie de sesiones donde estudiantes de todos

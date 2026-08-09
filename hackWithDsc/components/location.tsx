@@ -1,3 +1,4 @@
+/*
 import { MapPin, Navigation } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import { program } from "@/lib/events"
@@ -62,3 +63,4 @@ export function Location() {
     </section>
   )
 }
+*/

@@ -20,18 +20,18 @@ export function SiteHeader() {
 
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
           <a href="#about" className="transition-colors hover:text-foreground">
-            El programa
+            El proyecto
           </a>
           <a href="#agenda" className="transition-colors hover:text-foreground">
             Agenda
           </a>
-          <a href="#location" className="transition-colors hover:text-foreground">
-            Ubicación
-          </a>
+          
+
+          
         </nav>
 
         <a href="#agenda" className={buttonVariants({ size: "sm" })}>
-          Ver charlas
+          Ver proxima charla
         </a>
       </div>
     </header>

@@ -16,33 +16,33 @@ export type Talk = {
 
 export const program = {
   name: "Hack with DSC",
-  tagline: "Programa de charlas y talleres",
+  tagline: "Proyecto de charlas y talleres",
   edition: "Edición 2026",
-  dateRange: "12 – 14 de marzo, 2026",
+  dateRange: "20 de agosto, 2026",
   venue: {
-    name: "Auditorio de Ingeniería · Universidad Central",
-    address: "Av. de las Ciencias 1420, Ciudad Universitaria",
-    // Ciudad Universitaria, UNAM (referencia genérica para el mapa demo)
-    mapEmbed:
-      "https://www.google.com/maps?q=Ciudad+Universitaria&output=embed",
+    name: "Por confirmar...",
+    address: "",
+    
+    //mapEmbed:
+      //"https://www.google.com/maps?q=Ciudad+Universitaria&output=embed",
   },
 }
 
 export const talks: Talk[] = [
   {
-    id: "kickoff",
-    title: "Kickoff: Construye con la comunidad",
-    speaker: "María Fernández",
-    role: "DSC Lead",
-    type: "Keynote",
-    date: "Jue 12 mar",
-    time: "17:00 – 17:45",
-    room: "Auditorio Principal",
+    id: "ai-workshop",
+    title: "¿Cómo codear en 2026? Para principiantes",
+    speaker: "",
+    role: "",
+    type: "Taller",
+    date: "Jue 20 agost",
+    time: "12:00pm – 2:00pm",
+    room: "Por confirmar...",
     description:
-      "Abrimos el programa contando de qué trata Hack with DSC, cómo participar en los retos y qué construiremos juntos durante las tres jornadas.",
+      "Uso de agentes de terminal, Spec Driven Development básico, dirigir agentes de IA. Uso de capas gratuitas",
     color: "blue",
-    tags: ["Comunidad", "Intro"],
-  },
+    tags: ["IA", "Intro","Carrera"],
+  },/*
   {
     id: "web-modern",
     title: "Web moderna con Next.js y React",
@@ -112,5 +112,5 @@ export const talks: Talk[] = [
       "Los equipos presentan lo que construyeron durante el programa y cerramos con la premiación de los mejores proyectos.",
     color: "green",
     tags: ["Cierre", "Proyectos"],
-  },
+  },*/
 ]
