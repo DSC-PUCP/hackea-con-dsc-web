@@ -4,7 +4,7 @@
 
 **Web pública del programa de eventos del Developer Student Club PUCP.**
 
-Talleres, ponencias y hackathones para estudiantes que quieren dejar de acumular teoría
+Talleres, ponencias y hackathons para estudiantes que quieren dejar de acumular teoría
 y empezar a construir software de verdad.
 
 </div>

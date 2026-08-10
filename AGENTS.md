@@ -9,7 +9,7 @@ archivos, y varias de ellas se han tomado a propósito.
 ## 1. Qué es esto
 
 Web pública de **Hack with DSC**, el programa de eventos del *Developer Student Club
-PUCP*: talleres, ponencias y hackathones para estudiantes de tecnología. La web es la
+PUCP*: talleres, ponencias y hackathons para estudiantes de tecnología. La web es la
 cara pública del programa; su trabajo es que alguien entienda de qué va en 15 segundos
 y termine en el grupo de WhatsApp de la comunidad.
 

@@ -248,7 +248,7 @@ usan como cualquier clase de Tailwind:
 `lib/site-config.ts` → `copy.hero.titulo`. La parte `destacado` es la que sale con el
 degradado de colores.
 
-### Añadir un cuarto formato (junto a Talleres/Ponencias/Hackathones)
+### Añadir un cuarto formato (junto a Talleres/Ponencias/hackathons)
 
 1. `lib/site-config.ts` → añade una entrada al array `formatos`.
 2. Si usas un `color` que no existía, añádelo al mapa `clasesPorColor` en

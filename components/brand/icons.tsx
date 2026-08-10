@@ -47,7 +47,7 @@ function Star({ className }: IconProps) {
   )
 }
 
-/** Rayo macizo: el icono de Hackathones. */
+/** Rayo macizo: el icono de hackathons. */
 function Bolt({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>

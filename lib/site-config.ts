@@ -31,7 +31,7 @@ export const site = {
   seo: {
     title: 'Hack with DSC — Del código al siguiente nivel',
     description:
-      'El programa de talleres, ponencias y hackathones del Developer Student Club PUCP. ' +
+      'El programa de talleres, ponencias y hackathons del Developer Student Club PUCP. ' +
       'Aprende haciendo, construye software con estándares profesionales y crece con una ' +
       'comunidad de estudiantes que codean.',
     keywords: [
@@ -94,7 +94,7 @@ export const copy = {
     /** El título se parte en dos: la segunda mitad se pinta con el degradado de marca. */
     titulo: { normal: 'Del código al', destacado: 'siguiente nivel' },
     descripcion:
-      'Talleres, ponencias y hackathones para que dejes de acumular teoría y empieces a ' +
+      'Talleres, ponencias y hackathons para que dejes de acumular teoría y empieces a ' +
       'construir software de verdad: desplegado, defendible y hecho en equipo.',
     ctaPrimario: 'Únete a la comunidad',
     ctaSecundario: 'Qué es Hack with DSC',
@@ -130,7 +130,7 @@ export const copy = {
   cta: {
     titulo: 'La agenda se está cocinando',
     descripcion:
-      'Los talleres, ponencias y hackathones del programa se anuncian primero en el grupo de ' +
+      'Los talleres, ponencias y hackathons del programa se anuncian primero en el grupo de ' +
       'la comunidad. Entra ahí y te enteras antes que nadie — pronto también los verás acá.',
     boton: 'Entrar al grupo de WhatsApp',
     nota: 'Abierto a toda la comunidad PUCP.',
@@ -138,7 +138,7 @@ export const copy = {
 
   footer: {
     tagline: 'Un programa. Muchos eventos. Una comunidad que crece contigo.',
-    credito: 'Hecho por y para estudiantes.',
+    credito: 'Hecho con ⚡ por y para estudiantes.',
   },
 } as const
 
@@ -168,9 +168,9 @@ export const formatos = [
     color: 'purple',
   },
   {
-    id: 'hackathones',
+    id: 'hackathons',
     icon: 'bolt',
-    titulo: 'Hackathones',
+    titulo: 'Hackathons',
     descripcion: 'Compite, construye y demuestra todo tu talento en equipo.',
     color: 'red',
   },
@@ -208,7 +208,7 @@ export const pilares = [
 export const cintaPalabras = [
   'Talleres',
   'Ponencias',
-  'Hackathones',
+  'Hackathons',
   'Inteligencia Artificial',
   'Arquitectura de software',
   'Del localhost a producción',
