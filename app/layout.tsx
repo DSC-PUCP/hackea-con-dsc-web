@@ -1,7 +1,33 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Space_Grotesk, Inter } from 'next/font/google'
+import { Outfit, Poppins, Space_Grotesk } from 'next/font/google'
+
+import { site, themeColor } from '@/lib/site-config'
 import './globals.css'
+
+/*
+ * TIPOGRAFÍAS
+ *
+ * La identidad visual define tres: Agrandir Grand (títulos), CY Grotesk STD
+ * (subtítulos) y Poppins (contenido). Las dos primeras son comerciales y no están en
+ * el repo, así que acá se usan sustitutos libres del mismo género:
+ *
+ *   Agrandir Grand  →  Outfit         (geométrica, misma altura de x, pesos 100-900)
+ *   CY Grotesk STD  →  Space Grotesk  (grotesca técnica, buen carácter en versalitas)
+ *   Poppins         →  Poppins        (es la de marca: coincide exacto)
+ *
+ * El logotipo NO usa ninguna de estas: se sirve como imagen, así que el wordmark de
+ * marca siempre sale exacto sin importar la tipografía del texto.
+ *
+ * Cuando se compren las licencias, ver docs/identidad-visual.md: el cambio es de dos
+ * archivos y no toca ningún componente.
+ */
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-outfit',
+  display: 'swap',
+})
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -9,42 +35,49 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 })
 
-const inter = Inter({
+const poppins = Poppins({
   subsets: ['latin'],
-  variable: '--font-inter',
+  // Poppins no es variable: hay que pedir cada peso que se vaya a usar.
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-poppins',
   display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: 'Hack with DSC — Proyecto de charlas y talleres',
-  description:
-    'Hack with DSC es un proyecto del Developer Student Club: una serie de charlas y talleres para aprender, construir y conectar con la comunidad de estudiantes desarrolladores.',
-  generator: 'v0.app',
+  metadataBase: new URL(site.url),
+  title: site.seo.title,
+  description: site.seo.description,
+  keywords: [...site.seo.keywords],
+  applicationName: site.name,
+  authors: [{ name: site.organizerFull }],
+  openGraph: {
+    type: 'website',
+    locale: 'es_PE',
+    url: site.url,
+    siteName: site.name,
+    title: site.seo.title,
+    description: site.seo.description,
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: site.name }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: site.seo.title,
+    description: site.seo.description,
+    images: ['/og.jpg'],
+  },
   icons: {
     icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon-dark-32x32.png', sizes: '32x32' },
     ],
     apple: '/apple-icon.png',
   },
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
+  // La web es dark-only a propósito. Ver el comentario de cabecera en globals.css.
+  colorScheme: 'dark',
+  themeColor,
 }
 
 export default function RootLayout({
@@ -53,7 +86,23 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`dark bg-background ${spaceGrotesk.variable} ${inter.variable}`}>
+    <html
+      lang="es"
+      className={`dark ${outfit.variable} ${spaceGrotesk.variable} ${poppins.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/*
+          Marca el documento como "con JavaScript" antes del primer pintado.
+          Las animaciones de aparición al hacer scroll solo esconden contenido si esta
+          clase existe, así que sin JS la página se ve completa en vez de en blanco.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.add('js')`,
+          }}
+        />
+      </head>
       <body className="antialiased">
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}

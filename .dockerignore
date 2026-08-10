@@ -1,0 +1,47 @@
+# Lo que NO debe entrar al contexto de build de Docker.
+#
+# Importa por dos razones: velocidad (el contexto se copia entero antes de empezar) y
+# seguridad (nada de secretos ni material interno dentro de la imagen).
+
+# Dependencias: se instalan dentro de la imagen con el lockfile.
+node_modules
+.pnpm-store
+
+# Artefactos de build locales: la imagen los genera de cero.
+.next
+out
+build
+dist
+
+# Secretos. NUNCA dentro de la imagen: las variables se pasan al contenedor en
+# tiempo de ejecución (docker-compose.yml → env_file).
+.env
+.env.*
+!.env.example
+
+# Material interno del equipo. No es público.
+internals
+
+# Originales de diseño en alta: pesan y no se sirven. La web usa lo que genera
+# `pnpm assets` en public/brand/, que sí se comitea.
+identidad-visual
+referencias
+*.zip
+
+# Git y editores.
+.git
+.gitignore
+.github
+.vscode
+.idea
+
+# Documentación: se lee en el repo, no hace falta en la imagen.
+docs
+AGENTS.md
+README.md
+*.md
+!public/brand/README.md
+
+# Sistema operativo.
+.DS_Store
+Thumbs.db

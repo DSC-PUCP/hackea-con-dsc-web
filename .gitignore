@@ -1,3 +1,19 @@
+# Dependencias
 node_modules/
+
+# Secretos. .env.example SÍ se comitea (es la plantilla, sin valores reales).
 .env
+.env.local
+.env.*.local
+
+# Artefactos de build
 .next/
+out/
+*.tsbuildinfo
+
+# Material interno del equipo: la hoja de planificación de eventos.
+internals/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db

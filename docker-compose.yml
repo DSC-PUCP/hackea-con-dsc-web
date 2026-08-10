@@ -1,0 +1,59 @@
+# Despliegue de hackwithdsc en la MV.
+#
+# Uso normal:
+#   docker compose up -d --build     # construir y levantar
+#   docker compose logs -f web       # ver los logs
+#   docker compose down              # apagar
+#
+# Guía paso a paso para el servidor: docs/despliegue.md
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Se lee de .env. Tiene que estar puesto ANTES de construir: las variables
+        # NEXT_PUBLIC_* se incrustan en el bundle al compilar, no al arrancar. Si se
+        # cambia el dominio, hay que reconstruir (`--build`), no solo reiniciar.
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+
+    image: hackwithdsc-web:latest
+    container_name: hackwithdsc-web
+
+    # Se reinicia solo si se cae o si se reinicia la MV. "unless-stopped" respeta un
+    # apagado manual: si alguien hizo `docker compose stop`, no se vuelve a levantar.
+    restart: unless-stopped
+
+    # 127.0.0.1 a propósito: el contenedor SOLO es alcanzable desde la propia máquina.
+    # Quien atiende internet es nginx, que hace de proxy hacia acá y es el único que
+    # tiene el certificado TLS. Si esto fuera "3000:3000", la app quedaría expuesta
+    # por HTTP sin cifrar en el puerto 3000, saltándose el firewall y el HTTPS.
+    ports:
+      - '127.0.0.1:3000:3000'
+
+    env_file:
+      - .env
+
+    healthcheck:
+      # El mismo comando que declara el Dockerfile; se repite acá para poder ajustar
+      # los tiempos sin reconstruir la imagen.
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+    # Sin esto, los logs de Docker crecen sin límite y con el tiempo llenan el disco
+    # de la MV. Es la causa número uno de "el servidor se quedó sin espacio".
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
