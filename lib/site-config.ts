@@ -23,10 +23,12 @@ export const site = {
   organizerFull: 'Developer Student Club PUCP',
 
   /**
-   * Dominio público. Se usa para armar las URL absolutas de Open Graph.
-   * En producción se define con la variable de entorno (ver .env.example).
+   * El dominio público NO está acá: se resuelve en `lib/site-url.ts`.
+   *
+   * Motivo: leerlo bien tiene matices (variables vacías, sin esquema, las que pone
+   * Vercel sola) que ya tumbaron un despliegue una vez. Ese archivo lo explica y es el
+   * único sitio donde se decide. Se configura con NEXT_PUBLIC_SITE_URL.
    */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://hackwithdsc.pucp.edu.pe',
 
   seo: {
     title: 'Hack with DSC — Del código al siguiente nivel',

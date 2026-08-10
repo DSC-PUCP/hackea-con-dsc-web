@@ -14,13 +14,19 @@ El proyecto tiene **dos destinos**:
 No requiere trabajo de infraestructura: Vercel construye y despliega a cada push. Solo
 hay **tres cosas** que revisar en el panel del proyecto:
 
-1. **Variable de entorno `NEXT_PUBLIC_SITE_URL`** con la URL real del despliegue (por
-   ejemplo `https://hack-with-dsc.vercel.app`), **con `https://` incluido**.
+1. **Variable de entorno `NEXT_PUBLIC_SITE_URL`** — **opcional.** Si no se define, el
+   sitio detecta solo el dominio de Vercel (`VERCEL_PROJECT_PRODUCTION_URL`), así que la
+   tarjeta de previsualización de WhatsApp funciona sin configurar nada. Se define solo
+   para forzar otro dominio, como el de la universidad.
 
-   Si no se pone, la web funciona igual, pero la tarjeta de previsualización al compartir
-   el link por WhatsApp apunta al dominio de la MV, que todavía no existe → preview sin
-   imagen. Y ojo: es `NEXT_PUBLIC_*`, así que **se incrusta al compilar**. Cambiarla
-   exige un *redeploy*, no basta con guardar.
+   > ⚠️ **Lo que no se debe hacer: crearla y dejarla vacía.** Eso tumbó un despliegue con
+   > `TypeError: Invalid URL, input: ''`, porque el operador `??` de JavaScript no
+   > considera "vacío" un string vacío. Hoy `lib/site-url.ts` descarta los valores vacíos
+   > o inválidos y ya no rompe, pero si la creas, ponle valor y con `https://` incluido.
+   > Si la ves vacía en el panel, bórrala.
+
+   Es `NEXT_PUBLIC_*`, así que **se incrusta al compilar**: cambiarla exige un *redeploy*,
+   no basta con guardar.
 
 2. **Optimización de imágenes**: está desactivada a propósito (`images.unoptimized` en
    `next.config.mjs`), porque los WebP ya vienen optimizados del repo. En Vercel eso

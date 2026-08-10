@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Outfit, Poppins, Space_Grotesk } from 'next/font/google'
 
 import { site, themeColor } from '@/lib/site-config'
+import { urlDelSitio } from '@/lib/site-url'
 import './globals.css'
 
 /*
@@ -44,7 +45,9 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
+  // urlDelSitio siempre es una URL absoluta válida, así que esto no puede reventar el
+  // build. Ver lib/site-url.ts: antes sí lo hizo.
+  metadataBase: new URL(urlDelSitio),
   title: site.seo.title,
   description: site.seo.description,
   keywords: [...site.seo.keywords],
@@ -53,7 +56,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_PE',
-    url: site.url,
+    url: urlDelSitio,
     siteName: site.name,
     title: site.seo.title,
     description: site.seo.description,
