@@ -58,8 +58,9 @@ Corolarios prácticos:
 
 ### 2.2 No se muestra NADA de eventos todavía
 
-La web tiene exactamente **dos secciones**: la portada (`Hero`) y
-**"Qué es Hack with DSC"** (`QueEs`). Eso es todo, por decisión de producto.
+La portada tiene exactamente **dos secciones**: `Hero` y **"Qué es Hack with DSC"**
+(`QueEs`). Eso es todo, por decisión de producto. (La otra página del sitio es
+`/sponsors`, que va dirigida a empresas y no muestra agenda tampoco.)
 
 Nada de agenda, fechas, ponentes, lugares, links de inscripción ni contadores hasta que
 la lectura desde Google Sheets con caché esté implementada y probada
@@ -97,14 +98,20 @@ contenido si existe la clase `js` en `<html>` (la pone un script en línea en el
 
 ```
 app/
-  layout.tsx            tipografías, metadatos, Open Graph, clase `js`
-  page.tsx              la única página: Hero + QueEs
+  layout.tsx            tipografías, metadatos, clase `js`, y el ARMAZÓN COMÚN:
+                        header, pie, PointerParallax y ScrollReveal
+  page.tsx              la portada `/`: solo su <main> con Hero + QueEs
+  sponsors/page.tsx     la página de patrocinio `/sponsors`: solo su <main>
   globals.css           SISTEMA DE DISEÑO (colores, utilidades, animaciones)
+  sitemap.ts robots.ts  qué indexan los buscadores
   api/health/route.ts   GET /api/health, lo usa el healthcheck de Docker
+  api/revalidate/route  fuerza el refresco de la caché. Secreto + lista blanca
 
 components/
   hero.tsx              portada (servidor)
   que-es.tsx            "Qué es Hack with DSC" (servidor)
+  sponsors/             las secciones de /sponsors (todas de servidor)
+                        piezas.tsx = Seccion, EncabezadoSeccion, Parrafos, HaloDeFondo
   site-header.tsx       barra superior (cliente: cambia al hacer scroll)
   site-footer.tsx       pie
   pointer-parallax.tsx  cliente: publica la posición del cursor en variables CSS
@@ -113,12 +120,17 @@ components/
   ui/button.tsx         shadcn. Casi no se usa: los CTA usan la utilidad `btn-brand`
 
 lib/
-  site-config.ts        TODO el contenido, enlaces y metadatos
+  site-config.ts        TODO el contenido, enlaces y metadatos del repo
+  site-url.ts           urlDelSitio + assetPublico(). Único sitio que sabe el dominio
+  sheets/               cliente de Google Sheets, helpers de filas y traducción de
+                        enlaces de Drive a imágenes servibles. COMPARTIDO
+  sponsors/             tipos, esquemas Zod, lector, caché y contenido de reserva
   eventos/types.ts      contrato de datos para la Fase 2. Todavía sin usar
   utils.ts              cn()
 
 scripts/
-  prepare-assets.mjs    `pnpm assets`: genera public/brand/ y og.jpg
+  prepare-assets.mjs    `pnpm assets`: genera public/brand/, og.jpg y og-sponsors.jpg
+  probar-sponsors.mjs   `pnpm probar:sponsors`: prueba el lector sin tocar la interfaz
 
 deploy/
   nginx/                configuración del proxy inverso
@@ -142,6 +154,27 @@ mueve. Así una sección de servidor consigue animación con solo poner `data-re
 **Mantén ese patrón.** Antes de añadir `'use client'` a una sección, pregúntate si el
 efecto se puede lograr con una variable CSS o un atributo puesto desde fuera.
 
+### Añadir una página nueva
+
+Los tres van montados en `app/layout.tsx`, junto con el header y el pie. Así que **una
+página nueva es solo su `<main>`** — hereda armazón y movimiento sin hacer nada:
+
+```tsx
+// app/lo-que-sea/page.tsx
+export default function Page() {
+  return <main>{/* secciones */}</main>
+}
+```
+
+Dos cosas que sí tienes que atender:
+
+- **Lo que se ve al abrir la página usa la utilidad `enter`, no `data-reveal`.**
+  `data-reveal` espera un `IntersectionObserver`; lo de arriba del pliegue no puede
+  depender de eso. Está explicado en `globals.css`.
+- **Si va en el menú**, agrégala a `navegacion` en `lib/site-config.ts`. Las anclas se
+  escriben sin barra (`'#que-es'`) y las rutas con barra (`'/sponsors'`): el header
+  resuelve la diferencia solo.
+
 ---
 
 ## 4. Comandos
@@ -151,7 +184,9 @@ pnpm install        # instalar dependencias
 pnpm dev            # desarrollo en http://localhost:3000
 pnpm build          # build de producción (falla si hay errores de tipos: es a propósito)
 pnpm typecheck      # solo tipos, más rápido que el build
-pnpm assets         # regenerar public/brand/ desde identidad-visual/
+pnpm assets         # regenerar public/brand/ y las dos imágenes de Open Graph
+pnpm probar:sponsors             # lee la hoja de patrocinio e imprime qué entró y qué no
+pnpm probar:sponsors volcado.json  # lo mismo, contra un volcado, sin credenciales
 ```
 
 No hay ESLint configurado ni suite de tests. El control de calidad hoy es
@@ -198,11 +233,20 @@ Si cambias algo que una de estas describe, actualízala en el mismo cambio.
 
 ## 7. Estado y siguiente paso
 
-**Hecho**: portada, sección "Qué es", identidad visual aplicada, Docker, nginx, docs.
+**Hecho**: portada, sección "Qué es", identidad visual aplicada, Docker, nginx, docs, y
+la página `/sponsors` con su lectura desde Google Sheets.
 
-**Siguiente (Fase 2)**: leer los eventos desde Google Sheets con caché y recién
-entonces mostrar la agenda. El diseño está en `docs/arquitectura.md` y el contrato de
-datos en `lib/eventos/types.ts`. Nada de eso está implementado.
+Con `/sponsors` llegó la **capa compartida de Sheets** (`lib/sheets/`, validación con Zod,
+caché con `unstable_cache` y `/api/revalidate` con lista blanca de etiquetas). Está
+descrita en `docs/arquitectura.md` §3.0 y **hay que reusarla, no duplicarla**.
+
+**Siguiente (Fase 2)**: leer los eventos desde Google Sheets con caché y recién entonces
+mostrar la agenda. El contrato de datos está en `lib/eventos/types.ts`; lo que falta es
+solo su capa propia (rangos, esquemas y envoltorio de caché). Ver `docs/arquitectura.md`
+§3.5.
+
+**Pendiente menor de `/sponsors`**: la hoja de estilos `@media print` (§3.0.2 de
+`docs/arquitectura.md`) y las fotos de la galería.
 
 ---
 

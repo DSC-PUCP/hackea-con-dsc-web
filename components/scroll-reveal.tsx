@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 
 /**
@@ -18,6 +19,8 @@ import { useEffect } from 'react'
  *   <div data-reveal style={{ '--reveal-delay': '120ms' }} />
  */
 export function ScrollReveal() {
+  const ruta = usePathname()
+
   useEffect(() => {
     const elementos = document.querySelectorAll<HTMLElement>('[data-reveal]')
 
@@ -58,7 +61,15 @@ export function ScrollReveal() {
     }
 
     return () => observador.disconnect()
-  }, [])
+    // Se vuelve a buscar y observar en cada cambio de ruta.
+    //
+    // Este componente se monta una sola vez, en el layout, y captura los `data-reveal`
+    // que existan en ese momento. Con enlaces `<a>` normales eso basta, porque cada
+    // navegación recarga la página entera. Pero en cuanto alguien use `next/link` la
+    // navegación pasa a ser del lado del cliente, el componente NO se vuelve a montar, y
+    // el contenido de la página nueva se quedaría en `opacity: 0` para siempre — visible
+    // sin JavaScript y en blanco con él, que es el fallo más difícil de detectar.
+  }, [ruta])
 
   return null
 }

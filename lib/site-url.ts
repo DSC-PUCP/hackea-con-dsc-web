@@ -10,7 +10,9 @@
  *  2. Resolverla bien tiene más matices de los que parece (ver abajo), y merecen estar
  *     explicados en un solo sitio.
  *
- * Solo lo usa `app/layout.tsx`, para los metadatos de Open Graph.
+ * Exporta dos cosas: `urlDelSitio` (para metadatos, sitemap y canonical) y
+ * `assetPublico()` (para que las imágenes de `public/` sigan funcionando si el sitio vive
+ * en un subdirectorio).
  *
  * ── Por qué existe toda esta ceremonia ──────────────────────────────────────────────
  * La versión anterior era `process.env.NEXT_PUBLIC_SITE_URL ?? '<dominio>'`, y rompió
@@ -35,9 +37,14 @@
  * En Vercel casi nunca se llega hasta acá, porque `VERCEL_PROJECT_PRODUCTION_URL` está
  * siempre definida (salvo que se desactive el acceso a variables de sistema).
  *
- * Cuando exista el dominio propio de la universidad, este valor se cambia acá y ya.
+ * ⚠️ **Sin ruta.** Este valor no debe llevar subdirectorio. El día que el sitio se mueva a
+ * `https://dsc.inf.pucp.edu.pe/hack-with-dsc`, eso NO se pone acá: se pone en la variable
+ * `NEXT_PUBLIC_SITE_URL` al compilar, porque `next.config.mjs` deriva de ella el
+ * `basePath` que Next necesita para que los assets se pidan del sitio correcto. Si se
+ * escribiera la ruta acá, habría URL con subdirectorio pero sin `basePath`, y la web
+ * saldría sin estilos. Ver docs/despliegue.md.
  */
-const URL_POR_DEFECTO = 'https://dsc.inf.pucp.edu.pe/hack-with-dsc'
+const URL_POR_DEFECTO = 'https://hack-with-dsc.vercel.app'
 
 /**
  * En orden de preferencia:
@@ -63,29 +70,92 @@ const candidatos = [
   process.env.VERCEL_URL,
 ]
 
+/**
+ * Normaliza un candidato a URL absoluta, o devuelve `null` si no sirve.
+ *
+ * Conserva la RUTA a propósito. Antes esto usaba `.origin`, que la descartaba, y con un
+ * valor como `https://dsc.inf.pucp.edu.pe/hack-with-dsc` el sitemap y la imagen de Open
+ * Graph acababan apuntando al dominio pelado — al sitio equivocado. El sitio puede vivir
+ * en un subdirectorio de un dominio compartido, así que la ruta es parte de su identidad.
+ *
+ * Lo único que se quita es la barra final, para poder concatenar sin duplicarla.
+ */
+function normalizar(valor: string): string | null {
+  // Las variables de Vercel vienen SIN esquema ("mi-sitio.vercel.app"), y una persona
+  // configurando a mano se olvida del https:// la mitad de las veces.
+  const conEsquema = /^https?:\/\//i.test(valor) ? valor : `https://${valor}`
+
+  try {
+    const url = new URL(conEsquema)
+    // pathname siempre trae al menos "/", que acá sobra.
+    const ruta = url.pathname.replace(/\/+$/, '')
+    return `${url.origin}${ruta}`
+  } catch {
+    // Valor inválido: un dominio mal escrito no debe costar un despliegue.
+    return null
+  }
+}
+
 function resolver(): string {
   for (const candidato of candidatos) {
     const valor = candidato?.trim()
     if (!valor) continue
 
-    // Las variables de Vercel vienen SIN esquema ("mi-sitio.vercel.app"), y una persona
-    // configurando a mano se olvida del https:// la mitad de las veces.
-    const conEsquema = /^https?:\/\//i.test(valor) ? valor : `https://${valor}`
-
-    try {
-      // `.origin` normaliza: quita rutas, barras finales y parámetros sueltos.
-      return new URL(conEsquema).origin
-    } catch {
-      // Valor inválido. Se ignora y se prueba el siguiente: un dominio mal escrito no
-      // debe costar un despliegue.
-      continue
-    }
+    const normalizado = normalizar(valor)
+    if (normalizado) return normalizado
   }
 
-  // El valor por defecto pasa por la misma normalización que los demás, para que la
-  // promesa de "sin barra final" valga en TODOS los casos y no solo en algunos.
-  return new URL(URL_POR_DEFECTO).origin
+  // El valor por defecto pasa por la misma normalización, para que la promesa de "sin
+  // barra final" valga en TODOS los casos y no solo en algunos. El `??` final es por si
+  // alguien deja el valor por defecto mal escrito: es mejor una URL fea que un build roto.
+  return normalizar(URL_POR_DEFECTO) ?? 'https://localhost'
 }
 
-/** URL pública del sitio, absoluta y sin barra final. Garantizado válido. */
+/**
+ * URL pública del sitio: absoluta, válida y sin barra final. Puede incluir una ruta
+ * (`https://dominio/subcarpeta`) si el sitio vive en un subdirectorio.
+ */
 export const urlDelSitio = resolver()
+
+/**
+ * Prefijo del sitio dentro del dominio: `''` en la raíz, `/hack-with-dsc` si vive en un
+ * subdirectorio. Es el mismo valor que `next.config.mjs` le pasa a Next como `basePath`,
+ * derivado de la misma y única variable.
+ *
+ * Sale SOLO de `NEXT_PUBLIC_SITE_URL` —y no de `urlDelSitio`— porque tiene que coincidir
+ * exactamente con lo que se compiló: las variables que pone Vercel nunca traen ruta, y si
+ * una de ellas ganara acá, el prefijo diría una cosa y el `basePath` otra.
+ */
+function resolverRutaBase(): string {
+  const valor = process.env.NEXT_PUBLIC_SITE_URL?.trim()
+  if (!valor) return ''
+
+  try {
+    const url = new URL(/^https?:\/\//i.test(valor) ? valor : `https://${valor}`)
+    return url.pathname.replace(/\/+$/, '')
+  } catch {
+    return ''
+  }
+}
+
+export const rutaBase = resolverRutaBase()
+
+/**
+ * Prefija una ruta de `public/` con el subdirectorio del sitio.
+ *
+ * ── Por qué hace falta ────────────────────────────────────────────────────────────────
+ * Next aplica el `basePath` solo a sus propios assets (`/_next/...`) y a `next/link`. A
+ * los archivos de `public/` NO: con `images.unoptimized: true`, `next/image` deja el
+ * `src` tal cual lo escribiste. Comprobado sobre el HTML compilado — con
+ * `NEXT_PUBLIC_SITE_URL=https://dsc.inf.pucp.edu.pe/hack-with-dsc`, el CSS salía como
+ * `/hack-with-dsc/_next/...` pero el logotipo seguía saliendo como `/brand/logo...webp`,
+ * o sea pidiéndoselo a la raíz del dominio compartido, donde nginx ni siquiera enruta a
+ * esta app. La web se vería con estilos pero sin imágenes.
+ *
+ * Regla: **toda imagen del repo pasa por acá**. Las URL absolutas (`https://...`, que es
+ * como pueden venir los logos de aliados desde la hoja) se devuelven intactas.
+ */
+export function assetPublico(ruta: string): string {
+  if (!rutaBase || !ruta.startsWith('/') || ruta.startsWith('//')) return ruta
+  return `${rutaBase}${ruta}`
+}

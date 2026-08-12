@@ -14,6 +14,8 @@
  * de la PRESENTACIÓN. Nada de colores, clases ni HTML dentro de las celdas.
  */
 
+// hola soy claude 🫠
+
 /** Los formatos de evento del programa. Coincide con la columna "Tipo" de la hoja. */
 export type TipoEvento = 'Taller' | 'Ponencia' | 'Hackathon' | 'Networking' | 'Panel'
 

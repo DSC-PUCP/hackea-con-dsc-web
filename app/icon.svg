@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Hack with DSC">
+  <!--
+    Favicon del sitio. Next lo detecta por el nombre del archivo (convención `app/icon.svg`)
+    y genera el <link rel="icon"> él solo, aplicando el basePath si el sitio vive en un
+    subdirectorio. Por eso NO hay un bloque `icons` en app/layout.tsx: si lo hubiera,
+    ganaría el manual y habría que acordarse de prefijar la ruta a mano.
+
+    Por qué el par de chevrons y no el logotipo: un favicon se ve a 16 px, y a ese tamaño
+    ninguna palabra sobrevive. El logotipo (`/brand/logo-hack-with-dsc.webp`) mide 800x406,
+    así que además el navegador lo aplastaba a una ranura cuadrada y salía deformado. El
+    par ❰ ❱ es, según docs/identidad-visual.md §3, el elemento gráfico más reconocible de
+    la marca, y aguanta el tamaño porque son dos formas macizas.
+
+    Van en blanco sobre el degradado —y no en sus colores sobre el fondo tinta, como en el
+    header— porque a 16 px el contraste es lo único que queda: dos formas finas sobre
+    oscuro se emborronan, y un icono de color se distingue entre pestañas.
+
+    Los colores están escritos a mano, que es la única excepción a la regla de los 6
+    tokens de globals.css: un SVG servido como archivo estático no puede leer variables
+    CSS. Si cambian los tokens de marca, hay que cambiarlos también acá. Es el mismo caso
+    —y el mismo motivo— que `themeColor` en lib/site-config.ts.
+  -->
+  <defs>
+    <linearGradient id="marca" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f53d5c" />
+      <stop offset="0.55" stop-color="#813df5" />
+      <stop offset="1" stop-color="#3d90f5" />
+    </linearGradient>
+  </defs>
+
+  <rect width="180" height="180" rx="38" fill="url(#marca)" />
+
+  <!-- El mismo path del chevron de components/brand/icons.tsx (viewBox 0 0 14 24). El
+       primero va espejado para que abra ❰ y el segundo tal cual para que cierre ❱. -->
+  <g transform="translate(90 90) scale(2.9) translate(-14 -12)" fill="#ffffff">
+    <g transform="translate(14 0) scale(-1 1)">
+      <path d="M1 0h6.4L13.6 12 7.4 24H1l6.2-12z" />
+    </g>
+    <g transform="translate(14 0)">
+      <path d="M1 0h6.4L13.6 12 7.4 24H1l6.2-12z" />
+    </g>
+  </g>
+</svg>

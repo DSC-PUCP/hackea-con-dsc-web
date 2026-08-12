@@ -3,6 +3,7 @@ import Image from 'next/image'
 
 import { Chevron } from '@/components/brand/icons'
 import { cintaPalabras, copy, links, site } from '@/lib/site-config'
+import { assetPublico } from '@/lib/site-url'
 
 /**
  * Portada a pantalla completa.
@@ -79,7 +80,7 @@ export function Hero() {
           >
             <span className="sr-only">{site.name}</span>
             <Image
-              src="/brand/logo-hack-with-dsc.webp"
+              src={assetPublico('/brand/logo-hack-with-dsc.webp')}
               alt=""
               width={800}
               height={406}
@@ -138,7 +139,7 @@ export function Hero() {
           `translate: 0 0` con relleno `both`, así que dejaría el parallax congelado
           para siempre.
         */}
-        <div>
+        <div className="pointer-events-none">
           <div style={{ '--enter-delay': '120ms' } as React.CSSProperties} className="enter">
             <div className="parallax-front relative mx-auto w-[min(100%,30rem)] lg:w-full">
               {/* Aura detrás de la mascota, para asentarla en la escena. */}
@@ -148,7 +149,7 @@ export function Hero() {
               />
               <div className="animate-float">
                 <Image
-                  src="/brand/bugle-cyberpunk.webp"
+                  src={assetPublico('/brand/bugle-cyberpunk.webp')}
                   alt={copy.hero.bugleAlt}
                   width={967}
                   height={696}

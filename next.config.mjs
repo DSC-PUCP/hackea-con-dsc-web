@@ -1,5 +1,67 @@
+/**
+ * Deduce el `basePath` a partir de `NEXT_PUBLIC_SITE_URL`.
+ *
+ * ── Para qué sirve ────────────────────────────────────────────────────────────────────
+ * Hoy el sitio vive en la raíz de un dominio (`https://hack-with-dsc.vercel.app/`), y
+ * `basePath` queda desactivado. En el futuro va a vivir en un SUBDIRECTORIO del dominio
+ * oficial de DSC: `https://dsc.inf.pucp.edu.pe/hack-with-dsc`.
+ *
+ * En ese escenario Next necesita saber el prefijo, porque si no pide sus propios archivos
+ * (`/_next/static/...`) a la raíz del dominio, donde no están: la web carga sin estilos y
+ * los enlaces internos llevan al sitio equivocado.
+ *
+ * ── Por qué se deriva y no es su propia variable ──────────────────────────────────────
+ * Podría existir un `BASE_PATH` aparte, pero entonces habría DOS fuentes para el mismo
+ * dato (la ruta dentro de la URL, y el prefijo) y en cuanto se desincronizaran tendríamos
+ * un fallo confuso: metadatos apuntando a un sitio y assets a otro.
+ *
+ * Con una sola variable no hay nada que sincronizar. Para mudar el sitio al
+ * subdirectorio basta compilar con:
+ *
+ *   NEXT_PUBLIC_SITE_URL=https://dsc.inf.pucp.edu.pe/hack-with-dsc
+ *
+ * y tanto el `basePath` como las URL de Open Graph, el sitemap y el canonical salen bien
+ * solos. Ver docs/despliegue.md y lib/site-url.ts.
+ */
+function basePathDesdeUrlDelSitio() {
+  const valor = process.env.NEXT_PUBLIC_SITE_URL?.trim()
+  if (!valor) return undefined
+
+  try {
+    const url = new URL(/^https?:\/\//i.test(valor) ? valor : `https://${valor}`)
+    // Next exige que empiece con "/" y que NO termine con "/". Sin ruta, pathname es "/",
+    // que al quitarle la barra queda vacío: eso significa "raíz", o sea sin basePath.
+    const ruta = url.pathname.replace(/\/+$/, '')
+    return ruta || undefined
+  } catch {
+    // Valor inválido: lo maneja lib/site-url.ts. Acá simplemente no hay basePath.
+    return undefined
+  }
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  basePath: basePathDesdeUrlDelSitio(),
+
+  /**
+   * Orígenes que el servidor de DESARROLLO acepta para sus propios recursos.
+   *
+   * ── Qué se rompía sin esto ───────────────────────────────────────────────────────────
+   * `next dev` bloquea con 403 las peticiones a `/_next/*` cuyo `Origin` no reconoce, y
+   * en su lista por defecto no entra `127.0.0.1`. Como el servidor anuncia algunos
+   * recursos con URL absoluta a `127.0.0.1:3000`, dos chunks de cliente y el WebSocket de
+   * recarga en caliente se quedaban en 403 — **abriendo la web por `localhost` igual**.
+   *
+   * El síntoma no se parece en nada a la causa: la página se pinta, el HTML está entero y
+   * la consola no lanza ni una excepción, pero el JavaScript de cliente nunca termina de
+   * cargar. Con él se queda sin ejecutar `ScrollReveal`, así que TODO lo que lleva
+   * `data-reveal` se queda en `opacity: 0` y la página se ve a medias. Lo primero que se
+   * nota es el muro de logos vacío, y uno se va a buscar el fallo a las imágenes.
+   *
+   * Solo afecta a `next dev`: en producción no existe esta comprobación.
+   */
+  allowedDevOrigins: ['localhost', '127.0.0.1'],
+
   /**
    * Este proyecto se despliega en DOS sitios, y cada uno quiere un empaquetado
    * distinto:

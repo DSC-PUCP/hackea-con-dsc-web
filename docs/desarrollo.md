@@ -264,6 +264,38 @@ degradado de colores.
 2. Impórtala en `app/page.tsx` en el orden que corresponda.
 3. Si va en el menú, añádela a `navegacion` en `site-config.ts`.
 
+### Añadir una página nueva
+
+El header, el pie y los dos componentes del movimiento viven en `app/layout.tsx`, así que
+una página nueva **es solo su `<main>`** y hereda todo lo demás:
+
+```tsx
+// app/lo-que-sea/page.tsx  →  la URL /lo-que-sea
+export default function Page() {
+  return <main>{/* tus secciones */}</main>
+}
+```
+
+`app/sponsors/page.tsx` es el ejemplo vivo: sus secciones están en
+`components/sponsors/`, y las piezas que se repiten (contenedor, encabezado, párrafos)
+en `components/sponsors/piezas.tsx`.
+
+Tres avisos:
+
+- **Lo que se ve sin hacer scroll usa la clase `enter`, no `data-reveal`.** `data-reveal`
+  espera a que el elemento entre en pantalla; para lo que ya está visible al cargar, eso
+  es una apuesta innecesaria. `enter` es animación CSS pura.
+- **En el menú, las anclas van sin barra** (`'#que-es'`) y las rutas con barra
+  (`'/sponsors'`). El header sabe cuál es cuál.
+- **Los enlaces a otra página del sitio van con `next/link`, no con `<a href>`.** Es
+  `next/link` quien aplica el `basePath`: un `<a href="/sponsors">` escrito a mano apunta
+  a la raíz del dominio, y el día que el sitio viva en `/hack-with-dsc` da 404. Las
+  anclas puras (`#que-es`, dentro del mismo documento) sí van con `<a>`, porque ahí lo
+  que se quiere es el scroll suave del navegador y no hay ruta que prefijar.
+- **Las imágenes de `public/` se escriben con `assetPublico('/brand/loquesea.webp')`**, de
+  `lib/site-url.ts`. Escritas a mano se rompen el día que el sitio se mude a un
+  subdirectorio: Next prefija sus propios archivos pero no los de `public/`.
+
 ### Escalonar la aparición de varios elementos
 
 Pon `data-reveal` en cada uno y dales retardos distintos:
@@ -286,8 +318,13 @@ pnpm assets
 ```
 
 Eso corre `scripts/prepare-assets.mjs`, que recorta el área transparente, redimensiona,
-convierte a WebP y compone la imagen de Open Graph (`public/og.jpg`, la que se ve cuando
-alguien comparte el link por WhatsApp). El resultado **sí** se comitea.
+convierte a WebP y compone las **dos** imágenes de Open Graph: `public/og.jpg` (la de la
+portada) y `public/og-sponsors.jpg` (la de `/sponsors`), que es lo que se ve cuando
+alguien comparte cada link por WhatsApp. El resultado **sí** se comitea.
+
+Son estáticas y comiteadas a propósito: WhatsApp y LinkedIn cachean la vista previa de
+forma muy agresiva, así que una imagen generada al vuelo produce previsualizaciones
+desincronizadas. Si hay que corregir una, lo único fiable es **renombrar el archivo**.
 
 > **Por qué así y no dejar que Next optimice las imágenes**: al pre-generarlas, el
 > servidor no necesita la librería `sharp` en producción. Una pieza menos que instalar y

@@ -2,8 +2,12 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Outfit, Poppins, Space_Grotesk } from 'next/font/google'
 
+import { PointerParallax } from '@/components/pointer-parallax'
+import { ScrollReveal } from '@/components/scroll-reveal'
+import { SiteFooter } from '@/components/site-footer'
+import { SiteHeader } from '@/components/site-header'
 import { site, themeColor } from '@/lib/site-config'
-import { urlDelSitio } from '@/lib/site-url'
+import { assetPublico, urlDelSitio } from '@/lib/site-url'
 import './globals.css'
 
 /*
@@ -68,13 +72,22 @@ export const metadata: Metadata = {
     description: site.seo.description,
     images: ['/og.jpg'],
   },
-  icons: {
-    icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/icon-dark-32x32.png', sizes: '32x32' },
-    ],
-    apple: '/apple-icon.png',
-  },
+  /*
+   * Los iconos NO se declaran acá a propósito. Salen de `app/icon.svg` y
+   * `app/apple-icon.png`, que Next detecta por el nombre del archivo y enlaza él solo.
+   *
+   * Dos razones para preferir la convención al bloque manual:
+   *
+   *  · Next les aplica el `basePath` y un hash de contenido. Un `icon: '/loquesea.png'`
+   *    escrito a mano apunta a la raíz del dominio, y el día que el sitio viva en
+   *    `/hack-with-dsc` deja de existir — el mismo fallo que obligó a crear
+   *    `assetPublico()` en lib/site-url.ts.
+   *  · Si este bloque existiera, GANARÍA sobre los archivos, y quien añadiera un
+   *    `app/icon.png` no entendería por qué no pasa nada.
+   *
+   * Acá vivía un `icon` apuntando al logotipo (800x406), repetido dos veces: el navegador
+   * lo aplastaba a cuadrado y el favicon salía deformado. Ver el comentario de app/icon.svg.
+   */
 }
 
 export const viewport: Viewport = {
@@ -106,8 +119,35 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased">
+      <body
+        className="antialiased"
+        /*
+          La textura de grano es la única imagen que se pide desde el CSS, y el CSS no
+          sabe si el sitio vive en un subdirectorio. Se le pasa la ruta ya resuelta por
+          `assetPublico`, para que la regla de "ninguna ruta de asset escrita a mano"
+          valga también ahí. La usa la utilidad `bg-brand-noise` de globals.css.
+        */
+        style={{ '--url-grano': `url(${assetPublico('/brand/noise.png')})` } as React.CSSProperties}
+      >
+        {/*
+          El armazón común de TODAS las páginas vive acá, no en cada page.tsx.
+
+          `PointerParallax` y `ScrollReveal` no dibujan nada: publican estado (la posición
+          del cursor en variables CSS, y un atributo `data-visible` en lo que ya se ve) y
+          el CSS decide qué se mueve. Estar en el layout significa que cualquier ruta
+          nueva hereda el movimiento sin tener que acordarse de montarlos — y acordarse es
+          justo lo que se olvida: sin `ScrollReveal`, todo lo que tenga `data-reveal`
+          queda invisible en `opacity: 0`, y encima solo cuando el JavaScript SÍ carga.
+
+          Consecuencia práctica: una página nueva es solo su `<main>`.
+        */}
+        <PointerParallax />
+        <ScrollReveal />
+
+        <SiteHeader />
         {children}
+        <SiteFooter />
+
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

@@ -1,7 +1,8 @@
 import { ExternalLink, MessageCircle } from 'lucide-react'
+import Link from 'next/link'
 
 import { Chevron } from '@/components/brand/icons'
-import { copy, links, site } from '@/lib/site-config'
+import { copy, links, navegacionPie, site } from '@/lib/site-config'
 
 /**
  * Las redes que se muestran en el pie.
@@ -15,6 +16,14 @@ const redes = [
   { url: links.linkedin, label: 'LinkedIn', Icono: ExternalLink },
   { url: links.github, label: 'GitHub', Icono: ExternalLink },
 ].filter((red): red is typeof red & { url: string } => Boolean(red.url))
+
+/** Rótulo de columna. Las dos listas de enlaces se leerían como una sola sin esto. */
+const CLASE_TITULO =
+  'font-subtitle text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase'
+
+/** Enlace de columna. Compartida por las dos listas para que se vean idénticas. */
+const CLASE_ENLACE =
+  'group inline-flex items-center gap-2.5 font-subtitle text-sm text-muted-foreground transition-colors hover:text-foreground'
 
 export function SiteFooter() {
   return (
@@ -44,23 +53,48 @@ export function SiteFooter() {
             </p>
           </div>
 
-          <nav aria-label="Redes y comunidad" className="flex flex-col gap-3">
-            {redes.map((red) => (
-              <a
-                key={red.label}
-                href={red.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2.5 font-subtitle text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <red.Icono
-                  className="size-4 text-brand-purple transition-transform duration-300 group-hover:scale-110"
-                  aria-hidden
-                />
-                {red.label}
-              </a>
-            ))}
-          </nav>
+          <div className="flex flex-col gap-8 sm:flex-row sm:gap-16">
+            {/*
+              Los enlaces de sitio. Son la red de seguridad de la navegación: la barra de
+              arriba tiene el espacio que tiene, y por debajo de 640 px llegó a esconder
+              el menú entero. Acá caben siempre, y `/sponsors` es justo el enlace que una
+              empresa busca en el pie por convención.
+
+              Van con `next/link` y no con `<a>` porque es quien aplica el `basePath` si
+              el sitio acaba viviendo en un subdirectorio. Ver components/site-header.tsx.
+            */}
+            <nav aria-label="Páginas del sitio" className="flex flex-col gap-3">
+              <p className={CLASE_TITULO}>{copy.footer.tituloSitio}</p>
+              {navegacionPie.map((enlace) => (
+                <Link key={enlace.href} href={enlace.href} className={CLASE_ENLACE}>
+                  <Chevron
+                    dir="right"
+                    className="h-3 w-auto text-brand-purple transition-transform duration-300 group-hover:translate-x-0.5"
+                  />
+                  {enlace.label}
+                </Link>
+              ))}
+            </nav>
+
+            <nav aria-label="Redes y comunidad" className="flex flex-col gap-3">
+              <p className={CLASE_TITULO}>{copy.footer.tituloRedes}</p>
+              {redes.map((red) => (
+                <a
+                  key={red.label}
+                  href={red.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={CLASE_ENLACE}
+                >
+                  <red.Icono
+                    className="size-4 text-brand-purple transition-transform duration-300 group-hover:scale-110"
+                    aria-hidden
+                  />
+                  {red.label}
+                </a>
+              ))}
+            </nav>
+          </div>
         </div>
 
         <div className="mt-10 flex flex-col gap-1.5 border-t border-border pt-6 font-subtitle text-xs text-muted-foreground sm:flex-row sm:justify-between">
