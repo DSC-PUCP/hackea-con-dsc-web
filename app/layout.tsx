@@ -74,10 +74,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/icon-dark-32x32.png', sizes: '32x32' },
+      { url: '/brand/logo-hack-with-dsc.webp', type: 'image/webp' },
+      { url: '/brand/logo-hack-with-dsc-light.webp', type: 'image/webp' },
     ],
-    apple: '/apple-icon.png',
+    apple: '/brand/logo-hack-with-dsc.webp',
   },
 }
 
