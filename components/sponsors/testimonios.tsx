@@ -107,6 +107,9 @@ function Retrato({ testimonio }: { testimonio: Testimonio }) {
         alt={testimonio.autor}
         loading="lazy"
         decoding="async"
+        // Obligatorio: las fotos de Google Drive se sirven con 429 si el navegador manda
+        // `Referer` desde localhost. Ver lib/sheets/imagenes.ts.
+        referrerPolicy="no-referrer"
         className="size-12 shrink-0 rounded-full border border-border object-cover"
       />
     )

@@ -34,6 +34,30 @@
  *  · **Drive no es un CDN.** No promete cabeceras de caché ni velocidad, y tiene límites
  *    de descarga. Para un puñado de logos va sobrado; para las fotos de una galería
  *    entera, mejor el repo.
+ *  · **El `<img>` que las pinta tiene que llevar `referrerPolicy="no-referrer"`.** Ver
+ *    abajo; sin eso las imágenes no cargan en desarrollo.
+ *
+ * ── Por qué hace falta `referrerPolicy="no-referrer"` ────────────────────────────────
+ * `thumbnail` no devuelve la imagen: devuelve un 302 a `lh3.googleusercontent.com`, y ese
+ * segundo servidor MIRA LA CABECERA `Referer` y rechaza los que no le gustan con un
+ * **429 y un HTML de error** — no un 403, lo que despista bastante al mirar la pestaña
+ * Network. Medido sobre el mismo archivo, tres veces seguidas y con idéntico resultado:
+ *
+ *   (sin Referer)                    →  200, image/png     ← lo que se usa
+ *   Referer: http://localhost:3000/  →  429, text/html
+ *   Referer: https://localhost:3000/ →  429, text/html
+ *   Referer: http://localhost/       →  429, text/html
+ *   Referer: http://127.0.0.1:3000/  →  200, image/png
+ *   Referer: https://example.com/    →  200, image/png
+ *
+ * O sea: lo que Google bloquea es el nombre `localhost`, sin importar esquema ni puerto.
+ * Con la política por defecto del navegador (`strict-origin-when-cross-origin`) TODA la
+ * web sale con los logos rotos en `next dev`, mientras que en Vercel se ven bien — un
+ * fallo que solo existe en la máquina de quien desarrolla, que es el peor tipo de fallo.
+ *
+ * Quitando el `Referer` la imagen carga desde cualquier origen, así que además deja de
+ * importar qué dominios decida bloquear Google mañana. No se pierde nada: es una imagen
+ * pública en un servidor ajeno, y ese servidor no necesita saber quién la enlaza.
  *
  * Por eso Drive es la opción cómoda —se edita la hoja y listo, sin desplegar— y
  * `public/sponsors/` sigue siendo la opción robusta para lo que ya no va a cambiar.

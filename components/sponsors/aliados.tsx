@@ -61,6 +61,9 @@ export function Aliados({ aliados, textos }: { aliados: Aliado[]; textos: Textos
                         alt={aliado.nombre}
                         loading="lazy"
                         decoding="async"
+                        // Obligatorio: los logos de Google Drive se sirven con 429 si el
+                        // navegador manda `Referer` desde localhost. Ver lib/sheets/imagenes.ts.
+                        referrerPolicy="no-referrer"
                         className="max-h-20 max-w-full object-contain text-center font-subtitle text-sm font-semibold"
                       />
                     ) : (
