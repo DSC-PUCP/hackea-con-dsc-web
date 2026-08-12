@@ -18,6 +18,7 @@
 import { z } from 'zod'
 
 import { aOrden, esMostrable, oNulo, porOrden, type Fila, type Pestana } from '../sheets/filas.ts'
+import { urlDeImagen } from '../sheets/imagenes.ts'
 
 import type {
   Activo,
@@ -85,14 +86,20 @@ function filasValidas<T extends { orden: number }>(
 /**
  * Resuelve el valor de una columna de imagen a algo que se pueda poner en un `src`.
  *
- * La hoja admite dos formatos: una URL absoluta (se usa tal cual) o el nombre de un
- * archivo del repo. Del nombre se toma SOLO la última parte: si alguien escribe
- * `../../.env` en la celda, queda en `.env` y se resuelve dentro de la carpeta de logos,
- * que no lleva a ninguna parte. Es texto que edita gente distinta a la que despliega.
+ * La hoja admite dos formatos:
+ *
+ *  · una URL absoluta — incluidos los enlaces de Google Drive, que se traducen a su
+ *    versión servible (ver lib/sheets/imagenes.ts: el enlace de "Compartir" es una
+ *    página HTML, no la imagen);
+ *  · el nombre de un archivo del repo, que se resuelve contra `public/`.
+ *
+ * Del nombre de archivo se toma SOLO la última parte: si alguien escribe `../../.env` en
+ * la celda, queda en `.env` y se resuelve dentro de la carpeta de logos, que no lleva a
+ * ninguna parte. Es texto que edita gente distinta a la que despliega.
  */
 function resolverImagen(valor: string | null, carpeta: string): string | null {
   if (!valor) return null
-  if (/^https?:\/\//i.test(valor)) return valor
+  if (/^https?:\/\//i.test(valor)) return urlDeImagen(valor)
 
   const archivo = valor.split(/[\\/]/).pop()?.trim()
   return archivo ? `${carpeta}/${archivo}` : null

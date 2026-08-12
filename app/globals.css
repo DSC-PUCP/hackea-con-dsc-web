@@ -289,12 +289,6 @@
   box-shadow: 0 20px 60px -30px color-mix(in oklab, var(--brand-purple) 90%, transparent);
 }
 
-/* Contenedor claro para logos de terceros. Muchos logos corporativos vienen en PNG con
-   fondo blanco, y sobre el fondo tinta se ven como un recorte roto. */
-@utility caja-logo {
-  background: color-mix(in oklab, var(--brand-light) 92%, var(--brand-ink));
-}
-
 /* ── Testimonios largos ────────────────────────────────────────────────────────
    Las publicaciones de LinkedIn reales pasan de 400 palabras, así que se recortan y se
    despliegan con un `<details>` nativo. Abrir y cerrar lo hace el navegador: cero
