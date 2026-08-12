@@ -7,7 +7,7 @@ import { ScrollReveal } from '@/components/scroll-reveal'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
 import { site, themeColor } from '@/lib/site-config'
-import { urlDelSitio } from '@/lib/site-url'
+import { assetPublico, urlDelSitio } from '@/lib/site-url'
 import './globals.css'
 
 /*
@@ -110,7 +110,16 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased">
+      <body
+        className="antialiased"
+        /*
+          La textura de grano es la única imagen que se pide desde el CSS, y el CSS no
+          sabe si el sitio vive en un subdirectorio. Se le pasa la ruta ya resuelta por
+          `assetPublico`, para que la regla de "ninguna ruta de asset escrita a mano"
+          valga también ahí. La usa la utilidad `bg-brand-noise` de globals.css.
+        */
+        style={{ '--url-grano': `url(${assetPublico('/brand/noise.png')})` } as React.CSSProperties}
+      >
         {/*
           El armazón común de TODAS las páginas vive acá, no en cada page.tsx.
 

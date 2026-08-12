@@ -12,7 +12,7 @@ El proyecto tiene **dos destinos**:
 ## 0. Vercel (rama `main`)
 
 No requiere trabajo de infraestructura: Vercel construye y despliega a cada push. Solo
-hay **tres cosas** que revisar en el panel del proyecto:
+hay **cuatro cosas** que revisar en el panel del proyecto:
 
 1. **Variable de entorno `NEXT_PUBLIC_SITE_URL`** — **opcional.** Si no se define, el
    sitio detecta solo el dominio de Vercel (`VERCEL_PROJECT_PRODUCTION_URL`), así que la
@@ -34,6 +34,18 @@ hay **tres cosas** que revisar en el panel del proyecto:
 
 3. **`output: 'standalone'` no se activa en Vercel.** Es correcto y deliberado: lo pide
    solo el Dockerfile. Ver `docs/arquitectura.md` §1.1.
+
+4. **Las variables de Google Sheets** (`GOOGLE_SERVICE_ACCOUNT_EMAIL`,
+   `GOOGLE_PRIVATE_KEY`, `GOOGLE_SHEETS_SPONSORS_ID`, `REVALIDATE_SECRET`) — **opcionales
+   también.** Sin ellas, `/sponsors` se dibuja con el contenido de reserva del repo y no
+   pasa nada. Con ellas, el equipo edita esa página desde una hoja de cálculo.
+
+   No son `NEXT_PUBLIC_*`, así que no se incrustan en el paquete del navegador. Cambiarlas
+   sí exige un *redeploy* igualmente, porque la página se pre-genera al compilar. Cómo se
+   crea la cuenta de servicio: `docs/arquitectura.md` §3.2.
+
+   Al pegar `GOOGLE_PRIVATE_KEY`, que quede **en una sola línea**, con los `\n` literales
+   tal como vienen del JSON de Google.
 
 Lo que **no** hay que hacer en Vercel: subir el `.env`, ni configurar nginx, ni nada de
 Docker. Todo eso es exclusivo de la MV.
@@ -184,8 +196,27 @@ Lo que sí hay que ajustar aparte: el bloque `location` de nginx y la coordinaci
 > Si está mal, la web funciona igual, pero la tarjeta de previsualización al compartir el
 > link por WhatsApp sale sin imagen.
 
-Las variables de Google Sheets que aparecen comentadas en `.env.example` son para la
-Fase 2 y **todavía no se usan**. Déjalas comentadas.
+### Las variables de Google Sheets
+
+Son **opcionales**, y el sitio se despliega perfectamente sin ellas: `/sponsors` se dibuja
+con el contenido de reserva del repo, sin errores ni huecos. Ponlas cuando el equipo
+quiera editar esa página desde la hoja:
+
+```bash
+GOOGLE_SERVICE_ACCOUNT_EMAIL=...
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n"
+GOOGLE_SHEETS_SPONSORS_ID=...
+REVALIDATE_SECRET=...
+```
+
+Cómo se crea la cuenta de servicio: `docs/arquitectura.md` §3.2. Dos avisos operativos:
+
+- **En cuanto existan, `.env` es material sensible.** Permisos `600` y dueño el usuario
+  del despliegue. `.dockerignore` ya lo excluye de la imagen.
+- **No son `NEXT_PUBLIC_*`**, así que se leen en ejecución: para cambiarlas basta
+  reiniciar el contenedor, no hace falta reconstruir la imagen.
+
+`GOOGLE_SHEETS_ID` (la agenda de eventos) sigue siendo de la Fase 2 y todavía no se usa.
 
 ---
 
@@ -459,8 +490,10 @@ incrustado:
 curl -s https://EL-DOMINIO/ | grep -o 'og:image[^>]*'
 ```
 
-Debe mostrar la URL absoluta a `/og.jpg`. WhatsApp además cachea los previews de forma
-agresiva: puede tardar en actualizarse aunque ya esté bien.
+Debe mostrar la URL absoluta a `/og.jpg` (y la de `/sponsors`, a `/og-sponsors.jpg`).
+WhatsApp además cachea los previews de forma agresiva: puede tardar en actualizarse aunque
+ya esté bien. Si hay que corregir la imagen, lo único fiable para romper ese caché es
+renombrar el archivo.
 
 ### Quiero saber si el problema es la app o nginx
 
@@ -501,11 +534,14 @@ sudo dpkg-reconfigure --priority=low unattended-upgrades
 
 Y lo básico de SSH: acceso por clave, no por contraseña; `PermitRootLogin no`.
 
-> La app **no recibe datos de nadie**: no hay formularios, ni login, ni base de datos.
-> La superficie de ataque es esencialmente nginx y el sistema operativo. Cuando llegue la
-> Fase 2 (Google Sheets) eso cambia: habrá credenciales de una cuenta de servicio en
-> `.env`, y ese archivo pasa a ser material sensible — permisos `600` y dueño el usuario
-> del despliegue.
+> La app **no recibe datos de nadie**: no hay formularios, ni login, ni base de datos. El
+> formulario de patrocinio es un Google Form externo, y la cuenta de servicio de Sheets es
+> de solo lectura. La superficie de ataque es esencialmente nginx y el sistema operativo.
+>
+> Lo que sí hay que cuidar, en cuanto se configuren las credenciales de Google: `.env`
+> pasa a ser material sensible — permisos `600` y dueño el usuario del despliegue — y
+> `REVALIDATE_SECRET` es lo único que protege `/api/revalidate`. Si el enlace con el
+> secreto se filtra, se cambia la variable y se reinicia.
 
 ---
 

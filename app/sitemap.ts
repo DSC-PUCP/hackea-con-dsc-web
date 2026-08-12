@@ -12,9 +12,7 @@ import { urlDelSitio } from '@/lib/site-url'
  * la MV, sin tocar nada.
  *
  * ── Al agregar una página ──────────────────────────────────────────────────────────────
- * Se añade una entrada más a este array. Por ejemplo, para `/sponsors`:
- *
- *   { url: `${urlDelSitio}/sponsors`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 }
+ * Se añade una entrada más a este array, como la de `/sponsors` de abajo.
  *
  * Si una página NO debe salir en buscadores, no se agrega acá y además se la excluye en
  * `app/robots.ts`. Las dos cosas: el sitemap invita, robots prohíbe.
@@ -28,6 +26,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 1,
+    },
+    {
+      url: `${urlDelSitio}/sponsors`,
+      lastModified: new Date(),
+      // Cambia más seguido que la portada: su contenido se edita desde Google Sheets sin
+      // desplegar, así que `lastModified` (que es la fecha del build) se queda corto.
+      changeFrequency: 'weekly',
+      priority: 0.8,
     },
   ]
 }

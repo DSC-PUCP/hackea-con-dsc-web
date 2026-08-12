@@ -10,7 +10,9 @@
  *  2. Resolverla bien tiene más matices de los que parece (ver abajo), y merecen estar
  *     explicados en un solo sitio.
  *
- * Solo lo usa `app/layout.tsx`, para los metadatos de Open Graph.
+ * Exporta dos cosas: `urlDelSitio` (para metadatos, sitemap y canonical) y
+ * `assetPublico()` (para que las imágenes de `public/` sigan funcionando si el sitio vive
+ * en un subdirectorio).
  *
  * ── Por qué existe toda esta ceremonia ──────────────────────────────────────────────
  * La versión anterior era `process.env.NEXT_PUBLIC_SITE_URL ?? '<dominio>'`, y rompió
@@ -114,3 +116,46 @@ function resolver(): string {
  * (`https://dominio/subcarpeta`) si el sitio vive en un subdirectorio.
  */
 export const urlDelSitio = resolver()
+
+/**
+ * Prefijo del sitio dentro del dominio: `''` en la raíz, `/hack-with-dsc` si vive en un
+ * subdirectorio. Es el mismo valor que `next.config.mjs` le pasa a Next como `basePath`,
+ * derivado de la misma y única variable.
+ *
+ * Sale SOLO de `NEXT_PUBLIC_SITE_URL` —y no de `urlDelSitio`— porque tiene que coincidir
+ * exactamente con lo que se compiló: las variables que pone Vercel nunca traen ruta, y si
+ * una de ellas ganara acá, el prefijo diría una cosa y el `basePath` otra.
+ */
+function resolverRutaBase(): string {
+  const valor = process.env.NEXT_PUBLIC_SITE_URL?.trim()
+  if (!valor) return ''
+
+  try {
+    const url = new URL(/^https?:\/\//i.test(valor) ? valor : `https://${valor}`)
+    return url.pathname.replace(/\/+$/, '')
+  } catch {
+    return ''
+  }
+}
+
+export const rutaBase = resolverRutaBase()
+
+/**
+ * Prefija una ruta de `public/` con el subdirectorio del sitio.
+ *
+ * ── Por qué hace falta ────────────────────────────────────────────────────────────────
+ * Next aplica el `basePath` solo a sus propios assets (`/_next/...`) y a `next/link`. A
+ * los archivos de `public/` NO: con `images.unoptimized: true`, `next/image` deja el
+ * `src` tal cual lo escribiste. Comprobado sobre el HTML compilado — con
+ * `NEXT_PUBLIC_SITE_URL=https://dsc.inf.pucp.edu.pe/hack-with-dsc`, el CSS salía como
+ * `/hack-with-dsc/_next/...` pero el logotipo seguía saliendo como `/brand/logo...webp`,
+ * o sea pidiéndoselo a la raíz del dominio compartido, donde nginx ni siquiera enruta a
+ * esta app. La web se vería con estilos pero sin imágenes.
+ *
+ * Regla: **toda imagen del repo pasa por acá**. Las URL absolutas (`https://...`, que es
+ * como pueden venir los logos de aliados desde la hoja) se devuelven intactas.
+ */
+export function assetPublico(ruta: string): string {
+  if (!rutaBase || !ruta.startsWith('/') || ruta.startsWith('//')) return ruta
+  return `${rutaBase}${ruta}`
+}

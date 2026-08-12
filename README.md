@@ -70,9 +70,13 @@ Cero colores literales fuera de `globals.css`. Cero textos escritos dentro de un
 componente. Cambiar el morado de la marca tiene que seguir siendo una edición de una
 línea.
 
-**2. No se muestra nada de eventos todavía.** La web tiene dos secciones — la portada y
-"Qué es Hack with DSC" — y así se queda hasta que la lectura desde Google Sheets con caché
-esté implementada. Ver [`docs/arquitectura.md`](docs/arquitectura.md) §3.
+**2. No se muestra nada de eventos todavía.** La portada tiene dos secciones — la portada
+y "Qué es Hack with DSC" — y así se queda hasta que la lectura de la agenda desde Google
+Sheets esté implementada. Ver [`docs/arquitectura.md`](docs/arquitectura.md) §3.
+
+La otra página del sitio es **`/sponsors`**, la de patrocinio para empresas. Su contenido
+sí se edita desde una hoja de cálculo, sin desplegar; sin credenciales configuradas se
+dibuja con el contenido de reserva del repo y todo sigue funcionando.
 
 ---
 

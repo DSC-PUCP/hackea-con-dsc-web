@@ -185,6 +185,7 @@ Graph. Resultados:
 | `logo-hack-with-dsc-light.webp`| 34 KB  |
 | `noise.png`                    | 22 KB  |
 | `og.jpg`                       | 139 KB |
+| `og-sponsors.jpg`              | 131 KB |
 
 El original de Bugle pesa 660 KB; el WebP recortado, 62 KB. La portada entera carga menos
 que una sola de las imágenes originales.
@@ -192,12 +193,22 @@ que una sola de las imágenes originales.
 **No edites `public/brand/` a mano.** Si cambia un original, corre `pnpm assets` y comitea
 el resultado.
 
-### La imagen de Open Graph
+### Las imágenes de Open Graph
 
-`public/og.jpg` es lo que se ve cuando alguien comparte el link por WhatsApp. Se compone
-con el logotipo y con Bugle sobre el degradado de marca, **sin texto renderizado** — así no
-depende de las tipografías comerciales, porque el wordmark ya viene dibujado en el
-logotipo.
+Es lo que se ve cuando alguien comparte un link por WhatsApp. Hay **una por página**:
+
+| Archivo | Ruta | Cómo se distingue |
+| --- | --- | --- |
+| `public/og.jpg` | `/` | halos azul + rojo + morado |
+| `public/og-sponsors.jpg` | `/sponsors` | halos morado + verde, y el rótulo «PATROCINIO» |
+
+Las dos se componen con el logotipo y con Bugle sobre el degradado de marca. El wordmark
+va **como imagen**, no como texto, así que no dependen de las tipografías comerciales.
+
+La única excepción es el rótulo «PATROCINIO» de la segunda, que sí es texto renderizado
+con una pila de fuentes genéricas: es una palabra en versalitas, hace falta para que las
+dos previsualizaciones no se confundan en el mismo chat, y como el JPEG se comitea, el
+resultado no depende de qué fuentes tenga la máquina que corra `pnpm assets`.
 
 ### El grano
 

@@ -169,9 +169,12 @@
   mask-image: radial-gradient(ellipse 95% 65% at 50% 0%, #000 20%, transparent 78%);
 }
 
-/* Grano de pelicula. Rompe la planitud de los degradados y de la compresion. */
+/* Grano de pelicula. Rompe la planitud de los degradados y de la compresion.
+   La ruta llega desde `app/layout.tsx` en `--url-grano`, y no escrita aqui, porque el
+   sitio puede vivir en un subdirectorio: una URL absoluta escrita en el CSS se pediria a
+   la raiz del dominio, donde no esta. El valor de reserva cubre el caso de la raiz. */
 @utility bg-brand-noise {
-  background-image: url('/brand/noise.png');
+  background-image: var(--url-grano, url('/brand/noise.png'));
   background-repeat: repeat;
   opacity: 0.035;
   mix-blend-mode: overlay;
@@ -275,6 +278,53 @@
       linear-gradient(#000 0 0) content-box exclude,
       linear-gradient(#000 0 0);
     pointer-events: none;
+  }
+}
+
+/* Realce de la tarjeta destacada (el nivel de alianza marcado en la hoja).
+   Es un halo y un borde teñido, no un borde más grueso: engordarlo desalinearía esa
+   tarjeta respecto a las de al lado. */
+@utility card-destacada {
+  border-color: color-mix(in oklab, var(--brand-purple) 55%, transparent);
+  box-shadow: 0 20px 60px -30px color-mix(in oklab, var(--brand-purple) 90%, transparent);
+}
+
+/* Contenedor claro para logos de terceros. Muchos logos corporativos vienen en PNG con
+   fondo blanco, y sobre el fondo tinta se ven como un recorte roto. */
+@utility caja-logo {
+  background: color-mix(in oklab, var(--brand-light) 92%, var(--brand-ink));
+}
+
+/* ── Testimonios largos ────────────────────────────────────────────────────────
+   Las publicaciones de LinkedIn reales pasan de 400 palabras, así que se recortan y se
+   despliegan con un `<details>` nativo. Abrir y cerrar lo hace el navegador: cero
+   JavaScript y cero componentes de cliente nuevos, que es el patrón del proyecto.
+   Se usan en components/sponsors/testimonios.tsx. */
+@utility texto-recortado {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  overflow: hidden;
+
+  details[open] & {
+    -webkit-line-clamp: unset;
+  }
+}
+
+/* Las dos etiquetas del interruptor ("ver más" / "ver menos") viven en el HTML —y por
+   tanto en lib/site-config.ts— y no en un `content` de CSS: los textos no se escriben
+   en la hoja de estilos. */
+@utility solo-cerrado {
+  details[open] & {
+    display: none;
+  }
+}
+
+@utility solo-abierto {
+  display: none;
+
+  details[open] & {
+    display: inline;
   }
 }
 

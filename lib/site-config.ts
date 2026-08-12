@@ -80,8 +80,8 @@ export const links = {
 // ═════════════════════════════════════════════════════════════════════════════════
 
 /**
- * Enlaces del menú. Hoy hay una sola entrada a propósito: la web no muestra nada de
- * eventos hasta que la lectura desde Google Sheets esté lista.
+ * Enlaces del menú. Todavía no hay ninguna entrada de eventos a propósito: la web no
+ * muestra agenda hasta que la lectura desde Google Sheets esté lista.
  *
  * Admite dos tipos de destino, y no hay que preocuparse por la diferencia:
  *
@@ -91,7 +91,10 @@ export const links = {
  *
  * La lógica está en `resolverDestino`, dentro de components/site-header.tsx.
  */
-export const navegacion = [{ href: '#que-es', label: 'Qué es' }] as const
+export const navegacion = [
+  { href: '#que-es', label: 'Qué es' },
+  { href: '/sponsors', label: 'Patrocinio' },
+] as const
 
 // ═════════════════════════════════════════════════════════════════════════════════
 // Textos
@@ -149,7 +152,74 @@ export const copy = {
     tagline: 'Un programa. Muchos eventos. Una comunidad que crece contigo.',
     credito: 'Hecho con ⚡ por y para estudiantes.',
   },
+
+  /**
+   * MICRO-COPIA de la página `/sponsors`: etiquetas de botones, rótulos y textos
+   * accesibles. Es lo único de esa página que vive en el repo.
+   *
+   * El contenido editorial (títulos, párrafos, niveles, beneficios) NO está acá: se
+   * edita en Google Sheets y su respaldo está en `lib/sponsors/fallback.ts`. La frontera
+   * es fácil de recordar: si es una palabra de la interfaz, va acá; si es algo que el
+   * equipo querría cambiar sin pedir un despliegue, va en la hoja.
+   */
+  sponsors: {
+    /** Etiquetas accesibles de las secciones que no traen título desde la hoja. */
+    metricasAria: 'El programa en números',
+    galeriaAria: 'Fotos de ediciones anteriores',
+    /**
+     * Llamada secundaria de la portada. Hay dos porque la sección a la que baja depende
+     * de lo que la hoja tenga publicado: si los niveles todavía están en `mostrable=NO`,
+     * esa sección no existe en el documento y el enlace no llevaría a ninguna parte.
+     */
+    verNiveles: 'Ver los niveles de alianza',
+    verOferta: 'Ver qué ofrecemos',
+    /** Distintivo del nivel marcado como `destacado` en la hoja. */
+    nivelDestacado: 'Destacado',
+    /** Recorte de los testimonios largos. Es un `<details>`: cero JavaScript. */
+    verMas: 'Ver testimonio completo',
+    verMenos: 'Ver menos',
+    verPublicacion: 'Ver publicación',
+    /**
+     * Antecede al `contacto.email` de la hoja. Si no hay correo, no se muestra nada.
+     * Se evita empezar con una «O» suelta: en la tipografía del sitio se lee como un cero.
+     */
+    escribenos: 'También puedes escribirnos a',
+  },
 } as const
+
+/**
+ * Metadatos de `/sponsors`. Son estáticos a propósito: WhatsApp y LinkedIn cachean la
+ * vista previa de forma agresiva, así que no pueden depender de la hoja de cálculo.
+ *
+ * Los lee un jefe de marketing, no un estudiante: dicen qué es y para quién, y no son un
+ * eslogan.
+ */
+export const seoSponsors = {
+  title: 'Patrocina Hack with DSC — DSC PUCP',
+  description:
+    'Programa de talleres, ponencias y hackathons del Developer Student Club PUCP. ' +
+    'Formatos de alianza para empresas que quieren estar donde los estudiantes de ' +
+    'tecnología construyen software de verdad.',
+  ogAlt: 'Hack with DSC — información de patrocinio para empresas',
+} as const
+
+/**
+ * Fotos de ediciones anteriores para la galería de `/sponsors`.
+ *
+ * Viven en el repo (`public/sponsors/`) y no en la hoja porque son assets, no contenido
+ * editable. La lista es explícita —y no un listado del directorio— porque cada foto
+ * necesita su texto alternativo, y eso no se deduce de un nombre de archivo.
+ *
+ * Vacía = la sección no aparece. Es el estado correcto mientras no haya fotos propias:
+ * una galería con imágenes de archivo le miente al que la lee.
+ */
+export const galeriaSponsors = [] as ReadonlyArray<{
+  /** Ruta dentro de `public/`. Ej.: `/sponsors/vibecoding-2026-01.webp` */
+  src: string
+  alt: string
+  width: number
+  height: number
+}>
 
 // ═════════════════════════════════════════════════════════════════════════════════
 // Datos de la sección "Qué es Hack with DSC"

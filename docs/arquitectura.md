@@ -1,14 +1,19 @@
 # Arquitectura y decisiones técnicas
 
 Por qué el proyecto está hecho así, y el plan de lo que falta. Si vas a implementar la
-Fase 2, la §3 es tu documento.
+Fase 2 (eventos), la §3 es tu documento — y buena parte de lo que necesitas ya está
+construido: ver §3.0.
 
 ---
 
-## 1. Estado actual (Fase 1)
+## 1. Estado actual
 
-Un sitio de **una sola página, completamente estático**, con dos secciones: la portada y
-"Qué es Hack with DSC".
+**Dos páginas**, las dos pre-generadas:
+
+| Ruta | Qué es | De dónde sale su contenido |
+| --- | --- | --- |
+| `/` | La portada: `Hero` + "Qué es Hack with DSC" | del repo (`lib/site-config.ts`) |
+| `/sponsors` | La página de patrocinio, que sustituye al deck de ventas | de Google Sheets, con respaldo en el repo |
 
 ```
 Navegador
@@ -19,9 +24,26 @@ Navegador
     └── imágenes WebP de public/brand/
 ```
 
-No hay base de datos, ni API externa, ni sesiones, ni estado en el servidor. La página se
-genera una vez al construir y se sirve idéntica a todos. Es la razón de que sea rápida y
-de que operarla sea casi gratis.
+No hay base de datos, ni sesiones, ni estado en el servidor. `/sponsors` se regenera cada
+hora con lo que diga la hoja (§3), pero se sirve igual de pre-generada: nadie espera
+nunca a Google.
+
+### 1.0 Las imágenes de `public/` y el subdirectorio
+
+Detalle contraintuitivo, comprobado sobre el HTML compilado: **Next aplica el `basePath`
+a sus propios assets (`/_next/...`) y a `next/link`, pero NO a los archivos de
+`public/`.** Con `images.unoptimized: true`, `next/image` deja el `src` tal como se
+escribió.
+
+Consecuencia con `NEXT_PUBLIC_SITE_URL=https://dsc.inf.pucp.edu.pe/hack-with-dsc`: el CSS
+salía como `/hack-with-dsc/_next/...` pero el logotipo como `/brand/logo…webp`, o sea
+pidiéndoselo a la raíz del dominio compartido, donde nginx ni siquiera enruta a esta app.
+La web se vería con estilos y sin imágenes.
+
+Por eso existe `assetPublico()` en `lib/site-url.ts`. **Toda ruta de imagen del repo pasa
+por ahí**, incluida la textura de grano, que se le entrega al CSS como la variable
+`--url-grano` desde `app/layout.tsx`. Las URL absolutas (los logos de aliados que vengan
+de la hoja) se devuelven intactas.
 
 ### 1.1 Dos destinos de despliegue
 
@@ -128,13 +150,55 @@ Ver [`AGENTS.md`](../AGENTS.md) §3 para el mapa completo. En corto:
 
 ---
 
-## 3. Fase 2: eventos desde Google Sheets
+## 3. Contenido desde Google Sheets
 
-**Nada de esto está implementado.** Es el diseño acordado, para que quien lo tome no tenga
-que decidir de cero. El contrato de datos ya está escrito en
-[`lib/eventos/types.ts`](../lib/eventos/types.ts).
+### 3.0 Lo que YA está construido (y hay que reusar, no duplicar)
 
-### 3.1 El problema
+La página de patrocinio trajo consigo la primera integración real con Sheets. Se diseñó
+**para ser compartida** con la Fase 2 de eventos: en `lib/sheets/` no hay una sola línea
+específica de patrocinio.
+
+| Archivo | Qué hace | ¿Compartido? |
+| --- | --- | --- |
+| `lib/sheets/cliente.ts` | Autenticación con la cuenta de servicio y `batchGet` a la API REST | **Sí** |
+| `lib/sheets/filas.ts` | Matriz cruda → filas con nombre; `mostrable`, `orden`, tildes | **Sí** |
+| `app/api/revalidate/route.ts` | Refresco a demanda con secreto y lista blanca `['eventos','sponsors']` | **Sí** |
+| `lib/sponsors/esquemas.ts` | Validación Zod y transformación fila → tipo | patrón a copiar |
+| `lib/sponsors/sheets.ts` | Los rangos concretos de la hoja de patrocinio | solo sponsors |
+| `lib/sponsors/contenido.ts` | `unstable_cache` + mezcla con el contenido de reserva | patrón a copiar |
+| `scripts/probar-sponsors.mjs` | Prueba el lector sin tocar la interfaz | patrón a copiar |
+
+Lo que la Fase 2 tiene que escribir es solo su capa propia: los rangos de su hoja, sus
+esquemas, y su envoltorio de caché con la etiqueta `eventos` (que **ya** está en la lista
+blanca de la ruta de revalidación).
+
+**Dos hojas, no una.** Patrocinio usa `GOOGLE_SHEETS_SPONSORS_ID` y eventos usará
+`GOOGLE_SHEETS_ID`. Están separadas para poder dar permiso de edición del material de
+sponsors a gente que no debe tocar la agenda. Comparten las credenciales, pero **el
+permiso de lectura no se hereda**: hay que invitar al correo de la cuenta de servicio en
+cada hoja por separado.
+
+**Cómo se comporta sin credenciales.** `obtenerContenidoSponsors()` comprueba las
+credenciales *antes* de entrar en la caché, así que en local no se intenta hablar con
+Google, no se cachea un fallo y no se imprime nada. La página se dibuja con
+`lib/sponsors/fallback.ts` y la consola queda limpia. Es el estado normal en desarrollo,
+no una excepción.
+
+**Lo que decide quién gana.** Las claves de `Textos` se mezclan (hoja sobre repo, clave
+por clave); las listas no se mezclan. Si la hoja responde y una pestaña está vacía, esa
+sección de la página desaparece entera — es el interruptor editorial funcionando.
+
+### 3.0.1 Pendiente de `/sponsors`
+
+- **La versión imprimible (`@media print`)** del §8 del encargo: quedó fuera de la
+  primera tanda a propósito. La idea sigue siendo una hoja de estilos, no generar PDF en
+  el servidor: ocultar header, pie y CTAs, forzar fondo claro, `break-inside: avoid` en
+  las tarjetas de nivel y mostrar el correo de contacto en el pie impreso. Cero
+  JavaScript.
+- **Fotos de ediciones anteriores**: la galería existe y está vacía. Se llena agregando
+  archivos a `public/sponsors/` y entradas a `galeriaSponsors` en `lib/site-config.ts`.
+
+### 3.1 El problema (eventos)
 
 El equipo planifica en una hoja de cálculo (`internals/Eventos | Hack with DSC.xlsx`, con
 su equivalente en Google Sheets). Quieren editar ahí y que la web se actualice, sin pedirle
@@ -166,16 +230,95 @@ app lee **una** hoja que es del club: no hay nada que delegar. Con una cuenta de
 la web sigue funcionando aunque quien la configuró se gradúe — que en un grupo estudiantil
 pasa cada año.
 
-Pasos de configuración (a documentar al implementarlo):
-
-1. En Google Cloud Console: crear proyecto, habilitar **Google Sheets API**.
-2. Crear una cuenta de servicio, generar una clave JSON.
-3. **Compartir la hoja con el correo de la cuenta de servicio, en modo Lector.** Este es
-   el paso que todo el mundo olvida, y el error que da es confuso.
-4. Poner `GOOGLE_SHEETS_ID`, `GOOGLE_SERVICE_ACCOUNT_EMAIL` y `GOOGLE_PRIVATE_KEY` en
-   `.env` (ya están documentadas en `.env.example`).
-
 Permiso de **lectura solamente**. La app nunca escribe en la hoja.
+
+#### Cómo se crea, paso a paso
+
+Se hace **una sola vez** y sirve para las dos hojas (patrocinio y eventos). Hazlo con la
+cuenta de Google que ya es dueña de las hojas, o con una cuenta del club: el proyecto de
+Google Cloud debería sobrevivir a que quien lo creó se gradúe.
+
+**1. Proyecto en Google Cloud**
+
+- Entra a <https://console.cloud.google.com/> con esa cuenta.
+- Arriba a la izquierda, en el selector de proyectos → **Nuevo proyecto**.
+- Nombre: `hack-with-dsc`. Sin organización está bien si la cuenta es personal.
+
+**2. Habilitar la API de Sheets**
+
+- Menú ☰ → **APIs y servicios** → **Biblioteca**.
+- Busca **Google Sheets API** → **Habilitar**.
+- No hace falta habilitar Google Drive API: se leen valores de celdas, no archivos.
+
+**3. Crear la cuenta de servicio**
+
+- Menú ☰ → **IAM y administración** → **Cuentas de servicio** → **Crear cuenta de
+  servicio**.
+- Nombre: `lector-hojas`. El correo se genera solo y queda como
+  `lector-hojas@hack-with-dsc-XXXX.iam.gserviceaccount.com`. **Cópialo: es el dato que
+  hace falta en el paso 5.**
+- En "Otorgar acceso a este proyecto": **déjalo en blanco y continúa**. Los roles de IAM
+  gobiernan recursos de Google Cloud, y una hoja de cálculo no lo es — el permiso sobre la
+  hoja se da compartiéndola, en el paso 5. Es la confusión más común de este trámite.
+
+**4. Generar la clave**
+
+- Entra a la cuenta de servicio recién creada → pestaña **Claves** → **Agregar clave** →
+  **Crear clave nueva** → **JSON** → Crear.
+- Se descarga un `.json`. **Es una credencial: no va al repo, no va a WhatsApp, no va a
+  Drive compartido.** Si se filtra, se borra la clave desde esa misma pantalla y se crea
+  otra.
+
+**5. Compartir CADA hoja con ese correo**
+
+Este es el paso que todo el mundo olvida, y el error que da (`403`) no lo dice.
+
+- Abre la hoja de patrocinio → **Compartir** → pega el correo de la cuenta de servicio →
+  rol **Lector** → desmarca "Notificar" → **Enviar**.
+- Repite en la hoja de eventos cuando exista. **El permiso no se hereda entre hojas.**
+
+**6. Poner las variables**
+
+Del JSON descargado salen dos campos: `client_email` y `private_key`.
+
+En local, en `.env` (que está en `.gitignore`):
+
+```bash
+GOOGLE_SERVICE_ACCOUNT_EMAIL=lector-hojas@hack-with-dsc-XXXX.iam.gserviceaccount.com
+GOOGLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEv...\n-----END PRIVATE KEY-----\n"
+GOOGLE_SHEETS_SPONSORS_ID=1AbC...        # el tramo entre /d/ y /edit de la URL
+REVALIDATE_SECRET=                        # openssl rand -hex 32
+```
+
+La clave privada va **entre comillas dobles y en una sola línea**, con los `\n` tal como
+vienen en el JSON. Esa es la forma canónica y la que Vercel necesita. Si la pegas en
+varias líneas el código también lo aguanta (ver §3.5.1, trampa 2), pero no todas las
+herramientas que leen un `.env` lo hacen igual: en la duda, una sola línea.
+
+- En **Vercel**: panel del proyecto → Settings → Environment Variables, una por una, y
+  redesplegar. Al pegar la clave, que quede en una sola línea con los `\n` literales.
+- En la **MV**: en el `.env` del servidor, con permisos `600`.
+
+**7. Comprobar que funciona, antes de mirar la web**
+
+```bash
+pnpm probar:sponsors
+```
+
+Lee la hoja de verdad e imprime qué filas entraron, cuáles se descartaron y por qué. Si
+falla, el mensaje distingue los dos problemas que se confunden siempre: credenciales mal
+puestas (falla la autenticación) frente a hoja no compartida (responde `403`, y el
+mensaje te recuerda el paso 5).
+
+Sin credenciales, el mismo script acepta un volcado de la hoja en JSON:
+
+```bash
+pnpm probar:sponsors internals/volcado.json
+```
+
+**8. Si el script funciona pero la web sigue con el contenido de reserva**, no es un
+misterio: es la caché, que guardó el intento fallido anterior. `rm -rf .next/cache` y
+reconstruir. Ver §3.5.1, trampa 3.
 
 ### 3.3 Caché
 
@@ -210,16 +353,57 @@ Propiedades que importan:
   obligatorio: la web no puede caerse porque la API de Sheets tenga un mal día.
 - **Cuota**: como máximo 6 llamadas por hora, no una por visita.
 
-Para no esperar los 10 minutos, una ruta de revalidación:
+Patrocinio usa la misma estrategia con **una hora** (`revalidate: 3600`, etiqueta
+`sponsors`), que es lo que pidió el equipo.
+
+#### La ruta de revalidación (ya construida, y compartida)
+
+Para no esperar a que venza:
 
 ```
-POST /api/revalidate?secret=<REVALIDATE_SECRET>
-  └─▶ revalidateTag('eventos')
+POST /api/revalidate?secret=<REVALIDATE_SECRET>&tag=sponsors
+GET  /api/revalidate?secret=<REVALIDATE_SECRET>&tag=sponsors
 ```
 
-Se puede llamar desde un botón interno, o desde un Apps Script en la propia hoja que se
-dispare al editar. El secreto es obligatorio: sin él, cualquiera puede forzar llamadas a
-la API.
+- `tag` se valida contra la lista blanca `['eventos', 'sponsors']`. Otra cosa → **400**.
+- Sin `tag`, revalida `eventos` (el comportamiento con el que se diseñó).
+- Secreto inválido o ausente → **401**. Sin `REVALIDATE_SECRET` en el servidor → **503**.
+- **Responde también a GET a propósito.** La persona que edita la hoja no usa `curl`:
+  cuando no vea su cambio va a querer abrir un enlace en el navegador, y un navegador solo
+  hace GET. La operación es idempotente y sigue exigiendo el secreto.
+
+Las dos formas de dispararla:
+
+1. **El enlace que se le pasa a quien edita la hoja** (la que más se va a usar). Se arma
+   una vez y se guarda en la propia hoja, en una celda:
+
+   ```
+   https://hack-with-dsc.vercel.app/api/revalidate?secret=EL_SECRETO&tag=sponsors
+   ```
+
+   Ojo con lo obvio: ese enlace **lleva el secreto**, así que solo va donde ya haya
+   confianza — la misma hoja, que es privada. Si se filtra, se cambia
+   `REVALIDATE_SECRET` y se rehace el enlace.
+
+2. **Un Apps Script en la hoja**, para que sea automático. En *Extensiones → Apps Script*:
+
+   ```js
+   function onEdit() {
+     // Espera un poco: al escribir se disparan muchos onEdit seguidos y no tiene sentido
+     // pedir una revalidación por tecla.
+     const props = PropertiesService.getScriptProperties()
+     const ahora = Date.now()
+     if (ahora - Number(props.getProperty('ultimo') || 0) < 60000) return
+     props.setProperty('ultimo', String(ahora))
+
+     UrlFetchApp.fetch(
+       'https://hack-with-dsc.vercel.app/api/revalidate?secret=EL_SECRETO&tag=sponsors',
+       { method: 'post', muteHttpExceptions: true },
+     )
+   }
+   ```
+
+Aunque no se dispare nada, el contenido se actualiza solo dentro de la hora.
 
 ### 3.4 Validación en la frontera
 
@@ -237,20 +421,61 @@ Reglas:
 4. Nunca se leen las columnas internas. La forma más segura es leer un rango explícito de
    columnas, no la hoja entera.
 
-Conviene una librería de validación de esquemas (Zod o similar) en vez de comprobaciones a
-mano: hace que las reglas sean legibles y el mensaje de error, útil.
+La validación es con **Zod** (ya es dependencia). `lib/sponsors/esquemas.ts` es el ejemplo
+a copiar: un esquema por pestaña que declara solo lo imprescindible, y un `filasValidas()`
+que aplica el filtro de `mostrable`, valida, avisa de lo descartado con el número de fila,
+y ordena. Está factorizado justamente para que ninguna pestaña se quede sin el filtro de
+`mostrable` — que es el fallo que publica contenido a medio escribir.
+
+Y una regla que no está en la lista de arriba porque no es de datos sino de seguridad:
+**cualquier celda que acabe en un `href` o un `src` se filtra**. Solo se dejan pasar
+`http(s)` (y `mailto:` en los textos), y de un nombre de archivo se toma solo la última
+parte. Quien edita la hoja no es necesariamente quien despliega.
 
 ### 3.5 Orden de implementación sugerido
 
-1. Lector de la hoja detrás de una función, con los tipos de `lib/eventos/types.ts`.
-   Probarlo con un script en `scripts/`, sin tocar la interfaz todavía.
-2. Validación y transformación fila → `Evento`, con su descarte y su log.
-3. La caché (`unstable_cache` + `revalidate` + `tags`).
-4. La ruta de revalidación, con su secreto.
-5. **Solo entonces**, la interfaz: sección de agenda, tarjetas de evento, estados vacíos.
-6. Los estados vacíos importan tanto como el caso feliz: sin eventos, con fecha tentativa
+Buena parte ya está hecha (§3.0). Para eventos queda:
+
+1. Los rangos de su hoja y sus esquemas Zod, reusando `lib/sheets/`.
+2. Su envoltorio de caché con la etiqueta `eventos` (la ruta de revalidación ya la
+   contempla).
+3. Probarlo con `scripts/`, copiando `probar-sponsors.mjs`, sin tocar la interfaz.
+4. **Solo entonces**, la interfaz: sección de agenda, tarjetas de evento, estados vacíos.
+5. Los estados vacíos importan tanto como el caso feliz: sin eventos, con fecha tentativa
    en vez de fecha, sin lugar confirmado, sin link de inscripción. La hoja va a estar en
    ese estado la mayor parte del tiempo.
+
+### 3.5.1 Tres trampas comprobadas al conectar la hoja de verdad
+
+Las tres se dieron el 11 de agosto de 2026, con credenciales correctas y una hoja bien
+llena. Ninguna es evidente y las tres están ya resueltas en el código; quedan escritas
+porque volverán a aparecer con la hoja de eventos.
+
+**1. La cabecera no siempre está en la fila 1.** Quien mantiene la hoja escribe una nota
+para el resto del equipo encima de la tabla («todo en NO hasta tener los números
+confirmados»), que es justo lo que hay que hacer para que otra persona la llene bien. Si
+el lector da por hecho que la fila 1 es la cabecera, ninguna columna se llama `mostrable`,
+el filtro descarta la pestaña **entera y en silencio**, y la sección desaparece de la web
+sin decir por qué. `aFilas()` busca la cabecera: es la primera fila que trae una celda
+igual a `mostrable`.
+
+**2. `next build` y `node --env-file` leen el `.env` distinto.** Con la clave privada
+escrita en varias líneas, `node --env-file` quita las comillas y `next build` **no**: la
+clave le llega empezando por `"` y OpenSSL falla con
+`error:1E08010C:DECODER routines::unsupported`, que no dice nada. El síntoma es
+desconcertante — `pnpm probar:sponsors` funciona y `pnpm build` no, con las mismas
+credenciales. `clavePrivada()` normaliza las dos formas y, si aun así no parece un PEM,
+lo dice con todas sus letras.
+
+**3. La caché guarda también los fallos.** Si un build no pudo leer la hoja, ese "no pude"
+queda cacheado en `.next/cache` durante la hora de `revalidate`, y el siguiente build
+—aunque ya funcione— sigue sirviendo el contenido de reserva **sin volver a intentarlo y
+sin registrar nada**. Después de arreglar credenciales hay que vaciar la caché:
+
+```bash
+rm -rf .next/cache && pnpm build     # en local
+# en producción: POST /api/revalidate?secret=...&tag=sponsors
+```
 
 ### 3.6 Cosas que se van a olvidar
 
