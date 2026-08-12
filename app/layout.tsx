@@ -72,13 +72,22 @@ export const metadata: Metadata = {
     description: site.seo.description,
     images: ['/og.jpg'],
   },
-  icons: {
-    icon: [
-      { url: '/brand/logo-hack-with-dsc.webp', type: 'image/webp' },
-      { url: '/brand/logo-hack-with-dsc.webp', type: 'image/webp' },
-    ],
-    apple: '/brand/logo-hack-with-dsc.webp',
-  },
+  /*
+   * Los iconos NO se declaran acá a propósito. Salen de `app/icon.svg` y
+   * `app/apple-icon.png`, que Next detecta por el nombre del archivo y enlaza él solo.
+   *
+   * Dos razones para preferir la convención al bloque manual:
+   *
+   *  · Next les aplica el `basePath` y un hash de contenido. Un `icon: '/loquesea.png'`
+   *    escrito a mano apunta a la raíz del dominio, y el día que el sitio viva en
+   *    `/hack-with-dsc` deja de existir — el mismo fallo que obligó a crear
+   *    `assetPublico()` en lib/site-url.ts.
+   *  · Si este bloque existiera, GANARÍA sobre los archivos, y quien añadiera un
+   *    `app/icon.png` no entendería por qué no pasa nada.
+   *
+   * Acá vivía un `icon` apuntando al logotipo (800x406), repetido dos veces: el navegador
+   * lo aplastaba a cuadrado y el favicon salía deformado. Ver el comentario de app/icon.svg.
+   */
 }
 
 export const viewport: Viewport = {
