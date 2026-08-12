@@ -188,7 +188,53 @@ no una excepción.
 por clave); las listas no se mezclan. Si la hoja responde y una pestaña está vacía, esa
 sección de la página desaparece entera — es el interruptor editorial funcionando.
 
-### 3.0.1 Pendiente de `/sponsors`
+### 3.0.1 Las imágenes de la hoja: Drive, un CDN o el repo
+
+Las columnas de imagen (`logo` en `Aliados`, `foto` en `Testimonios`) aceptan tres cosas,
+y el lector resuelve las tres:
+
+| Lo que pegas en la celda | Qué hace el lector |
+| --- | --- |
+| Un enlace de **Google Drive** | Lo traduce a la versión servible (ver abajo) |
+| Cualquier otra **URL `https://`** | La usa tal cual, sin tocarla |
+| Un **nombre de archivo** (`cgs.svg`) | Lo busca en `public/sponsors/aliados/` |
+
+**Lo de Drive tiene truco, y es la parte que sorprende.** El enlace que Drive da al pulsar
+"Compartir" **no es la imagen**: es una página web con visor y botones. Medido sobre el
+mismo archivo:
+
+```
+https://drive.google.com/file/d/1fq1Jm…/view?usp=drive_link   →  text/html, 74 KB
+https://drive.google.com/uc?export=view&id=1fq1Jm…           →  image/png, 39 KB
+https://drive.google.com/thumbnail?id=1fq1Jm…&sz=w600        →  image/png, 15 KB
+```
+
+Puesto en un `<img>`, el primero no pinta nada. Por eso `lib/sheets/imagenes.ts` extrae el
+identificador del archivo y reescribe el enlace a `thumbnail`, que además devuelve la
+imagen ya redimensionada. **Se pega el enlace tal como lo da Drive y ya está.**
+
+Dos condiciones y un aviso:
+
+- **El archivo tiene que estar compartido como "cualquier persona con el enlace"**, en
+  modo Lector. Si no, no carga.
+- **Los endpoints de Drive no están documentados por Google.** Funcionan y llevan años
+  funcionando, pero si algún día cambian, la web no se rompe: cada imagen lleva el nombre
+  de la empresa como texto alternativo y se degrada a texto.
+- **Drive no es un CDN.** Para un puñado de logos va sobrado. Para una galería entera,
+  el repo.
+
+**El formato del archivo importa más que dónde esté.** Los logos se pintan directamente
+sobre el fondo tinta, sin recuadro claro detrás, así que:
+
+- PNG o SVG **con transparencia** → se ve bien;
+- JPEG, o PNG con **fondo blanco sólido** → se ve un rectángulo blanco;
+- un logo en tinta oscura → no se lee. Hay que pedir la versión para fondos oscuros.
+
+Eso no se arregla en el CSS: se arregla pidiéndole a la empresa el archivo bueno. Y no
+uses miniaturas de resultados de Google Imágenes (`encrypted-tbn0.gstatic.com`): traen
+fondo blanco, son de baja resolución y ese enlace puede desaparecer cualquier día.
+
+### 3.0.2 Pendiente de `/sponsors`
 
 - **La versión imprimible (`@media print`)** del §8 del encargo: quedó fuera de la
   primera tanda a propósito. La idea sigue siendo una hoja de estilos, no generar PDF en

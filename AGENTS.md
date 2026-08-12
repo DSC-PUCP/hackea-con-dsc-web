@@ -122,7 +122,8 @@ components/
 lib/
   site-config.ts        TODO el contenido, enlaces y metadatos del repo
   site-url.ts           urlDelSitio + assetPublico(). Único sitio que sabe el dominio
-  sheets/               cliente de Google Sheets y helpers de filas. COMPARTIDO
+  sheets/               cliente de Google Sheets, helpers de filas y traducción de
+                        enlaces de Drive a imágenes servibles. COMPARTIDO
   sponsors/             tipos, esquemas Zod, lector, caché y contenido de reserva
   eventos/types.ts      contrato de datos para la Fase 2. Todavía sin usar
   utils.ts              cn()
@@ -244,7 +245,7 @@ mostrar la agenda. El contrato de datos está en `lib/eventos/types.ts`; lo que 
 solo su capa propia (rangos, esquemas y envoltorio de caché). Ver `docs/arquitectura.md`
 §3.5.
 
-**Pendiente menor de `/sponsors`**: la hoja de estilos `@media print` (§3.0.1 de
+**Pendiente menor de `/sponsors`**: la hoja de estilos `@media print` (§3.0.2 de
 `docs/arquitectura.md`) y las fotos de la galería.
 
 ---

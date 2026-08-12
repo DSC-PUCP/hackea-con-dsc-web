@@ -8,8 +8,12 @@ import type { Aliado, Textos } from '@/lib/sponsors/types'
  *
  * Tres detalles que parecen menores y no lo son:
  *
- *  · **Los logos van sobre un fondo claro** (`caja-logo`). Muchos logos corporativos son
- *    PNG con fondo blanco: sobre el fondo tinta del sitio se ven como recortes rotos.
+ *  · **Los logos van directos sobre el fondo del sitio**, sin recuadro claro detrás. Es
+ *    una decisión de diseño, y tiene una consecuencia que hay que conocer: un logo que
+ *    llegue en JPEG o en PNG **con fondo blanco sólido** se va a ver como un rectángulo
+ *    blanco. La solución es el archivo —pedir el logo en PNG o SVG con transparencia—,
+ *    no el CSS. Lo mismo con un logo oscuro: sobre fondo tinta no se lee, y hay que
+ *    pedir la versión para fondos oscuros.
  *  · **El texto alternativo es el nombre de la empresa.** Si la imagen no carga, el
  *    navegador pinta ese texto solo: nunca queda un cuadro roto, y no hace falta ni una
  *    línea de JavaScript para conseguirlo.
@@ -36,12 +40,19 @@ export function Aliados({ aliados, textos }: { aliados: Aliado[]; textos: Textos
               </p>
             ) : null}
 
-            <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {/*
+              Ancho fijo por logo y no una rejilla que reparta el espacio: con tres
+              aliados, unas columnas elásticas dan huecos anchísimos y bajos, y el logo se
+              pierde dentro. Con un ancho fijo los logos se alinean a la izquierda, se
+              acomodan solos al ir sumando empresas, y el hueco no cambia de forma.
+            */}
+            <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-4">
               {grupo.aliados.map((aliado, indice) => (
                 <li
                   key={`${aliado.nombre}-${indice}`}
                   data-reveal
                   style={{ '--reveal-delay': `${indice * 60}ms` } as React.CSSProperties}
+                  className="w-36"
                 >
                   <Marco url={aliado.url}>
                     {aliado.logo ? (
@@ -50,14 +61,10 @@ export function Aliados({ aliados, textos }: { aliados: Aliado[]; textos: Textos
                         alt={aliado.nombre}
                         loading="lazy"
                         decoding="async"
-                        // `text-brand-ink` es para cuando la imagen NO carga: el
-                        // navegador dibuja el texto alternativo con el color heredado, y
-                        // el del sitio es claro — quedaba casi invisible sobre la caja
-                        // clara del logo. Comprobado con un archivo inexistente.
-                        className="max-h-12 max-w-full object-contain text-center font-subtitle text-sm font-semibold text-brand-ink"
+                        className="max-h-20 max-w-full object-contain text-center font-subtitle text-sm font-semibold"
                       />
                     ) : (
-                      <span className="text-center font-subtitle text-sm font-semibold text-brand-ink">
+                      <span className="text-center font-subtitle text-sm font-semibold">
                         {aliado.nombre}
                       </span>
                     )}
@@ -72,10 +79,15 @@ export function Aliados({ aliados, textos }: { aliados: Aliado[]; textos: Textos
   )
 }
 
-/** La caja clara del logo. Es un enlace solo si la hoja trae `url`. */
+/**
+ * El hueco donde vive cada logo. Es un enlace solo si la hoja trae `url`.
+ *
+ * La altura fija es lo que mantiene la fila alineada: los logos llegan con proporciones
+ * distintas (cuadrados, apaisados, verticales) y sin una caja común cada uno se sentaría
+ * a una altura distinta y el muro se vería descuadrado.
+ */
 function Marco({ url, children }: { url: string | null; children: React.ReactNode }) {
-  const clases =
-    'caja-logo flex h-24 items-center justify-center rounded-2xl p-5 transition-transform duration-300'
+  const clases = 'flex h-28 items-center justify-center p-3 transition-transform duration-300'
 
   if (!url) return <div className={clases}>{children}</div>
 
