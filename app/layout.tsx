@@ -75,7 +75,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/brand/logo-hack-with-dsc.webp', type: 'image/webp' },
-      { url: '/brand/logo-hack-with-dsc-light.webp', type: 'image/webp' },
+      { url: '/brand/logo-hack-with-dsc.webp', type: 'image/webp' },
     ],
     apple: '/brand/logo-hack-with-dsc.webp',
   },

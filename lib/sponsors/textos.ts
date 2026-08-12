@@ -61,3 +61,16 @@ export function destinoDelCta(textos: Textos): string | null {
   const correo = texto(textos, 'contacto.email')
   return correo ? `mailto:${correo}` : null
 }
+
+/**
+ * El enlace a la presentación de Canva: el detalle de niveles, beneficios y condiciones
+ * que se sacó de esta web para tratarlo mejor en una pieza aparte.
+ *
+ * **No tiene respaldo en el repo, y es a propósito.** Es el único dato de la página que
+ * no puede tenerlo: un enlace de reserva a una presentación que quizá se movió o se
+ * despublicó es peor que no tener botón. Si la hoja no responde, el botón sencillamente
+ * no se pinta — la misma regla que ya sigue el CTA.
+ */
+export function enlaceDelCanva(textos: Textos): string | null {
+  return enlaceSeguro(texto(textos, 'canva.url'))
+}

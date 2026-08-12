@@ -36,6 +36,13 @@ export type Acento = keyof typeof clasesDeAcento
  * El espaciado vertical se puede cambiar desde fuera (`className="py-10"`) porque pasa
  * por `cn()`: sin tailwind-merge, `py-20` y `py-10` son la misma utilidad y ganaría la
  * que estuviera más abajo en la hoja generada, no la que se escribió después.
+ *
+ * ── Por qué `py-16 md:py-20` y no más ────────────────────────────────────────────────
+ * Era `py-20 md:py-28`, o sea 224 px de aire entre dos secciones en escritorio. Se medía
+ * bien cuando la página traía niveles y beneficios; al sacarlos al Canva quedaron cinco
+ * secciones y esos huecos pasaron a leerse como que falta contenido, no como respiración.
+ * Ahora son 160 px. Es UN número y está acá: si algún día vuelven las secciones que se
+ * fueron, se sube acá y sube en toda la página a la vez.
  */
 export function Seccion({
   id,
@@ -52,7 +59,7 @@ export function Seccion({
     <section
       id={id}
       aria-label={aria}
-      className={cn('relative isolate scroll-mt-24 overflow-hidden py-20 md:py-28', className)}
+      className={cn('relative isolate scroll-mt-24 overflow-hidden py-16 md:py-20', className)}
     >
       <div className="mx-auto max-w-6xl px-5 md:px-6">{children}</div>
     </section>

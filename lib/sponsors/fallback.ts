@@ -83,6 +83,18 @@ const textos = {
    */
   'cta.url': 'https://forms.gle/Yk31B9tKiXQcGDhn7',
 
+  /*
+   * `canva.url` — la presentación con el detalle de niveles y beneficios.
+   *
+   * Va documentada acá, pero SIN valor: es la única clave del contrato que no lleva
+   * respaldo. Un enlace de reserva a una presentación que pudo moverse o despublicarse
+   * es peor que no tener botón, así que si la hoja no la trae, los dos botones que la
+   * usan no se pintan. Ver `enlaceDelCanva()` en lib/sponsors/textos.ts.
+   *
+   * Se escribe en la pestaña `Textos`, junto a `cta.url`, y no en una pestaña de enlaces
+   * aparte: dos sitios donde buscar un enlace es un sitio de más.
+   */
+
   // 'letrachica.titulo': 'Letra chica',
   // 'letrachica.cuerpo':
   //   'Las fechas, sedes y formatos de cada edición se confirman con el equipo antes de ' +

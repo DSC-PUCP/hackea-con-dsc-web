@@ -2,7 +2,7 @@ import { ArrowDown, ArrowUpRight } from 'lucide-react'
 
 import { Chevron } from '@/components/brand/icons'
 import { copy } from '@/lib/site-config'
-import { destinoDelCta, texto } from '@/lib/sponsors/textos'
+import { destinoDelCta, enlaceDelCanva, texto } from '@/lib/sponsors/textos'
 import type { Textos } from '@/lib/sponsors/types'
 
 /**
@@ -33,18 +33,26 @@ export function HeroSponsors({
   const destino = destinoDelCta(textos)
 
   /*
-   * A dónde baja el botón secundario.
+   * A dónde lleva el botón secundario, en orden de preferencia.
    *
    * No puede estar fijo en `#niveles`: mientras esa pestaña de la hoja siga en
    * `mostrable = NO`, la sección no se dibuja y el enlace no llevaría a ninguna parte —
    * un botón muerto en la primera pantalla de la página que se le manda a una empresa.
-   * Si no hay ni niveles ni activos, no se pinta el botón.
+   * Si no hay nada de lo tres, no se pinta el botón.
+   *
+   * El Canva va primero porque es donde vive ahora el detalle de niveles y beneficios:
+   * lleva a la versión completa de lo que las anclas enseñan resumido. Las dos anclas se
+   * quedan como respaldo para el día que esas secciones vuelvan a la web.
    */
-  const secundario = hayNiveles
-    ? { ancla: '#niveles', etiqueta: copy.sponsors.verNiveles }
-    : hayActivos
-      ? { ancla: '#que-ofrecemos', etiqueta: copy.sponsors.verOferta }
-      : null
+  const canva = enlaceDelCanva(textos)
+
+  const secundario = canva
+    ? { destino: canva, etiqueta: copy.sponsors.verPropuesta, externo: true }
+    : hayNiveles
+      ? { destino: '#niveles', etiqueta: copy.sponsors.verNiveles, externo: false }
+      : hayActivos
+        ? { destino: '#que-ofrecemos', etiqueta: copy.sponsors.verOferta, externo: false }
+        : null
 
   return (
     <section id="top" className="relative isolate overflow-hidden pt-32 pb-8 md:pt-40 md:pb-14">
@@ -107,14 +115,26 @@ export function HeroSponsors({
 
             {secundario ? (
               <a
-                href={secundario.ancla}
+                href={secundario.destino}
+                // Un ancla se queda en el documento; el Canva se abre aparte para no
+                // sacar a la empresa de la página desde la primera pantalla.
+                target={secundario.externo ? '_blank' : undefined}
+                rel={secundario.externo ? 'noopener noreferrer' : undefined}
                 className="group inline-flex items-center justify-center gap-2.5 rounded-full border border-input bg-card/50 px-7 py-3.5 font-subtitle text-base font-semibold backdrop-blur-sm transition-colors hover:border-brand-purple/50 hover:bg-card"
               >
                 {secundario.etiqueta}
-                <ArrowDown
-                  className="size-4 transition-transform duration-300 group-hover:translate-y-0.5"
-                  aria-hidden
-                />
+                {/* La flecha dice a dónde va: abajo si baja, afuera si sale del sitio. */}
+                {secundario.externo ? (
+                  <ArrowUpRight
+                    className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    aria-hidden
+                  />
+                ) : (
+                  <ArrowDown
+                    className="size-4 transition-transform duration-300 group-hover:translate-y-0.5"
+                    aria-hidden
+                  />
+                )}
               </a>
             ) : null}
           </div>

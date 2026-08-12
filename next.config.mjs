@@ -44,6 +44,25 @@ const nextConfig = {
   basePath: basePathDesdeUrlDelSitio(),
 
   /**
+   * Orígenes que el servidor de DESARROLLO acepta para sus propios recursos.
+   *
+   * ── Qué se rompía sin esto ───────────────────────────────────────────────────────────
+   * `next dev` bloquea con 403 las peticiones a `/_next/*` cuyo `Origin` no reconoce, y
+   * en su lista por defecto no entra `127.0.0.1`. Como el servidor anuncia algunos
+   * recursos con URL absoluta a `127.0.0.1:3000`, dos chunks de cliente y el WebSocket de
+   * recarga en caliente se quedaban en 403 — **abriendo la web por `localhost` igual**.
+   *
+   * El síntoma no se parece en nada a la causa: la página se pinta, el HTML está entero y
+   * la consola no lanza ni una excepción, pero el JavaScript de cliente nunca termina de
+   * cargar. Con él se queda sin ejecutar `ScrollReveal`, así que TODO lo que lleva
+   * `data-reveal` se queda en `opacity: 0` y la página se ve a medias. Lo primero que se
+   * nota es el muro de logos vacío, y uno se va a buscar el fallo a las imágenes.
+   *
+   * Solo afecta a `next dev`: en producción no existe esta comprobación.
+   */
+  allowedDevOrigins: ['localhost', '127.0.0.1'],
+
+  /**
    * Este proyecto se despliega en DOS sitios, y cada uno quiere un empaquetado
    * distinto:
    *

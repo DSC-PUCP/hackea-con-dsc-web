@@ -211,6 +211,15 @@ export const copy = {
      */
     verNiveles: 'Ver los niveles de alianza',
     verOferta: 'Ver qué ofrecemos',
+    /**
+     * Destino preferente del botón secundario: la presentación de Canva con el detalle
+     * de niveles y beneficios. Gana a las dos anclas de arriba cuando la hoja trae
+     * `canva.url`, porque lleva a la versión completa de lo mismo.
+     *
+     * La etiqueta no dice «Canva» ni «presentación» a propósito: si mañana la pieza pasa
+     * a ser un PDF, el texto sigue siendo cierto y no hay que desplegar para corregirlo.
+     */
+    verPropuesta: 'Ver la propuesta completa',
     /** Distintivo del nivel marcado como `destacado` en la hoja. */
     nivelDestacado: 'Destacado',
     /** Recorte de los testimonios largos. Es un `<details>`: cero JavaScript. */

@@ -2,7 +2,7 @@ import { ArrowUpRight } from 'lucide-react'
 
 import { HaloDeFondo, Parrafos, Seccion } from '@/components/sponsors/piezas'
 import { copy } from '@/lib/site-config'
-import { destinoDelCta, texto } from '@/lib/sponsors/textos'
+import { destinoDelCta, enlaceDelCanva, texto } from '@/lib/sponsors/textos'
 import type { Textos } from '@/lib/sponsors/types'
 
 /**
@@ -19,6 +19,7 @@ export function LlamadoFinal({ textos }: { textos: Textos }) {
   const etiqueta = texto(textos, 'cta.label')
   const correo = texto(textos, 'contacto.email')
   const destino = destinoDelCta(textos)
+  const canva = enlaceDelCanva(textos)
 
   if (!titulo && !cuerpo && !destino) return null
 
@@ -47,17 +48,39 @@ export function LlamadoFinal({ textos }: { textos: Textos }) {
         </div>
 
         <div className="shrink-0">
-          {destino && etiqueta ? (
-            <a
-              href={destino}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-brand inline-flex w-full items-center justify-center gap-2.5 rounded-full px-7 py-3.5 font-subtitle text-base font-semibold md:w-auto"
-            >
-              {etiqueta}
-              <ArrowUpRight className="size-5" aria-hidden />
-            </a>
-          ) : null}
+          {/*
+            Los dos botones: escribir (el que cierra el trato) y ver la propuesta
+            completa (el que resuelve las dudas antes de escribir). En una fila desde
+            640 px; apilados en móvil, porque juntos no caben.
+          */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            {destino && etiqueta ? (
+              <a
+                href={destino}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-brand inline-flex w-full items-center justify-center gap-2.5 rounded-full px-7 py-3.5 font-subtitle text-base font-semibold sm:w-auto"
+              >
+                {etiqueta}
+                <ArrowUpRight className="size-5" aria-hidden />
+              </a>
+            ) : null}
+
+            {canva ? (
+              <a
+                href={canva}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex w-full items-center justify-center gap-2.5 rounded-full border border-input bg-card/50 px-7 py-3.5 font-subtitle text-base font-semibold backdrop-blur-sm transition-colors hover:border-brand-purple/50 hover:bg-card sm:w-auto"
+              >
+                {copy.sponsors.verPropuesta}
+                <ArrowUpRight
+                  className="size-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  aria-hidden
+                />
+              </a>
+            ) : null}
+          </div>
 
           {correo ? (
             <p className="mt-3 text-center font-subtitle text-sm text-muted-foreground md:text-right">
