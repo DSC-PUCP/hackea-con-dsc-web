@@ -83,16 +83,16 @@ const textos = {
    */
   'cta.url': 'https://forms.gle/Yk31B9tKiXQcGDhn7',
 
-  'letrachica.titulo': 'Letra chica',
-  'letrachica.cuerpo':
-    'Las fechas, sedes y formatos de cada edición se confirman con el equipo antes de ' +
-    'cerrar la alianza.\n\n' +
-    'El stand presencial solo es posible en las actividades que se realizan dentro del ' +
-    'campus PUCP. DSC HACK, el hackathon principal, se realiza en una sede externa: ahí la ' +
-    'presencia de marca se resuelve con otros formatos.\n\n' +
-    'Hack with DSC no comparte datos personales de los participantes con las empresas ' +
-    'aliadas: ni currículos, ni perfiles, ni reportes de desempeño.\n\n' +
-    'Esta página es informativa y no constituye una oferta comercial cerrada.',
+  // 'letrachica.titulo': 'Letra chica',
+  // 'letrachica.cuerpo':
+  //   'Las fechas, sedes y formatos de cada edición se confirman con el equipo antes de ' +
+  //   'cerrar la alianza.\n\n' +
+  //   'El stand presencial solo es posible en las actividades que se realizan dentro del ' +
+  //   'campus PUCP. DSC HACK, el hackathon principal, se realiza en una sede externa: ahí la ' +
+  //   'presencia de marca se resuelve con otros formatos.\n\n' +
+  //   'Hack with DSC no comparte datos personales de los participantes con las empresas ' +
+  //   'aliadas: ni currículos, ni perfiles, ni reportes de desempeño.\n\n' +
+  //   'Esta página es informativa y no constituye una oferta comercial cerrada.',
 
   /*
    * La segunda vía de contacto: se muestra debajo del botón, y además es a donde cae el

@@ -287,6 +287,11 @@ Tres avisos:
   es una apuesta innecesaria. `enter` es animación CSS pura.
 - **En el menú, las anclas van sin barra** (`'#que-es'`) y las rutas con barra
   (`'/sponsors'`). El header sabe cuál es cuál.
+- **Los enlaces a otra página del sitio van con `next/link`, no con `<a href>`.** Es
+  `next/link` quien aplica el `basePath`: un `<a href="/sponsors">` escrito a mano apunta
+  a la raíz del dominio, y el día que el sitio viva en `/hack-with-dsc` da 404. Las
+  anclas puras (`#que-es`, dentro del mismo documento) sí van con `<a>`, porque ahí lo
+  que se quiere es el scroll suave del navegador y no hay ruta que prefijar.
 - **Las imágenes de `public/` se escriben con `assetPublico('/brand/loquesea.webp')`**, de
   `lib/site-url.ts`. Escritas a mano se rompen el día que el sitio se mude a un
   subdirectorio: Next prefija sus propios archivos pero no los de `public/`.

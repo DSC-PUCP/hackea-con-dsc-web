@@ -1,11 +1,19 @@
 'use client'
 
 import { MessageCircle } from 'lucide-react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { Chevron } from '@/components/brand/icons'
 import { copy, links, navegacion, site } from '@/lib/site-config'
+
+/**
+ * Clase compartida por los enlaces del menú. Está fuera del componente porque la usan
+ * las dos ramas del render (ancla y ruta) y tienen que verse idénticas.
+ */
+const CLASE_ENLACE =
+  'font-subtitle text-sm text-muted-foreground transition-colors hover:text-foreground'
 
 /**
  * Barra superior. La comparten todas las páginas (se monta en app/layout.tsx).
@@ -50,51 +58,109 @@ export function SiteHeader() {
           : 'border-b border-transparent bg-transparent'
       }`}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3.5 md:px-6">
-        <a
-          href={enLaPortada ? '#top' : '/'}
-          aria-label={`${site.name} — ir al inicio`}
-          className="group flex shrink-0 items-center gap-2"
-        >
-          <Chevron
-            dir="left"
-            className="h-4 w-auto text-brand-red transition-transform duration-300 group-hover:-translate-x-0.5"
-          />
-          <span className="font-display text-base font-extrabold tracking-tight whitespace-nowrap sm:text-lg">
-            {site.name}
-          </span>
-          <Chevron
-            dir="right"
-            className="h-4 w-auto text-brand-purple transition-transform duration-300 group-hover:translate-x-0.5"
-          />
-        </a>
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-3.5 sm:gap-4 md:px-6">
+        <LogoEnlace destino={enLaPortada ? '#top' : '/'} />
 
-        <div className="flex items-center gap-1 sm:gap-5">
-          <nav className="hidden items-center gap-5 sm:flex">
-            {navegacion.map((enlace) => (
-              <a
-                key={enlace.href}
-                href={resolverDestino(enlace.href)}
-                className="font-subtitle text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {enlace.label}
-              </a>
-            ))}
+        <div className="flex shrink-0 items-center gap-3 sm:gap-5">
+          {/*
+            Visible SIEMPRE, también en móvil. Antes era `hidden sm:flex` y por debajo de
+            640 px el menú entero desaparecía: `/sponsors` no tenía ni un solo camino
+            desde un teléfono. Cabe porque el menú son solo rutas — ver `navegacion` en
+            lib/site-config.ts.
+          */}
+          <nav aria-label="Páginas del sitio" className="flex items-center gap-5">
+            {navegacion.map((enlace) => {
+              const destino = resolverDestino(enlace.href)
+
+              /*
+               * Las anclas puras se dejan como `<a>`, para que el salto sea scroll suave
+               * en el mismo documento. Lo que navega pasa por `next/link`, que además es
+               * quien aplica el `basePath` cuando el sitio vive en un subdirectorio: un
+               * `<a href="/sponsors">` a pelo apuntaría a la raíz del dominio compartido
+               * y daría 404. Ver `assetPublico()` en lib/site-url.ts, mismo problema.
+               */
+              return destino.startsWith('#') ? (
+                <a key={enlace.href} href={destino} className={CLASE_ENLACE}>
+                  {enlace.label}
+                </a>
+              ) : (
+                <Link
+                  key={enlace.href}
+                  href={destino}
+                  // Ahora que el menú es una sola entrada, entrar a /sponsors y ver
+                  // «Patrocinio» ahí arriba sin ninguna marca es desorientador.
+                  aria-current={ruta === destino ? 'page' : undefined}
+                  className={CLASE_ENLACE}
+                >
+                  {enlace.label}
+                </Link>
+              )
+            })}
           </nav>
 
           <a
             href={links.whatsapp}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-brand inline-flex items-center gap-2 rounded-full px-4 py-2 font-subtitle text-sm font-semibold"
+            aria-label={copy.header.comunidadAria}
+            title={copy.header.comunidadAria}
+            className="btn-brand inline-flex items-center gap-2 rounded-full px-2.5 py-2 font-subtitle text-sm font-semibold sm:px-4"
           >
             <MessageCircle className="size-4" aria-hidden />
-            {/* En pantallas chicas el texto largo no cabe junto al logotipo. */}
-            <span className="sm:hidden">Comunidad</span>
+            {/*
+              El texto solo desde 640 px. En móvil el botón se queda con el icono: no es
+              una pérdida real, porque el hero trae el mismo destino en un botón grande a
+              media pantalla de distancia, y es lo que libera el sitio que necesita el
+              menú. La etiqueta accesible la pone el `aria-label` de arriba.
+            */}
             <span className="hidden sm:inline">{copy.hero.ctaPrimario}</span>
           </a>
         </div>
       </div>
     </header>
+  )
+}
+
+/**
+ * El logotipo de la barra, que además es el enlace al inicio.
+ *
+ * Existe como pieza aparte por una sola razón: el destino cambia de naturaleza según la
+ * ruta —`#top` en la portada, `/` fuera de ella— y eso obliga a elegir entre `<a>` y
+ * `next/link`. Ver el comentario del menú: el `<a href="/">` a pelo se rompe el día que
+ * el sitio viva en un subdirectorio.
+ *
+ * Sobre el ancho: NO lleva `shrink-0`. Por debajo de unos 340 px el logotipo, el menú y
+ * el botón dejan de caber, y con `shrink-0` la barra desbordaría y le metería scroll
+ * horizontal a toda la página. Con `min-w-0` + `truncate`, en su lugar se recorta el
+ * final del nombre. Recortar una letra es feo; una web que se mueve de lado lo es más.
+ */
+function LogoEnlace({ destino }: { destino: string }) {
+  const contenido = (
+    <>
+      <Chevron
+        dir="left"
+        className="h-4 w-auto shrink-0 text-brand-red transition-transform duration-300 group-hover:-translate-x-0.5"
+      />
+      <span className="truncate font-display text-base font-extrabold tracking-tight sm:text-lg">
+        {site.name}
+      </span>
+      <Chevron
+        dir="right"
+        className="h-4 w-auto shrink-0 text-brand-purple transition-transform duration-300 group-hover:translate-x-0.5"
+      />
+    </>
+  )
+
+  const clase = 'group flex min-w-0 items-center gap-2'
+  const etiqueta = `${site.name} — ir al inicio`
+
+  return destino.startsWith('#') ? (
+    <a href={destino} aria-label={etiqueta} className={clase}>
+      {contenido}
+    </a>
+  ) : (
+    <Link href={destino} aria-label={etiqueta} className={clase}>
+      {contenido}
+    </Link>
   )
 }

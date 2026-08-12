@@ -83,7 +83,18 @@ export const links = {
  * Enlaces del menú. Todavía no hay ninguna entrada de eventos a propósito: la web no
  * muestra agenda hasta que la lectura desde Google Sheets esté lista.
  *
- * Admite dos tipos de destino, y no hay que preocuparse por la diferencia:
+ * ── Por qué el menú son SOLO páginas ────────────────────────────────────────────────
+ * Antes había también un `#que-es`, y se quitó por dos razones. La primera: no aportaba.
+ * La portada tiene exactamente dos secciones, y el hero ya ofrece ese mismo destino dos
+ * veces (el botón secundario y la señal de scroll); un enlace de menú a la segunda
+ * sección de una página de dos secciones es decoración. La segunda: desde `/sponsors` te
+ * navegaba y te soltaba a media portada, saltándose el hero.
+ *
+ * Que el menú signifique una sola cosa —«sitios a los que puedes ir»— es además lo que
+ * permite que quepa en un teléfono sin desplegable. Con dos entradas no cabía, y estaba
+ * oculto por debajo de 640 px: `/sponsors` era inalcanzable desde un móvil.
+ *
+ * Aun así admite los dos tipos de destino, por si algún día hace falta:
  *
  *   · anclas de la portada — `'#que-es'`, SIEMPRE sin la barra inicial. El header le pone
  *     el `/` delante solo cuando hace falta (o sea, cuando no estás en la portada);
@@ -91,8 +102,21 @@ export const links = {
  *
  * La lógica está en `resolverDestino`, dentro de components/site-header.tsx.
  */
-export const navegacion = [
-  { href: '#que-es', label: 'Qué es' },
+export const navegacion = [{ href: '/sponsors', label: 'Patrocinio' }] as const
+
+/**
+ * Enlaces de sitio del pie. Es la red de seguridad de la navegación: funciona en
+ * cualquier ancho, no depende de que el menú de arriba tenga espacio, y es donde una
+ * empresa busca «patrocinio» por pura convención.
+ *
+ * Acá los destinos van SIEMPRE absolutos (`/#que-es`, no `#que-es`) porque el pie es un
+ * componente de servidor y no sabe en qué ruta está. Desde la portada eso recarga en vez
+ * de hacer scroll suave, y es un precio aceptable: quien pulsa un enlace del pie ya
+ * terminó con la página.
+ */
+export const navegacionPie = [
+  { href: '/', label: 'Inicio' },
+  { href: '/#que-es', label: 'Qué es' },
   { href: '/sponsors', label: 'Patrocinio' },
 ] as const
 
@@ -101,6 +125,17 @@ export const navegacion = [
 // ═════════════════════════════════════════════════════════════════════════════════
 
 export const copy = {
+  header: {
+    /**
+     * Etiqueta accesible del botón de WhatsApp cuando se queda sin texto.
+     *
+     * Por debajo de 640 px el botón se pinta solo con el icono: a 390 px el ancho útil
+     * son 350, y el logotipo más el enlace del menú más el botón con texto no caben. Sin
+     * esta etiqueta, un lector de pantalla anunciaría «enlace» y nada más.
+     */
+    comunidadAria: 'Únete a la comunidad en WhatsApp',
+  },
+
   hero: {
     eyebrow: 'DSC PUCP presenta',
     /** El título se parte en dos: la segunda mitad se pinta con el degradado de marca. */
@@ -151,6 +186,9 @@ export const copy = {
   footer: {
     tagline: 'Un programa. Muchos eventos. Una comunidad que crece contigo.',
     credito: 'Hecho con ⚡ por y para estudiantes.',
+    /** Rótulos de las dos columnas de enlaces. Sin ellos se leen como una sola lista. */
+    tituloSitio: 'El sitio',
+    tituloRedes: 'Comunidad',
   },
 
   /**
