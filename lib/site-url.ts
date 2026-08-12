@@ -35,9 +35,14 @@
  * En Vercel casi nunca se llega hasta acá, porque `VERCEL_PROJECT_PRODUCTION_URL` está
  * siempre definida (salvo que se desactive el acceso a variables de sistema).
  *
- * Cuando exista el dominio propio de la universidad, este valor se cambia acá y ya.
+ * ⚠️ **Sin ruta.** Este valor no debe llevar subdirectorio. El día que el sitio se mueva a
+ * `https://dsc.inf.pucp.edu.pe/hack-with-dsc`, eso NO se pone acá: se pone en la variable
+ * `NEXT_PUBLIC_SITE_URL` al compilar, porque `next.config.mjs` deriva de ella el
+ * `basePath` que Next necesita para que los assets se pidan del sitio correcto. Si se
+ * escribiera la ruta acá, habría URL con subdirectorio pero sin `basePath`, y la web
+ * saldría sin estilos. Ver docs/despliegue.md.
  */
-const URL_POR_DEFECTO = 'https://dsc.inf.pucp.edu.pe/hack-with-dsc'
+const URL_POR_DEFECTO = 'https://hack-with-dsc.vercel.app'
 
 /**
  * En orden de preferencia:
@@ -63,29 +68,49 @@ const candidatos = [
   process.env.VERCEL_URL,
 ]
 
+/**
+ * Normaliza un candidato a URL absoluta, o devuelve `null` si no sirve.
+ *
+ * Conserva la RUTA a propósito. Antes esto usaba `.origin`, que la descartaba, y con un
+ * valor como `https://dsc.inf.pucp.edu.pe/hack-with-dsc` el sitemap y la imagen de Open
+ * Graph acababan apuntando al dominio pelado — al sitio equivocado. El sitio puede vivir
+ * en un subdirectorio de un dominio compartido, así que la ruta es parte de su identidad.
+ *
+ * Lo único que se quita es la barra final, para poder concatenar sin duplicarla.
+ */
+function normalizar(valor: string): string | null {
+  // Las variables de Vercel vienen SIN esquema ("mi-sitio.vercel.app"), y una persona
+  // configurando a mano se olvida del https:// la mitad de las veces.
+  const conEsquema = /^https?:\/\//i.test(valor) ? valor : `https://${valor}`
+
+  try {
+    const url = new URL(conEsquema)
+    // pathname siempre trae al menos "/", que acá sobra.
+    const ruta = url.pathname.replace(/\/+$/, '')
+    return `${url.origin}${ruta}`
+  } catch {
+    // Valor inválido: un dominio mal escrito no debe costar un despliegue.
+    return null
+  }
+}
+
 function resolver(): string {
   for (const candidato of candidatos) {
     const valor = candidato?.trim()
     if (!valor) continue
 
-    // Las variables de Vercel vienen SIN esquema ("mi-sitio.vercel.app"), y una persona
-    // configurando a mano se olvida del https:// la mitad de las veces.
-    const conEsquema = /^https?:\/\//i.test(valor) ? valor : `https://${valor}`
-
-    try {
-      // `.origin` normaliza: quita rutas, barras finales y parámetros sueltos.
-      return new URL(conEsquema).origin
-    } catch {
-      // Valor inválido. Se ignora y se prueba el siguiente: un dominio mal escrito no
-      // debe costar un despliegue.
-      continue
-    }
+    const normalizado = normalizar(valor)
+    if (normalizado) return normalizado
   }
 
-  // El valor por defecto pasa por la misma normalización que los demás, para que la
-  // promesa de "sin barra final" valga en TODOS los casos y no solo en algunos.
-  return new URL(URL_POR_DEFECTO).origin
+  // El valor por defecto pasa por la misma normalización, para que la promesa de "sin
+  // barra final" valga en TODOS los casos y no solo en algunos. El `??` final es por si
+  // alguien deja el valor por defecto mal escrito: es mejor una URL fea que un build roto.
+  return normalizar(URL_POR_DEFECTO) ?? 'https://localhost'
 }
 
-/** URL pública del sitio, absoluta y sin barra final. Garantizado válido. */
+/**
+ * URL pública del sitio: absoluta, válida y sin barra final. Puede incluir una ruta
+ * (`https://dominio/subcarpeta`) si el sitio vive en un subdirectorio.
+ */
 export const urlDelSitio = resolver()

@@ -155,6 +155,28 @@ Lo único obligatorio hoy:
 NEXT_PUBLIC_SITE_URL=https://el-dominio-real.pucp.edu.pe
 ```
 
+### Si el sitio va en un subdirectorio
+
+Escenario previsto: `https://dsc.inf.pucp.edu.pe/hack-with-dsc` en vez de un subdominio
+propio. Se resuelve **incluyendo la ruta en esta misma variable**:
+
+```ini
+NEXT_PUBLIC_SITE_URL=https://dsc.inf.pucp.edu.pe/hack-with-dsc
+```
+
+`next.config.mjs` deduce de ahí el `basePath` de Next, y con eso la app prefija sola todos
+sus assets (`/hack-with-dsc/_next/...`), los enlaces internos, el sitemap y las URL de Open
+Graph. **No hay una segunda variable que poner**: se hizo así a propósito, para que no
+puedan desincronizarse.
+
+Lo que sí hay que ajustar aparte: el bloque `location` de nginx y la coordinación del
+`robots.txt` raíz. Los tres pasos están detallados en la cabecera de
+`deploy/nginx/hackwithdsc.conf`.
+
+> Verificación rápida de que quedó bien: `curl -s https://EL-DOMINIO/hack-with-dsc/ | grep
+> -o '/hack-with-dsc/_next[^"]*' | head -1`. Si no devuelve nada, la app se compiló sin la
+> ruta y la web va a salir sin estilos.
+
 > ⚠️ **Esto se lee al construir, no al arrancar.** En Next, las variables `NEXT_PUBLIC_*`
 > se incrustan dentro del JavaScript compilado. Si cambias el dominio más adelante, hay
 > que **reconstruir** (`docker compose up -d --build`); reiniciar el contenedor no basta.

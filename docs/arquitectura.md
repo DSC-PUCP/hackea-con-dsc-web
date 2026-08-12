@@ -42,6 +42,28 @@ destino arrastra configuración del otro.
 Al crear la rama `prod` y su Action, lo único que hace falta es construir con esa variable
 puesta — el `Dockerfile` ya la trae.
 
+### 1.2 El sitio tiene que poder vivir en un subdirectorio
+
+Hoy está en la raíz de un dominio (`https://hack-with-dsc.vercel.app/`). El plan a futuro es
+moverlo a un **subdirectorio** del dominio oficial de DSC:
+`https://dsc.inf.pucp.edu.pe/hack-with-dsc`.
+
+Eso está preparado, y con **una sola variable**: si `NEXT_PUBLIC_SITE_URL` incluye una ruta,
+`next.config.mjs` deduce el `basePath` de Next a partir de ella.
+
+Por qué derivarlo en vez de tener su propia variable: si hubiera un `BASE_PATH` aparte,
+serían dos fuentes para el mismo dato, y desincronizarlas produce un fallo desagradable de
+diagnosticar — metadatos apuntando a un sitio y assets a otro, con la web cargando sin
+estilos. Con una sola no hay nada que sincronizar. Es el mismo principio de una sola fuente
+de verdad que rige los colores y los textos.
+
+Consecuencia para quien escriba código: **nunca escribas el dominio a mano.** Usa
+`urlDelSitio` de `lib/site-url.ts` para cualquier URL absoluta (canonical, Open Graph,
+sitemap). Un dominio literal sobrevive hasta la mudanza y no más.
+
+Los pasos de nginx y la advertencia sobre `robots.txt` en subdirectorios están en
+`docs/despliegue.md` §4 y en la cabecera de `deploy/nginx/hackwithdsc.conf`.
+
 ### Decisiones y por qué
 
 **Next.js 16 con App Router.** Es lo que ya usaba el proyecto. Para una landing es más de

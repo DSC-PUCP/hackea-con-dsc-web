@@ -80,9 +80,16 @@ export const links = {
 // ═════════════════════════════════════════════════════════════════════════════════
 
 /**
- * Enlaces del menú. Hoy hay una sola sección a propósito: la web no muestra nada de
+ * Enlaces del menú. Hoy hay una sola entrada a propósito: la web no muestra nada de
  * eventos hasta que la lectura desde Google Sheets esté lista.
- * Al agregar una sección nueva, se agrega su entrada acá.
+ *
+ * Admite dos tipos de destino, y no hay que preocuparse por la diferencia:
+ *
+ *   · anclas de la portada — `'#que-es'`, SIEMPRE sin la barra inicial. El header le pone
+ *     el `/` delante solo cuando hace falta (o sea, cuando no estás en la portada);
+ *   · rutas del sitio — `'/sponsors'`, tal cual.
+ *
+ * La lógica está en `resolverDestino`, dentro de components/site-header.tsx.
  */
 export const navegacion = [{ href: '#que-es', label: 'Qué es' }] as const
 

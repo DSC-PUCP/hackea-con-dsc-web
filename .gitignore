@@ -17,3 +17,7 @@ internals/
 # Sistema operativo
 .DS_Store
 Thumbs.db
+
+.claude
+.agents
+skills-lock.json

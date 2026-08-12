@@ -2,6 +2,10 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Outfit, Poppins, Space_Grotesk } from 'next/font/google'
 
+import { PointerParallax } from '@/components/pointer-parallax'
+import { ScrollReveal } from '@/components/scroll-reveal'
+import { SiteFooter } from '@/components/site-footer'
+import { SiteHeader } from '@/components/site-header'
 import { site, themeColor } from '@/lib/site-config'
 import { urlDelSitio } from '@/lib/site-url'
 import './globals.css'
@@ -107,7 +111,25 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        {/*
+          El armazón común de TODAS las páginas vive acá, no en cada page.tsx.
+
+          `PointerParallax` y `ScrollReveal` no dibujan nada: publican estado (la posición
+          del cursor en variables CSS, y un atributo `data-visible` en lo que ya se ve) y
+          el CSS decide qué se mueve. Estar en el layout significa que cualquier ruta
+          nueva hereda el movimiento sin tener que acordarse de montarlos — y acordarse es
+          justo lo que se olvida: sin `ScrollReveal`, todo lo que tenga `data-reveal`
+          queda invisible en `opacity: 0`, y encima solo cuando el JavaScript SÍ carga.
+
+          Consecuencia práctica: una página nueva es solo su `<main>`.
+        */}
+        <PointerParallax />
+        <ScrollReveal />
+
+        <SiteHeader />
         {children}
+        <SiteFooter />
+
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

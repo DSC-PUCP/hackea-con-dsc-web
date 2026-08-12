@@ -97,8 +97,9 @@ contenido si existe la clase `js` en `<html>` (la pone un script en línea en el
 
 ```
 app/
-  layout.tsx            tipografías, metadatos, Open Graph, clase `js`
-  page.tsx              la única página: Hero + QueEs
+  layout.tsx            tipografías, metadatos, clase `js`, y el ARMAZÓN COMÚN:
+                        header, pie, PointerParallax y ScrollReveal
+  page.tsx              la portada `/`: solo su <main> con Hero + QueEs
   globals.css           SISTEMA DE DISEÑO (colores, utilidades, animaciones)
   api/health/route.ts   GET /api/health, lo usa el healthcheck de Docker
 
@@ -141,6 +142,27 @@ mueve. Así una sección de servidor consigue animación con solo poner `data-re
 
 **Mantén ese patrón.** Antes de añadir `'use client'` a una sección, pregúntate si el
 efecto se puede lograr con una variable CSS o un atributo puesto desde fuera.
+
+### Añadir una página nueva
+
+Los tres van montados en `app/layout.tsx`, junto con el header y el pie. Así que **una
+página nueva es solo su `<main>`** — hereda armazón y movimiento sin hacer nada:
+
+```tsx
+// app/lo-que-sea/page.tsx
+export default function Page() {
+  return <main>{/* secciones */}</main>
+}
+```
+
+Dos cosas que sí tienes que atender:
+
+- **Lo que se ve al abrir la página usa la utilidad `enter`, no `data-reveal`.**
+  `data-reveal` espera un `IntersectionObserver`; lo de arriba del pliegue no puede
+  depender de eso. Está explicado en `globals.css`.
+- **Si va en el menú**, agrégala a `navegacion` en `lib/site-config.ts`. Las anclas se
+  escriben sin barra (`'#que-es'`) y las rutas con barra (`'/sponsors'`): el header
+  resuelve la diferencia solo.
 
 ---
 

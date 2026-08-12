@@ -264,6 +264,26 @@ degradado de colores.
 2. Impórtala en `app/page.tsx` en el orden que corresponda.
 3. Si va en el menú, añádela a `navegacion` en `site-config.ts`.
 
+### Añadir una página nueva (por ejemplo `/sponsors`)
+
+El header, el pie y los dos componentes del movimiento viven en `app/layout.tsx`, así que
+una página nueva **es solo su `<main>`** y hereda todo lo demás:
+
+```tsx
+// app/sponsors/page.tsx  →  la URL /sponsors
+export default function Page() {
+  return <main>{/* tus secciones */}</main>
+}
+```
+
+Dos avisos:
+
+- **Lo que se ve sin hacer scroll usa la clase `enter`, no `data-reveal`.** `data-reveal`
+  espera a que el elemento entre en pantalla; para lo que ya está visible al cargar, eso
+  es una apuesta innecesaria. `enter` es animación CSS pura.
+- **En el menú, las anclas van sin barra** (`'#que-es'`) y las rutas con barra
+  (`'/sponsors'`). El header sabe cuál es cuál.
+
 ### Escalonar la aparición de varios elementos
 
 Pon `data-reveal` en cada uno y dales retardos distintos:
