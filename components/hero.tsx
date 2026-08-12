@@ -139,7 +139,7 @@ export function Hero() {
           `translate: 0 0` con relleno `both`, así que dejaría el parallax congelado
           para siempre.
         */}
-        <div>
+        <div className="pointer-events-none">
           <div style={{ '--enter-delay': '120ms' } as React.CSSProperties} className="enter">
             <div className="parallax-front relative mx-auto w-[min(100%,30rem)] lg:w-full">
               {/* Aura detrás de la mascota, para asentarla en la escena. */}
