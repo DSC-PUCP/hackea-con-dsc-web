@@ -1,0 +1,543 @@
+﻿==================== lib\sheets\cliente.ts ====================
+/**
+ * Cliente de lectura de Google Sheets. COMPARTIDO: lo va a usar tambiÃ©n la Fase 2 de
+ * eventos, asÃ­ que acÃ¡ no hay nada especÃ­fico de patrocinio.
+ *
+ * â”€â”€ Por quÃ© no se usa el paquete `googleapis` â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * Todo lo que este proyecto necesita de Google es UNA llamada de solo lectura
+ * (`spreadsheets.values.batchGet`). `googleapis` trae decenas de megas de superficie
+ * para cientos de servicios que no se tocan, y la imagen de Docker de producciÃ³n estÃ¡
+ * deliberadamente mantenida en ~314 MB. Con `google-auth-library` (que es lo Ãºnico
+ * genuinamente difÃ­cil: firmar el JWT y renovar el token) mÃ¡s `fetch` a la API REST,
+ * el resultado es el mismo y se lee en una pantalla.
+ *
+ * â”€â”€ Permisos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * Ãmbito de SOLO LECTURA. La app nunca escribe en la hoja, y la cuenta de servicio no
+ * deberÃ­a tener permiso para hacerlo. Ver docs/arquitectura.md Â§3.2.
+ */
+
+import { GoogleAuth } from 'google-auth-library'
+
+const AMBITO_SOLO_LECTURA = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+
+/**
+ * CuÃ¡nto se espera a Google antes de rendirse.
+ *
+ * Existe porque una regeneraciÃ³n de cachÃ© colgada es peor que una fallida: la fallida
+ * cae al contenido de reserva y se acabÃ³, la colgada retiene un worker. Diez segundos es
+ * mucho mÃ¡s de lo que tarda `batchGet` en el peor dÃ­a.
+ */
+const ESPERA_MAXIMA_MS = 10_000
+
+/**
+ * Una variable de entorno DEFINIDA PERO VACÃA es el caso que ya tumbÃ³ un despliegue en
+ * este proyecto (ver lib/site-url.ts). AcÃ¡ se trata igual que si no existiera.
+ */
+function variable(nombre: string): string | null {
+  const valor = process.env[nombre]?.trim()
+  return valor ? valor : null
+}
+
+/**
+ * Â¿EstÃ¡n las credenciales de la cuenta de servicio?
+ *
+ * Se consulta ANTES de intentar nada, para que la ausencia de credenciales â€”el estado
+ * normal en desarrollo localâ€” no produzca ni una excepciÃ³n ni una lÃ­nea de log. Caer al
+ * contenido de reserva tiene que ser silencioso.
+ */
+export function hayCredencialesDeGoogle(): boolean {
+  return Boolean(variable('GOOGLE_SERVICE_ACCOUNT_EMAIL') && variable('GOOGLE_PRIVATE_KEY'))
+}
+
+/**
+ * Reconstruye la clave privada en formato PEM, venga como venga.
+ *
+ * â”€â”€ Por quÃ© hace falta tanta tolerancia â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * Una clave privada es un bloque de varias lÃ­neas metido en una variable de entorno de
+ * una sola lÃ­nea, y cada herramienta que lee un `.env` resuelve ese conflicto distinto.
+ * Ya se dieron los tres casos en este proyecto:
+ *
+ *   Â· Vercel y el JSON de Google Cloud â†’ una lÃ­nea con `\n` literales;
+ *   Â· `node --env-file` â†’ acepta valores de varias lÃ­neas y quita las comillas;
+ *   Â· `next build` (dotenv) â†’ con un valor de varias lÃ­neas **deja las comillas dentro**,
+ *     asÃ­ que la clave empieza por `"` y OpenSSL revienta con
+ *     `error:1E08010C:DECODER routines::unsupported`, que no dice absolutamente nada.
+ *
+ * Ese Ãºltimo caso es traicionero: `pnpm probar:sponsors` funcionaba y `pnpm build` no,
+ * con las mismas credenciales. En vez de exigirle a cada persona que la escriba de una
+ * forma exacta, se normaliza: se quitan las comillas, se convierten los `\n` literales
+ * en saltos reales, y se rearma el PEM lÃ­nea por lÃ­nea.
+ */
+function clavePrivada(valor: string): string {
+  const lineas = valor
+    .trim()
+    .replace(/^["']|["']$/g, '')
+    .replace(/\\n/g, '\n')
+    .split('\n')
+    .map((linea) => linea.trim())
+    .filter(Boolean)
+
+  const pem = `${lineas.join('\n')}\n`
+
+  // Fallar acÃ¡ con un mensaje entendible, y no en las tripas de OpenSSL diez lÃ­neas
+  // despuÃ©s. El lector lo captura y cae al contenido de reserva; el motivo queda escrito.
+  if (!/^-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(pem)) {
+    throw new Error(
+      'GOOGLE_PRIVATE_KEY no parece una clave PEM: tiene que empezar con ' +
+        '"-----BEGIN PRIVATE KEY-----". CÃ³piala del campo `private_key` del JSON de ' +
+        'Google Cloud, entre comillas dobles y en una sola lÃ­nea con los \\n literales.',
+    )
+  }
+
+  return pem
+}
+
+let autenticacion: GoogleAuth | null = null
+
+function obtenerAutenticacion(): GoogleAuth {
+  // Se reutiliza entre llamadas a propÃ³sito: la librerÃ­a cachea el token de acceso
+  // dentro de esta instancia, asÃ­ que crear una nueva cada vez significarÃ­a pedirle un
+  // token a Google en cada regeneraciÃ³n.
+  autenticacion ??= new GoogleAuth({
+    credentials: {
+      client_email: variable('GOOGLE_SERVICE_ACCOUNT_EMAIL') ?? '',
+      private_key: clavePrivada(variable('GOOGLE_PRIVATE_KEY') ?? ''),
+    },
+    scopes: [AMBITO_SOLO_LECTURA],
+  })
+
+  return autenticacion
+}
+
+/**
+ * Lee varios rangos de una hoja en UNA sola llamada.
+ *
+ * Es `batchGet` y no una llamada por pestaÃ±a por una razÃ³n concreta: con seis pestaÃ±as y
+ * una regeneraciÃ³n cada diez minutos, una llamada por pestaÃ±a serÃ­an 36 peticiones por
+ * hora contra la cuota, para traer exactamente lo mismo.
+ *
+ * Los rangos se escriben con columnas explÃ­citas (`Niveles!A1:G200`) y nunca como la
+ * pestaÃ±a entera: asÃ­ el equipo puede agregar columnas internas a la derecha sin que la
+ * web se entere, y nunca se leen datos que no se publican.
+ *
+ * Devuelve una matriz por cada rango pedido, EN EL MISMO ORDEN. Un rango sin datos
+ * devuelve una matriz vacÃ­a, no un error.
+ */
+export async function leerRangos(idHoja: string, rangos: string[]): Promise<string[][][]> {
+  const cliente = await obtenerAutenticacion().getClient()
+  const { token } = await cliente.getAccessToken()
+
+  if (!token) throw new Error('Google no devolviÃ³ un token de acceso')
+
+  const url = new URL(
+    `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(idHoja)}/values:batchGet`,
+  )
+  for (const rango of rangos) url.searchParams.append('ranges', rango)
+  // FORMATTED_VALUE: los valores llegan como los ve una persona en la hoja. Es lo que se
+  // quiere, porque todo lo que se publica es texto ("+30", "10 equipos") y nadie hace
+  // cuentas con ello.
+  url.searchParams.set('valueRenderOption', 'FORMATTED_VALUE')
+  url.searchParams.set('majorDimension', 'ROWS')
+
+  const respuesta = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(ESPERA_MAXIMA_MS),
+    // La cachÃ© la maneja `unstable_cache` una capa mÃ¡s arriba. Que Next no meta otra.
+    cache: 'no-store',
+  })
+
+  if (!respuesta.ok) {
+    // 403 casi siempre significa lo mismo: nadie compartiÃ³ la hoja con el correo de la
+    // cuenta de servicio. Es el paso que mÃ¡s se olvida y el error de Google no lo dice.
+    const pista =
+      respuesta.status === 403
+        ? ' â€” Â¿compartiste la hoja con el correo de la cuenta de servicio, en modo Lector?'
+        : ''
+    throw new Error(`Google Sheets respondiÃ³ ${respuesta.status}${pista}`)
+  }
+
+  const datos = (await respuesta.json()) as {
+    valueRanges?: { values?: string[][] }[]
+  }
+
+  return rangos.map((_, indice) => datos.valueRanges?.[indice]?.values ?? [])
+}
+
+==================== lib\sheets\filas.ts ====================
+/**
+ * De la matriz cruda que devuelve Google a filas con nombre. COMPARTIDO con la futura
+ * Fase 2 de eventos: acÃ¡ no hay nada de patrocinio.
+ *
+ * La regla que gobierna todo este archivo: **la hoja la editan personas**. Va a haber
+ * celdas en blanco, mayÃºsculas inconsistentes, tildes puestas y quitadas, y espacios
+ * invisibles al final de las cosas. Nada de eso puede tumbar la web, asÃ­ que todo se
+ * normaliza acÃ¡, una sola vez, en la frontera.
+ */
+
+/** Una fila de la hoja, con las cabeceras normalizadas como claves. */
+export type Fila = Record<string, string>
+
+/** El contenido Ãºtil de una pestaÃ±a, ya separado de sus notas y su cabecera. */
+export type Pestana = {
+  filas: Fila[]
+  /**
+   * En quÃ© fila de la HOJA estÃ¡ la cabecera (contando desde 1, como las ve una persona).
+   * Sirve para que un aviso pueda decir "revisa la fila 7" y que ese nÃºmero sea el que
+   * de verdad se lee en Google Sheets.
+   */
+  cabeceraEnFila: number
+}
+
+/**
+ * Las marcas diacrÃ­ticas que `normalize('NFD')` separa de su letra: la tilde de la `Ã¡`,
+ * la virgulilla de la `Ã±`, la diÃ©resis de la `Ã¼`.
+ *
+ * Se construye con `new RegExp` y no como literal para que el rango se lea como texto en
+ * el cÃ³digo. Escrito como literal serÃ­an dos caracteres invisibles entre corchetes,
+ * imposibles de revisar en un diff y muy fÃ¡ciles de romper sin darse cuenta.
+ */
+const DIACRITICOS = new RegExp('[\\u0300-\\u036f]', 'g')
+
+/** MinÃºsculas y sin tildes. Es la base de todas las comparaciones de este archivo. */
+function sinTildes(valor: string): string {
+  return valor.normalize('NFD').replace(DIACRITICOS, '').trim().toLowerCase()
+}
+
+/**
+ * Normaliza una cabecera a una clave estable: minÃºsculas, sin tildes y con guion bajo.
+ *
+ *   'Nivel ID' â†’ 'nivel_id'      'APORTE TEXTO' â†’ 'aporte_texto'
+ *   'Mostrable' â†’ 'mostrable'    'DescripciÃ³n' â†’ 'descripcion'
+ *
+ * Sin esto, cambiar "Orden" por "orden" en la hoja romperÃ­a la web, y nadie relacionarÃ­a
+ * jamÃ¡s las dos cosas.
+ */
+function comoClave(cabecera: string): string {
+  return sinTildes(cabecera)
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+}
+
+/**
+ * La columna que TODAS las pestaÃ±as comparten, y por eso sirve para reconocer la
+ * cabecera. Ver `buscarCabecera`.
+ */
+const COLUMNA_INTERRUPTOR = 'mostrable'
+
+/**
+ * Encuentra la fila de cabecera en vez de dar por hecho que es la primera.
+ *
+ * â”€â”€ Por quÃ© no basta con la primera fila â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * Quien mantiene la hoja escribe instrucciones arriba de la tabla (Â«todo en NO hasta
+ * tener los nÃºmeros confirmadosÂ»), que es exactamente lo que hay que hacer para que otra
+ * persona la llene bien. Si el lector toma esa nota como cabecera, ninguna columna se
+ * llama `mostrable`, el filtro descarta la pestaÃ±a entera **en silencio**, y la web se
+ * queda sin esa secciÃ³n sin decir por quÃ©. PasÃ³ de verdad con la pestaÃ±a `Activos`.
+ *
+ * El criterio es la columna `mostrable` porque es la Ãºnica que el encargo obliga a tener
+ * en todas las pestaÃ±as. Se compara la celda COMPLETA, no si la contiene: una nota que
+ * mencione la palabra Â«mostrableÂ» no confunde a nadie.
+ *
+ * Si no aparece en las primeras filas se usa la primera, que es el comportamiento
+ * razonable para una pestaÃ±a que todavÃ­a no sigue la convenciÃ³n.
+ */
+function buscarCabecera(valores: string[][]): number {
+  const hastaDonde = Math.min(valores.length, 10)
+
+  for (let indice = 0; indice < hastaDonde; indice++) {
+    if (valores[indice].some((celda) => comoClave(celda) === COLUMNA_INTERRUPTOR)) return indice
+  }
+
+  return 0
+}
+
+/**
+ * Convierte la matriz de un rango en filas con nombre.
+ *
+ * Ojo con algo que sorprende: Google **recorta las celdas vacÃ­as del final**, asÃ­ que
+ * una fila puede llegar con menos elementos que la cabecera. Por eso se recorre la
+ * cabecera y no la fila, y lo que falte queda como cadena vacÃ­a.
+ */
+export function aFilas(valores: string[][]): Pestana {
+  const indice = buscarCabecera(valores)
+  const cabecera = valores[indice]
+  if (!cabecera) return { filas: [], cabeceraEnFila: 1 }
+
+  const claves = cabecera.map(comoClave)
+
+  return {
+    cabeceraEnFila: indice + 1,
+    filas: valores.slice(indice + 1).map((celdas) => {
+      const fila: Fila = {}
+      claves.forEach((clave, columna) => {
+        if (clave) fila[clave] = (celdas[columna] ?? '').trim()
+      })
+      return fila
+    }),
+  }
+}
+
+/**
+ * Lee la columna `mostrable`, el interruptor editorial.
+ *
+ * Se acepta cualquier forma razonable de decir que sÃ­ porque quien llena la hoja escribe
+ * "SÃ", "si", "SÃ­ ", "x" o "TRUE" segÃºn el dÃ­a, y descartar contenido bueno por una
+ * tilde serÃ­a el peor de los fallos posibles: silencioso.
+ *
+ * Una celda vacÃ­a es NO. Es a propÃ³sito: la hoja va a tener filas a medio escribir la
+ * mayor parte del tiempo, y lo seguro es que no se publiquen solas.
+ */
+export function esMostrable(fila: Fila): boolean {
+  return ['si', 'x', 'true', 'verdadero', 'yes', '1'].includes(sinTildes(fila.mostrable ?? ''))
+}
+
+/**
+ * Lee la columna `orden`. Si falta o no es un nÃºmero, devuelve la posiciÃ³n en la hoja,
+ * que es justo el desempate que espera quien la edita: "lo dejo como estÃ¡ y sale como
+ * lo veo".
+ */
+export function aOrden(fila: Fila, posicion: number): number {
+  const crudo = (fila.orden ?? '').trim().replace(',', '.')
+  if (!crudo) return posicion
+
+  const numero = Number(crudo)
+  return Number.isFinite(numero) ? numero : posicion
+}
+
+/** Texto opcional: devuelve `null` en vez de cadena vacÃ­a, que es lo que dicen los tipos. */
+export function oNulo(valor: string | undefined): string | null {
+  const limpio = valor?.trim()
+  return limpio ? limpio : null
+}
+
+/**
+ * Ordena por `orden` y, cuando empata o falta, por la posiciÃ³n original en la hoja.
+ *
+ * `sort` en JavaScript es estable desde ES2019, asÃ­ que bastarÃ­a con ordenar por
+ * `orden`; el Ã­ndice va explÃ­cito igual para que el desempate sea una decisiÃ³n visible y
+ * no un detalle del motor.
+ */
+export function porOrden<T extends { orden: number }>(elementos: T[]): T[] {
+  return elementos
+    .map((elemento, indice) => ({ elemento, indice }))
+    .sort((a, b) => a.elemento.orden - b.elemento.orden || a.indice - b.indice)
+    .map(({ elemento }) => elemento)
+}
+
+==================== lib\eventos\types.ts ====================
+/**
+ * Modelo de datos de los eventos.
+ *
+ * âš ï¸ TODAVÃA NO SE USA EN LA WEB. La pÃ¡gina no muestra nada de eventos por decisiÃ³n
+ * de producto: primero tiene que estar lista la lectura desde Google Sheets con cachÃ©.
+ * Ver docs/arquitectura.md â†’ "Fase 2".
+ *
+ * Estos tipos son el contrato entre la hoja de cÃ¡lculo y la interfaz. EstÃ¡n calcados
+ * de las columnas que ya usa el equipo en su hoja de planificaciÃ³n
+ * (`internals/Eventos | Hack with DSC.xlsx`), asÃ­ que quien implemente el lector solo
+ * tiene que mapear columna â†’ campo.
+ *
+ * Regla de oro del mapeo: la hoja es la fuente de verdad del CONTENIDO, pero nunca
+ * de la PRESENTACIÃ“N. Nada de colores, clases ni HTML dentro de las celdas.
+ */
+
+// hola soy claude ðŸ« 
+
+/** Los formatos de evento del programa. Coincide con la columna "Tipo" de la hoja. */
+export type TipoEvento = 'Taller' | 'Ponencia' | 'Hackathon' | 'Networking' | 'Panel'
+
+/**
+ * Una persona que participa en un evento: ponente, mentor o jurado.
+ * Viene de la hoja de personas, que se une con la de eventos por `id`.
+ */
+export type Persona = {
+  /** Columna "ID Persona". Estable: no cambia aunque se corrija el nombre. */
+  id: string
+  /** Columna "Nombres y apellidos". */
+  nombre: string
+  /** Columna "LinkedIn URL". `null` si no tiene o no quiso compartirlo. */
+  linkedin: string | null
+  /** Columna "Github URL". */
+  github: string | null
+  /** Columna "IMAGEN URL". Foto de perfil. */
+  imagen: string | null
+}
+
+export type Evento = {
+  /** Columna "EVENT_ID". Es la clave estable del evento; nunca se reutiliza. */
+  id: string
+  /** Columna "Nombre de evento". */
+  titulo: string
+  /** Columna "Tipo". */
+  tipo: TipoEvento
+  /** Columna "TemÃ¡tica": de quÃ© trata, en una frase. */
+  tematica: string
+  /**
+   * Columna "Info web": el texto que sÃ­ se publica.
+   * Ojo: la hoja tambiÃ©n tiene "Observaciones", que es interno y NO se publica.
+   */
+  infoWeb: string | null
+
+  /**
+   * Fecha confirmada, en ISO 8601 (`2026-08-20`).
+   * `null` cuando todavÃ­a es tentativa: en ese caso se usa `fechaTentativa`.
+   */
+  fecha: string | null
+  /** Columna "Fecha tentativa": texto libre tipo "Sem 3". Se muestra tal cual. */
+  fechaTentativa: string | null
+  /** Columna "Hora", texto libre: "12:00pm â€“ 2:00pm". */
+  hora: string | null
+  /** Columna "Tiempo": duraciÃ³n o formato ("2 o 3 dÃ­as", "24 horas"). */
+  duracion: string | null
+  /** Columna "Lugar". `null` o "Por confirmar" mientras no se sepa. */
+  lugar: string | null
+
+  /** Columna "Permite externos a PUCP". */
+  permiteExternos: boolean
+  /** Columna "Link de inscripciÃ³n (luma)". `null` â†’ mostrar "prÃ³ximamente". */
+  inscripcion: string | null
+
+  ponentes: Persona[]
+  mentores: Persona[]
+  jurados: Persona[]
+
+  /**
+   * Columna "Mostrable en web".
+   *
+   * Es el interruptor editorial del equipo: el lector DEBE descartar todo evento en
+   * el que esto sea falso. AsÃ­ la hoja puede tener eventos a medio planificar sin
+   * riesgo de que se filtren a la web.
+   */
+  mostrableEnWeb: boolean
+}
+
+/**
+ * Lo que devuelve el lector de la hoja.
+ *
+ * Trae `obtenidoEn` para poder mostrar en la interfaz cuÃ¡ndo se actualizÃ³ por Ãºltima
+ * vez, y `origen` para saber si se estÃ¡ viendo dato fresco o la copia en cachÃ© â€” que
+ * es justo lo que se necesita para depurar cuando alguien reclama "ya lo cambiÃ© en la
+ * hoja y la web no se actualiza".
+ */
+export type ResultadoEventos = {
+  eventos: Evento[]
+  obtenidoEn: string
+  origen: 'sheets' | 'cache'
+}
+
+==================== app\page.tsx ====================
+import { Hero } from '@/components/hero'
+import { QueEs } from '@/components/que-es'
+
+/**
+ * Portada del sitio, en `/`.
+ *
+ * A propÃ³sito solo hay DOS secciones: la portada y "QuÃ© es Hack with DSC". No se muestra
+ * nada de eventos (agenda, fechas, ponentes, lugares) hasta que la lectura desde Google
+ * Sheets con cachÃ© estÃ© implementada â€” ver docs/arquitectura.md Â§3.
+ *
+ * El header, el pie y los dos componentes que dan el movimiento estÃ¡n en
+ * `app/layout.tsx`, porque los comparten todas las pÃ¡ginas. AcÃ¡ solo va el contenido.
+ */
+export default function Page() {
+  return (
+    <main>
+      <Hero />
+      <QueEs />
+    </main>
+  )
+}
+
+==================== app\api\revalidate\route.ts ====================
+/**
+ * Fuerza el refresco de un contenido cacheado sin esperar a que venza.
+ *
+ *   POST /api/revalidate?secret=<REVALIDATE_SECRET>&tag=sponsors
+ *   GET  /api/revalidate?secret=<REVALIDATE_SECRET>&tag=sponsors
+ *
+ * â”€â”€ Por quÃ© tambiÃ©n por GET â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * Porque la persona que edita la hoja no usa `curl`. Cuando no vea su cambio reflejado
+ * va a querer abrir un enlace en el navegador, y un navegador solo hace GET. La
+ * operaciÃ³n es idempotente (marca una etiqueta como vencida, nada mÃ¡s) y sigue exigiendo
+ * el secreto, asÃ­ que abrirla por GET no aÃ±ade riesgo. Sin esta puerta, la Ãºnica vÃ­a
+ * serÃ­a pedirle ayuda a alguien del equipo tÃ©cnico cada vez.
+ *
+ * â”€â”€ La lista blanca â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ * `tag` no se pasa directo a `revalidateTag`. Solo se aceptan las etiquetas que este
+ * proyecto usa de verdad; cualquier otra cosa devuelve 400. Sin la lista, el parÃ¡metro
+ * serÃ­a una entrada arbitraria a la cachÃ© interna de Next.
+ *
+ * La ruta es compartida con la futura Fase 2 de eventos: cuando esa lectura exista, ya
+ * estÃ¡ su etiqueta contemplada acÃ¡ y no hay que crear una segunda ruta.
+ */
+
+import { revalidateTag } from 'next/cache'
+
+import { ETIQUETA_SPONSORS } from '@/lib/sponsors/contenido'
+
+/** Etiqueta por defecto: mantiene el comportamiento que se diseÃ±Ã³ primero para eventos. */
+const ETIQUETA_EVENTOS = 'eventos'
+
+const ETIQUETAS_PERMITIDAS: readonly string[] = [ETIQUETA_EVENTOS, ETIQUETA_SPONSORS]
+
+/** Nunca se cachea: cachear la respuesta de "vacÃ­a la cachÃ©" serÃ­a absurdo. */
+export const dynamic = 'force-dynamic'
+
+async function revalidar(peticion: Request) {
+  const parametros = new URL(peticion.url).searchParams
+  const secretoEsperado = process.env.REVALIDATE_SECRET?.trim()
+
+  // Sin secreto configurado en el servidor no hay nada contra quÃ© comparar, y dejar
+  // pasar a todo el mundo serÃ­a peor que no tener la ruta. 503 y no 401: el problema es
+  // del despliegue, no de quien llama.
+  if (!secretoEsperado) {
+    return Response.json(
+      { ok: false, error: 'REVALIDATE_SECRET no estÃ¡ configurado en el servidor' },
+      { status: 503 },
+    )
+  }
+
+  if (parametros.get('secret') !== secretoEsperado) {
+    return Response.json({ ok: false, error: 'Secreto invÃ¡lido' }, { status: 401 })
+  }
+
+  const etiqueta = parametros.get('tag')?.trim() || ETIQUETA_EVENTOS
+
+  if (!ETIQUETAS_PERMITIDAS.includes(etiqueta)) {
+    return Response.json(
+      {
+        ok: false,
+        error: `Etiqueta no permitida: "${etiqueta}"`,
+        permitidas: ETIQUETAS_PERMITIDAS,
+      },
+      { status: 400 },
+    )
+  }
+
+  /*
+   * El segundo argumento es obligatorio desde Next 16. `'max'` significa "marca la
+   * etiqueta como vencida, pero sigue sirviendo la copia guardada mientras se regenera":
+   * exactamente la propiedad que hace que nadie espere nunca a Google.
+   *
+   * La alternativa de vencimiento inmediato es `updateTag`, y no sirve acÃ¡: solo se puede
+   * llamar desde una Server Action, no desde un route handler.
+   */
+  revalidateTag(etiqueta, 'max')
+
+  return Response.json({
+    ok: true,
+    etiqueta,
+    // Sirve para saber, desde el navegador, si el clic llegÃ³ de verdad. La pÃ¡gina se
+    // regenera en la siguiente visita, asÃ­ que sin esto no hay ninguna seÃ±al.
+    revalidadoEn: new Date().toISOString(),
+  })
+}
+
+export async function POST(peticion: Request) {
+  return revalidar(peticion)
+}
+
+export async function GET(peticion: Request) {
+  return revalidar(peticion)
+}
+
