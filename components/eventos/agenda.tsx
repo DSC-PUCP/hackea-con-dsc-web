@@ -61,9 +61,15 @@ export function SeccionDeEventos({
 
   return (
     <section id={id} className="scroll-mt-24">
+      {/*
+        Un escalón por debajo del `<h1>` de la página (que es `text-4xl sm:text-5xl`), y
+        a propósito. Estos rótulos no son títulos que compitan: solo dicen qué subconjunto
+        viene debajo —«Próximos eventos», «Ya pasaron»— y con el tamaño anterior se leían
+        como un segundo encabezado de página a dos dedos del primero.
+      */}
       <h2
         data-reveal
-        className="font-display text-2xl leading-tight font-extrabold tracking-tight sm:text-3xl"
+        className="font-display text-xl leading-tight font-extrabold tracking-tight sm:text-2xl"
       >
         {titulo}
       </h2>
@@ -238,9 +244,15 @@ function Encabezado({ evento }: { evento: Evento }) {
         ) : null}
       </span>
 
-      <h3 className="mt-1 font-display text-base leading-snug font-bold text-pretty sm:text-lg">
+      {/*
+        `h4` y no `h3`: el evento cuelga del mes, y el mes es el `h3` de la lista. Con los
+        dos en `h3` quedaban como hermanos, y quien navega por encabezados leía el título
+        del evento como si no estuviera dentro de ningún mes. La jerarquía completa es
+        h1 página → h2 lista → h3 mes → h4 evento. El aspecto no cambia: manda la clase.
+      */}
+      <h4 className="mt-1 font-display text-base leading-snug font-bold text-pretty sm:text-lg">
         {evento.nombre}
-      </h3>
+      </h4>
 
       {nota ? (
         <span className="mt-1 block font-subtitle text-xs text-muted-foreground">{nota}</span>

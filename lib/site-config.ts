@@ -227,12 +227,31 @@ export const copy = {
   agenda: {
     /** Cabecera de la página `/agenda`. */
     eyebrow: 'Agenda',
-    titulo: 'Todo lo que se viene',
+    /**
+     * ── Por qué el título de la página NO habla del futuro ─────────────────────────
+     * Decía «Todo lo que se viene», y debajo la primera lista se llamaba «Lo que viene»:
+     * dos encabezados seguidos diciendo lo mismo, y el de abajo sin ganarse su sitio.
+     *
+     * El reparto que lo arregla es que cada uno haga un trabajo distinto: **el H1 nombra
+     * la página entera** —que incluye lo que ya pasó— y **cada H2 nombra su lista**. Por
+     * eso este título habla de «el programa» y no de «lo que viene».
+     *
+     * Tiene un segundo efecto que importa más de lo que parece: el día que termine el
+     * último evento del ciclo, la página va a quedarse solo con eventos pasados. Con el
+     * título viejo se habría titulado «Todo lo que se viene» encima de una lista de cosas
+     * que ya ocurrieron. Con este, sigue siendo cierto sin que nadie toque nada.
+     */
+    titulo: 'Todo el programa, fecha por fecha',
     intro:
       'Talleres, ponencias y hackathons del programa. Cada uno se inscribe por su cuenta y ' +
       'el cupo se llena rápido: abre el que te sirva y guárdate la fecha.',
 
-    tituloProximos: 'Lo que viene',
+    /*
+     * Los dos rótulos de lista. Dicen QUÉ SUBCONJUNTO es cada una, no de qué va la
+     * página: eso ya lo dijo el título de arriba. Son una pareja y hay que leerlos
+     * juntos — «Próximos eventos» / «Ya pasaron».
+     */
+    tituloProximos: 'Próximos eventos',
     tituloPasados: 'Ya pasaron',
     introPasados:
       'Lo que ya ocurrió este ciclo. Las inscripciones están cerradas, pero la página de ' +

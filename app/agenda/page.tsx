@@ -140,7 +140,12 @@ export default async function Page() {
             <div className="glow-purple absolute top-[10%] right-[-20%] size-[38rem] max-w-[140vw] opacity-25" />
           </div>
 
-          <div className="mx-auto max-w-5xl space-y-16 px-5 pb-24 md:px-6 md:pb-32">
+          {/*
+            El `pt` no es decorativo: el hero cierra con `pb-10 md:pb-14`, y sin nada más
+            el primer rótulo de lista quedaba pegado a la entradilla, como si fuera parte
+            de ella. Con esto se lee como lo que es, el comienzo de otra cosa.
+          */}
+          <div className="mx-auto max-w-5xl space-y-16 px-5 pt-6 pb-24 md:px-6 md:pt-10 md:pb-32">
             <SeccionDeEventos id="proximos" titulo={copy.agenda.tituloProximos} eventos={proximos} />
 
             <SeccionDeEventos
