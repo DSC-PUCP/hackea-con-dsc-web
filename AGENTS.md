@@ -123,13 +123,17 @@ components/
   eventos/              la agenda (servidor). agenda.tsx = lista agrupada por mes; un
                         evento SE DESPLIEGA EN MÓVIL (`<details>` nativo, cero JS) y NO
                         se despliega en escritorio, con las mismas piezas de contenido
-                        definidas una sola vez. personas.tsx = ponentes/mentores/jurados,
-                        con pila de caras cuando son muchos
+                        definidas una sola vez. personas.tsx = ponentes/mentores/jurados;
+                        la forma se decide POR ROL, no por el total, y todos conservan su
+                        enlace a LinkedIn
   site-header.tsx       barra superior (cliente: cambia al hacer scroll)
   site-footer.tsx       pie
   pointer-parallax.tsx  cliente: publica la posición del cursor en variables CSS
   scroll-reveal.tsx     cliente: pone data-visible al entrar en pantalla
   brand/icons.tsx       chevron del logo + iconos macizos de los 3 formatos
+  brand/redes.tsx       logotipos de las redes de DSC PUCP, en SVG. Están dibujados a
+                        mano porque lucide-react YA NO trae iconos de marca: importar
+                        `Instagram` de lucide no falla al compilar, da `undefined`
   ui/button.tsx         shadcn. Casi no se usa: los CTA usan la utilidad `btn-brand`
 
 lib/

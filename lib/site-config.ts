@@ -69,10 +69,36 @@ export const themeColor = '#0f0d1c'
  * para esconderlos. Cuando exista la cuenta, se pone la URL acá y aparece.
  */
 export const links = {
+  /**
+   * El grupo de la comunidad. Es de **Hack with DSC**: es a donde apuntan todos los CTA
+   * del sitio y donde se anuncian los eventos antes que en ninguna parte.
+   */
   whatsapp: 'https://chat.whatsapp.com/JLlbloJJKu8L8O7vLLGFHn?s=cl&p=a&mlu=0&ilr=0',
-  instagram: null as string | null,
-  linkedin: null as string | null,
-  github: null as string | null,
+} as const
+
+/**
+ * Las redes de **DSC PUCP**, no de Hack with DSC.
+ *
+ * La distinción importa y por eso están en su propia constante: Hack with DSC es un
+ * programa, y quien lo organiza es el Developer Student Club PUCP, que existe antes y
+ * después del programa y publica muchas más cosas. En el pie se rotulan como suyas, para
+ * que nadie siga una cuenta esperando encontrar solo esta agenda.
+ *
+ * `null` significa «esa cuenta todavía no existe» y el pie la salta sin dejar hueco. Para
+ * publicar una, basta escribir su URL acá: no hay que tocar ningún componente.
+ */
+export const redesDsc = {
+  instagram: 'https://www.instagram.com/dsc.pucp/',
+  linkedin: 'https://www.linkedin.com/company/developer-student-club-pucp',
+  github: 'https://github.com/DSC-PUCP',
+  youtube: 'https://www.youtube.com/@dsc_pucp/',
+  tiktok: 'https://www.tiktok.com/@dsc.pucp',
+} as const
+
+/** Los otros dos caminos a DSC PUCP, que no son redes sociales y se leen como texto. */
+export const contactoDsc = {
+  web: 'https://dsc.inf.pucp.edu.pe',
+  correo: 'dsc.pucp@gmail.com',
 } as const
 
 // ═════════════════════════════════════════════════════════════════════════════════
@@ -262,6 +288,16 @@ export const copy = {
     /** Rótulos de las dos columnas de enlaces. Sin ellos se leen como una sola lista. */
     tituloSitio: 'El sitio',
     tituloRedes: 'Comunidad',
+    /**
+     * Rótulo de la fila de iconos. Dice de QUIÉN son las cuentas, y esa es toda su razón
+     * de existir: sin él, cinco logotipos debajo del nombre «Hack with DSC» se leen como
+     * las redes del programa, que no son. Ver `redesDsc` en este mismo archivo.
+     */
+    tituloRedesDsc: 'Síguenos como DSC PUCP',
+    /** Textos accesibles de la fila de iconos: se leen «Instagram de DSC PUCP». */
+    redAria: (red: string) => `${red} de DSC PUCP`,
+    web: 'Web de DSC PUCP',
+    correo: 'Escríbenos',
   },
 
   /**

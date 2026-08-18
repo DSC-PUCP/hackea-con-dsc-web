@@ -3,38 +3,42 @@ import type { Evento, Persona, Rol } from '@/lib/eventos/types'
 import { iniciales } from '@/lib/iniciales'
 
 /**
- * Quién participa en un evento, dentro de su tarjeta.
+ * Quién participa en un evento.
  *
  * ── El problema que resuelve ─────────────────────────────────────────────────────────
  * Los eventos de este programa no se parecen entre sí. Un taller tiene un ponente. Una
- * hackathon tiene tres ponentes, seis mentores y cuatro jurados: trece personas. Pintarlos
- * todos igual da uno de estos dos resultados malos, según cuál se elija:
+ * hackathon tiene un ponente, seis mentores y cuatro jurados: once personas repartidas en
+ * tres papeles que no significan lo mismo. Tratarlos igual sale mal en las dos
+ * direcciones — con la ficha completa de cada uno la hackathon entierra la agenda, y con
+ * un contador («11 participantes») el taller pierde lo único que hace que alguien se
+ * apunte, que es ver de quién va a aprender.
  *
- *  · con la ficha completa de cada persona, la hackathon ocupa media pantalla de móvil y
- *    entierra al resto de la agenda;
- *  · con solo un contador («13 participantes»), el taller pierde lo único que hace que
- *    alguien se apunte, que es ver de quién va a aprender.
+ * ── La forma se decide POR ROL, no por el total ──────────────────────────────────────
+ * Esto empezó decidiéndose con la suma de las tres columnas, y estaba mal: en esa misma
+ * hackathon, el ponente —que es uno— se pintaba compacto por culpa de los mentores, y se
+ * perdía su cargo. Cada rol se mira por separado:
  *
- * Así que la tarjeta cambia de forma según cuánta gente haya:
+ *   1–3 personas  →  ficha: foto, nombre y cargo. Se lee cada una.
+ *   4 o más       →  fichas breves en fila que envuelven: foto y nombre.
  *
- *   1–3 personas  →  ficha por persona: foto, nombre y cargo. Se lee cada una.
- *   4 o más       →  una pila de fotos superpuestas por rol, con el conteo al lado.
+ * En la hackathon de arriba eso da: el ponente con su cargo, y mentoría y jurado como dos
+ * filas de nombres. Once personas en unas seis líneas, y ninguna anónima.
  *
- * El umbral está en `DETALLE_HASTA`. La pila ocupa lo mismo con cuatro personas que con
- * veinte, así que ninguna hackathon puede romper la maqueta por muchos jurados que sume.
+ * ── Todo el mundo conserva su enlace ─────────────────────────────────────────────────
+ * Antes el modo compacto eran caras superpuestas sin nombre y sin enlace: en una
+ * hackathon, los jurados —que suelen ser el argumento para presentarse— quedaban como
+ * fotos mudas. Ahora **cada persona es un enlace a su LinkedIn en las dos formas**, y en
+ * la breve el objetivo pulsable es la ficha entera (foto + nombre), no solo la foto.
  *
  * ── Nada es obligatorio ──────────────────────────────────────────────────────────────
  * Un rol vacío no se menciona (no existe «0 mentores»); un evento sin nadie no pinta esta
- * zona; una persona sin foto sale con sus iniciales; una sin LinkedIn sale sin enlace.
- * Durante media planificación esto va a estar a medio llenar, y esa es la situación
- * normal, no el caso raro.
+ * zona; una persona sin foto sale con sus iniciales; una sin LinkedIn sale sin enlace,
+ * pero sigue saliendo. Durante media planificación esto va a estar a medio llenar, y esa
+ * es la situación normal, no el caso raro.
  */
 
-/** Hasta acá se muestra la ficha de cada persona. Desde acá, la pila compacta. */
+/** Hasta acá, ficha con cargo. Desde acá, ficha breve. Se cuenta DENTRO de cada rol. */
 const DETALLE_HASTA = 3
-
-/** Cuántas caras se ven en la pila antes del «+N». Cinco caben en 320 px de ancho. */
-const CARAS_EN_LA_PILA = 5
 
 /**
  * Rótulos por rol, en formas que no marcan género.
@@ -49,7 +53,6 @@ const ROTULOS: Record<Rol, string> = {
   jurados: 'Jurado',
 }
 
-/** Para el conteo de la pila: «6 en mentoría» se lee mal; «Mentoría · 6», bien. */
 export function Personas({ evento }: { evento: Evento }) {
   const grupos = (['ponentes', 'mentores', 'jurados'] as const)
     .map((rol) => ({ rol, personas: evento[rol] }))
@@ -57,96 +60,133 @@ export function Personas({ evento }: { evento: Evento }) {
 
   if (grupos.length === 0) return null
 
-  const total = grupos.reduce((suma, grupo) => suma + grupo.personas.length, 0)
-  const compacto = total > DETALLE_HASTA
-
   return (
-    <div className="mt-5 space-y-3 border-t border-border/70 pt-4">
-      {grupos.map(({ rol, personas }) =>
-        compacto ? (
-          <PilaDeCaras key={rol} rol={rol} personas={personas} />
-        ) : (
-          <FichasDePersonas key={rol} rol={rol} personas={personas} />
-        ),
-      )}
-    </div>
-  )
-}
+    <div className="mt-5 space-y-4 border-t border-border/70 pt-4">
+      {grupos.map(({ rol, personas }) => (
+        <div key={rol}>
+          <p className="font-subtitle text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+            {ROTULOS[rol]}
+            {/*
+              El conteo solo cuando hay bastantes. Con dos jurados, «Jurado · 2» es ruido
+              —se ven los dos—; con nueve, saber cuántos son antes de contarlos ayuda.
+            */}
+            {personas.length > DETALLE_HASTA ? (
+              <span className="font-medium"> · {personas.length}</span>
+            ) : null}
+          </p>
 
-/** Pocas personas: cada una con su cargo, que es lo que convence a quien duda. */
-function FichasDePersonas({ rol, personas }: { rol: Rol; personas: Persona[] }) {
-  return (
-    <div>
-      <Rotulo>{ROTULOS[rol]}</Rotulo>
-
-      <ul className="mt-2 space-y-2">
-        {personas.map((persona) => (
-          <li key={persona.id} className="flex items-center gap-3">
-            <Cara persona={persona} />
-
-            <div className="min-w-0">
-              <p className="truncate font-subtitle text-sm font-semibold">
-                <NombreConEnlace persona={persona} />
-              </p>
-              {persona.cargo ? (
-                <p className="truncate text-xs text-muted-foreground">{persona.cargo}</p>
-              ) : null}
-            </div>
-          </li>
-        ))}
-      </ul>
+          {personas.length > DETALLE_HASTA ? (
+            <FichasBreves personas={personas} />
+          ) : (
+            <FichasConCargo personas={personas} />
+          )}
+        </div>
+      ))}
     </div>
   )
 }
 
 /**
- * Muchas personas: caras superpuestas y el número al lado.
- *
- * Los nombres no se pierden — cada cara lleva el nombre como texto alternativo y como
- * `title`, y las que no caben quedan en la etiqueta accesible de la lista. Un lector de
- * pantalla los enumera todos; la vista solo enseña cinco.
+ * Pocas personas en el rol: cada una con su cargo, que es lo que convence a quien duda.
+ * Es la forma del ponente de un taller y la del jurado de tres de una hackathon chica.
  */
-function PilaDeCaras({ rol, personas }: { rol: Rol; personas: Persona[] }) {
-  const visibles = personas.slice(0, CARAS_EN_LA_PILA)
-  const restantes = personas.length - visibles.length
-
+function FichasConCargo({ personas }: { personas: Persona[] }) {
   return (
-    <div className="flex items-center gap-3">
-      {/*
-        `-space-x-2` es lo que las superpone. `ring-card` recorta cada cara contra el fondo
-        de la tarjeta: sin ese anillo, dos fotos oscuras contiguas se leen como una mancha.
-      */}
-      <ul
-        className="flex -space-x-2"
-        aria-label={`${ROTULOS[rol]}: ${personas.map((p) => p.nombre).join(', ')}`}
-      >
-        {visibles.map((persona) => (
-          <li key={persona.id}>
-            <Cara persona={persona} enPila />
-          </li>
-        ))}
+    <ul className="mt-2 space-y-2">
+      {personas.map((persona) => (
+        <li key={persona.id}>
+          <Enlazada persona={persona} className="group/p flex items-center gap-3">
+            <Cara persona={persona} />
 
-        {restantes > 0 ? (
-          <li aria-hidden>
-            <span className="flex size-9 items-center justify-center rounded-full bg-muted font-subtitle text-xs font-semibold text-muted-foreground ring-2 ring-card">
-              +{restantes}
+            <span className="min-w-0">
+              <span className="block truncate font-subtitle text-sm font-semibold transition-colors group-hover/p:text-brand-blue">
+                {persona.nombre}
+              </span>
+              {persona.cargo ? (
+                <span className="block truncate text-xs text-muted-foreground">
+                  {persona.cargo}
+                </span>
+              ) : null}
             </span>
-          </li>
-        ) : null}
-      </ul>
-
-      <p className="font-subtitle text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-        {ROTULOS[rol]} · {personas.length}
-      </p>
-    </div>
+          </Enlazada>
+        </li>
+      ))}
+    </ul>
   )
 }
 
-function Rotulo({ children }: { children: React.ReactNode }) {
+/**
+ * Muchas personas en el rol: foto y nombre en fichas que envuelven.
+ *
+ * Sustituye a la pila de caras superpuestas que había antes. La pila ocupaba menos, pero
+ * escondía los nombres y no se podía pulsar cada cara sin apuntar a la mitad tapada por
+ * la siguiente. Once personas en fichas son unas seis líneas: cuesta cuatro líneas más y
+ * a cambio se lee quién es cada quién y se llega a su perfil.
+ *
+ * El cargo no cabe en la ficha breve, así que va en el `title`: no se pierde, se pospone.
+ */
+function FichasBreves({ personas }: { personas: Persona[] }) {
   return (
-    <p className="font-subtitle text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+    <ul className="mt-2 flex flex-wrap gap-2">
+      {personas.map((persona) => (
+        <li key={persona.id}>
+          <Enlazada
+            persona={persona}
+            titulo={persona.cargo ?? undefined}
+            className="flex items-center gap-2 rounded-full border border-border/70 bg-card/40 py-1 pr-3.5 pl-1 transition-colors hover:border-brand-blue/45 hover:bg-card"
+          >
+            <Cara persona={persona} pequena />
+            <span className="font-subtitle text-xs font-medium">{persona.nombre}</span>
+          </Enlazada>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/**
+ * Envuelve a una persona en su enlace a LinkedIn, o en un `<span>` si no tiene.
+ *
+ * Existe para que las dos formas de ficha compartan exactamente la misma regla y no haya
+ * una donde el enlace se olvide. Lo que NO hace es pintar un enlace muerto: sin LinkedIn
+ * no hay `<a>`, así que no recibe foco del teclado ni se anuncia como pulsable.
+ *
+ * El objetivo pulsable es la ficha entera —foto y nombre—, no solo la foto: una foto de
+ * 36 px es un blanco incómodo en un teléfono, y el nombre es lo que la gente intenta
+ * tocar de todas formas.
+ */
+function Enlazada({
+  persona,
+  titulo,
+  className,
+  children,
+}: {
+  persona: Persona
+  titulo?: string
+  className?: string
+  children: React.ReactNode
+}) {
+  if (!persona.linkedin) {
+    return (
+      <span className={className} title={titulo}>
+        {children}
+      </span>
+    )
+  }
+
+  return (
+    <a
+      href={persona.linkedin}
+      target="_blank"
+      rel="noopener noreferrer"
+      // Sin esto, quien navegue saltando de enlace en enlace oye once veces el nombre a
+      // secas y no sabe a dónde va ninguno.
+      aria-label={`${persona.nombre} en LinkedIn`}
+      title={titulo}
+      className={className}
+    >
       {children}
-    </p>
+    </a>
   )
 }
 
@@ -156,46 +196,33 @@ function Rotulo({ children }: { children: React.ReactNode }) {
  * `referrerPolicy="no-referrer"` es obligatorio: las fotos vienen de Google Drive, y ese
  * servidor responde 429 cuando el navegador manda `Referer` desde localhost. Ver
  * lib/sheets/imagenes.ts.
+ *
+ * `aria-hidden` en las iniciales, y el `alt` de la foto vacío: el nombre ya está escrito
+ * al lado en las dos formas de ficha, y sin esto un lector de pantalla lo diría dos veces
+ * seguidas.
  */
-function Cara({ persona, enPila = false }: { persona: Persona; enPila?: boolean }) {
-  const base = `size-9 shrink-0 rounded-full object-cover ${enPila ? 'ring-2 ring-card' : 'border border-border'}`
+function Cara({ persona, pequena = false }: { persona: Persona; pequena?: boolean }) {
+  const tamano = pequena ? 'size-7' : 'size-9'
 
   if (persona.foto) {
     return (
       <img
         src={assetPublico(persona.foto)}
-        alt={persona.nombre}
-        title={persona.nombre}
+        alt=""
         loading="lazy"
         decoding="async"
         referrerPolicy="no-referrer"
-        className={base}
+        className={`${tamano} shrink-0 rounded-full border border-border object-cover`}
       />
     )
   }
 
   return (
     <span
-      title={persona.nombre}
-      className={`${base} flex items-center justify-center bg-brand-purple/15 font-display text-xs font-bold text-brand-purple`}
+      aria-hidden
+      className={`${tamano} flex shrink-0 items-center justify-center rounded-full bg-brand-purple/15 font-display text-xs font-bold text-brand-purple`}
     >
       {iniciales(persona.nombre)}
     </span>
-  )
-}
-
-/** Enlace a LinkedIn si lo hay; si no, el nombre en texto. Nunca un enlace muerto. */
-function NombreConEnlace({ persona }: { persona: Persona }) {
-  if (!persona.linkedin) return <>{persona.nombre}</>
-
-  return (
-    <a
-      href={persona.linkedin}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="transition-colors hover:text-brand-blue"
-    >
-      {persona.nombre}
-    </a>
   )
 }
