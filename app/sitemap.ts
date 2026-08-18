@@ -28,6 +28,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
+      url: `${urlDelSitio}/agenda`,
+      lastModified: new Date(),
+      // La que más cambia del sitio: cada evento nuevo en la hoja la altera, y eso pasa
+      // varias veces por semana durante el programa.
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
       url: `${urlDelSitio}/sponsors`,
       lastModified: new Date(),
       // Cambia más seguido que la portada: su contenido se edita desde Google Sheets sin

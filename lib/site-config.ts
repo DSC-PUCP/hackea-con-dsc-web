@@ -91,8 +91,19 @@ export const links = {
  * navegaba y te soltaba a media portada, saltándose el hero.
  *
  * Que el menú signifique una sola cosa —«sitios a los que puedes ir»— es además lo que
- * permite que quepa en un teléfono sin desplegable. Con dos entradas no cabía, y estaba
- * oculto por debajo de 640 px: `/sponsors` era inalcanzable desde un móvil.
+ * permite que quepa en un teléfono sin desplegable. Cuando mezclaba anclas y rutas estaba
+ * oculto por debajo de 640 px, y `/sponsors` era inalcanzable desde un móvil.
+ *
+ * ── El presupuesto de ancho, que ya está gastado ────────────────────────────────────
+ * Hoy son DOS entradas, y a 390 px la barra va justa: logotipo + Agenda + Patrocinio + el
+ * botón de WhatsApp en modo icono suman algo más de lo que hay. Es una decisión tomada,
+ * no un descuido: **se prefiere que el logotipo se recorte** —tiene `min-w-0 truncate`
+ * justo para eso, ver components/site-header.tsx— antes que esconder un destino y volver
+ * a dejar una página sin camino desde el móvil. El recorte es cosmético; un destino
+ * inalcanzable no.
+ *
+ * Una TERCERA entrada ya no entra, y no se arregla apretando espacios: toca desplegable,
+ * con todo lo que eso trae (primer componente de cliente con estado, foco, Escape).
  *
  * Aun así admite los dos tipos de destino, por si algún día hace falta:
  *
@@ -102,7 +113,13 @@ export const links = {
  *
  * La lógica está en `resolverDestino`, dentro de components/site-header.tsx.
  */
-export const navegacion = [{ href: '/sponsors', label: 'Patrocinio' }] as const
+export const navegacion = [
+  // Primero la agenda: es lo que viene a buscar un estudiante, que es casi todo el
+  // tráfico. Patrocinio lo busca una empresa, y una empresa llega por un enlace directo
+  // que le mandó alguien del equipo, no explorando el menú.
+  { href: '/agenda', label: 'Agenda' },
+  { href: '/sponsors', label: 'Patrocinio' },
+] as const
 
 /**
  * Enlaces de sitio del pie. Es la red de seguridad de la navegación: funciona en
@@ -117,6 +134,7 @@ export const navegacion = [{ href: '/sponsors', label: 'Patrocinio' }] as const
 export const navegacionPie = [
   { href: '/', label: 'Inicio' },
   { href: '/#que-es', label: 'Qué es' },
+  { href: '/agenda', label: 'Agenda' },
   { href: '/sponsors', label: 'Patrocinio' },
 ] as const
 
@@ -174,11 +192,66 @@ export const copy = {
     },
   },
 
+  /**
+   * MICRO-COPIA de la sección de agenda. El contenido de cada evento (nombre, fecha,
+   * descripción, quién participa) NO está acá: se edita en Google Sheets. La frontera es
+   * la misma que en `sponsors`: si es una palabra de la interfaz, va acá; si es algo que
+   * el equipo querría cambiar sin pedir un despliegue, va en la hoja.
+   */
+  agenda: {
+    /** Cabecera de la página `/agenda`. */
+    eyebrow: 'Agenda',
+    titulo: 'Todo lo que se viene',
+    intro:
+      'Talleres, ponencias y hackathons del programa. Cada uno se inscribe por su cuenta y ' +
+      'el cupo se llena rápido: abre el que te sirva y guárdate la fecha.',
+
+    tituloProximos: 'Lo que viene',
+    tituloPasados: 'Ya pasaron',
+    introPasados:
+      'Lo que ya ocurrió este ciclo. Las inscripciones están cerradas, pero la página de ' +
+      'cada uno sigue abierta si quieres ver de qué fue.',
+
+    /** Cuando la hoja todavía no tiene fecha. Ver lib/eventos/fechas.ts. */
+    sinFecha: 'Fecha por confirmar',
+    /** Rótulo del grupo que junta a todos los eventos sin fecha, al final de la lista. */
+    sinFechaGrupo: 'Todavía sin fecha',
+
+    inscribirme: 'Inscribirme',
+    /** Cuando el evento está confirmado pero el enlace de Luma todavía no existe. */
+    proximamente: 'Inscripción próximamente',
+    /** En los eventos ya pasados, donde «Inscribirme» sería mentira. */
+    verEnLuma: 'Ver en Luma',
+    /*
+     * Cortos a propósito: van en la misma línea que el tipo de evento, arriba de la
+     * ficha, y ahí compiten por el ancho con el título. «Solo para la comunidad PUCP»
+     * ocupaba media línea para decir lo mismo.
+     */
+    abiertoExternos: 'Abierto a externos',
+    soloPucp: 'Solo PUCP',
+
+    /**
+     * Estado vacío de la página.
+     *
+     * A diferencia de una sección, una PÁGINA no se puede esconder: si la hoja no se
+     * puede leer o no hay ningún evento publicado, `/agenda` sigue existiendo y alguien
+     * va a llegar. Así que tiene que decir algo útil y ofrecer una salida, que es el
+     * grupo de WhatsApp.
+     */
+    vacio: {
+      titulo: 'La agenda se está cocinando',
+      descripcion:
+        'Todavía no hay eventos publicados. Los anunciamos primero en el grupo de la ' +
+        'comunidad, así que entra ahí y te enteras apenas se confirmen.',
+    },
+  },
+
   cta: {
-    titulo: 'La agenda se está cocinando',
+    titulo: 'No te pierdas ninguno',
     descripcion:
       'Los talleres, ponencias y hackathons del programa se anuncian primero en el grupo de ' +
-      'la comunidad. Entra ahí y te enteras antes que nadie — pronto también los verás acá.',
+      'la comunidad. Entra ahí y te enteras antes que nadie, incluso antes de que la fecha ' +
+      'llegue a esta página.',
     boton: 'Entrar al grupo de WhatsApp',
     nota: 'Abierto a toda la comunidad PUCP.',
   },
@@ -248,6 +321,22 @@ export const seoSponsors = {
     'Formatos de alianza para empresas que quieren estar donde los estudiantes de ' +
     'tecnología construyen software de verdad.',
   ogAlt: 'Hack with DSC — información de patrocinio para empresas',
+} as const
+
+/**
+ * Metadatos de `/agenda`. Estáticos por el mismo motivo que los de `/sponsors`, y acá
+ * pesa todavía más: el contenido de esta página cambia cada semana desde Google Sheets, y
+ * unas previsualizaciones que fueran con él dejarían circulando por WhatsApp enlaces que
+ * anuncian un taller que ya pasó.
+ *
+ * La descripción NO nombra eventos concretos por la misma razón.
+ */
+export const seoAgenda = {
+  title: 'Agenda — Hack with DSC',
+  description:
+    'Todos los talleres, ponencias y hackathons de Hack with DSC, el programa del ' +
+    'Developer Student Club PUCP. Fechas, de qué va cada uno y dónde inscribirte.',
+  ogAlt: 'Hack with DSC — agenda de talleres, ponencias y hackathons',
 } as const
 
 /**

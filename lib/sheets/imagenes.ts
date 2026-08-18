@@ -1,6 +1,6 @@
 /**
  * Traduce enlaces de Google Drive a algo que un `<img src>` pueda usar. COMPARTIDO: lo
- * va a necesitar también la Fase 2 para las fotos de ponentes.
+ * usan los logos de aliados en `/sponsors` y las fotos de las personas de la agenda.
  *
  * ── El problema, en una línea ────────────────────────────────────────────────────────
  * El enlace que Drive te da al pulsar "Compartir" **no es una imagen**. Es una página

@@ -9,7 +9,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "assets": "node scripts/prepare-assets.mjs",
-    "probar:sponsors": "node --experimental-strip-types --env-file-if-exists=.env scripts/probar-sponsors.mjs"
+    "probar:sponsors": "node --experimental-strip-types --env-file-if-exists=.env scripts/probar-sponsors.mjs",
+    "probar:eventos": "node --experimental-strip-types --env-file-if-exists=.env scripts/probar-eventos.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

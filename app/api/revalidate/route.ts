@@ -16,16 +16,14 @@
  * proyecto usa de verdad; cualquier otra cosa devuelve 400. Sin la lista, el parámetro
  * sería una entrada arbitraria a la caché interna de Next.
  *
- * La ruta es compartida con la futura Fase 2 de eventos: cuando esa lectura exista, ya
- * está su etiqueta contemplada acá y no hay que crear una segunda ruta.
+ * La ruta es compartida por las dos lecturas del sitio, `eventos` y `sponsors`. Cada
+ * etiqueta se importa del módulo que la define, no se escribe a mano acá.
  */
 
 import { revalidateTag } from 'next/cache'
 
+import { ETIQUETA_EVENTOS } from '@/lib/eventos/contenido'
 import { ETIQUETA_SPONSORS } from '@/lib/sponsors/contenido'
-
-/** Etiqueta por defecto: mantiene el comportamiento que se diseñó primero para eventos. */
-const ETIQUETA_EVENTOS = 'eventos'
 
 const ETIQUETAS_PERMITIDAS: readonly string[] = [ETIQUETA_EVENTOS, ETIQUETA_SPONSORS]
 

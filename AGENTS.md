@@ -58,23 +58,29 @@ Corolarios prácticos:
 
 ### 2.2 No se muestra NADA de eventos todavía
 
-La portada tiene exactamente **dos secciones**: `Hero` y **"Qué es Hack with DSC"**
-(`QueEs`). Eso es todo, por decisión de producto. (La otra página del sitio es
-`/sponsors`, que va dirigida a empresas y no muestra agenda tampoco.)
+El sitio tiene **tres páginas**: la portada (`Hero` + **"Qué es Hack with DSC"**, y nada
+más), `/agenda` y `/sponsors`.
 
-Nada de agenda, fechas, ponentes, lugares, links de inscripción ni contadores hasta que
-la lectura desde Google Sheets con caché esté implementada y probada
-([`docs/arquitectura.md`](docs/arquitectura.md) → Fase 2).
+La agenda estuvo un tiempo en la portada y se movió a su propia ruta: es contenido que
+crece y que se comparte por su cuenta, y al final de la portada obligaba a recorrer el
+hero entero para ver una fecha.
+
+**Ninguna fecha, ponente ni enlace de inscripción se escribe en el repo.** Todo eso sale
+de Google Sheets (`lib/eventos/`). Ojo con la diferencia entre sección y página: una
+sección puede devolver `null` y desaparecer, **una ruta no**. `/agenda` sigue existiendo
+aunque la hoja esté caída, así que tiene estado vacío propio con salida al WhatsApp.
 
 Motivo: publicar fechas que después cambian quema credibilidad, y el programa se
-planifica en una hoja de cálculo que se mueve todas las semanas.
+planifica en una hoja de cálculo que se mueve todas las semanas. Por eso tampoco hay
+contenido de reserva para eventos, al contrario que en `/sponsors` — una fecha vieja es
+peor que ninguna fecha.
 
 `internals/` contiene la hoja de planificación real. **Es material interno**: sirve
 para entender la forma de los datos, no para copiar contenido a la web. Está en
 `.gitignore` y en `.dockerignore`.
 
-Si te piden "añade la agenda", la respuesta correcta es implementar la Fase 2 completa,
-no cablear datos a mano.
+Si te piden "añade un evento", la respuesta correcta es que se añade **en la hoja**, no en
+el repo. Si te piden cambiar cómo se ve la agenda, eso sí es código: `components/eventos/`.
 
 ### 2.3 Dark-only
 
@@ -101,6 +107,8 @@ app/
   layout.tsx            tipografías, metadatos, clase `js`, y el ARMAZÓN COMÚN:
                         header, pie, PointerParallax y ScrollReveal
   page.tsx              la portada `/`: solo su <main> con Hero + QueEs
+  agenda/page.tsx       la agenda `/agenda`: lee la hoja UNA vez y reparte entre las
+                        dos secciones. Tiene estado vacío porque una ruta no se esconde
   sponsors/page.tsx     la página de patrocinio `/sponsors`: solo su <main>
   globals.css           SISTEMA DE DISEÑO (colores, utilidades, animaciones)
   sitemap.ts robots.ts  qué indexan los buscadores
@@ -112,6 +120,11 @@ components/
   que-es.tsx            "Qué es Hack with DSC" (servidor)
   sponsors/             las secciones de /sponsors (todas de servidor)
                         piezas.tsx = Seccion, EncabezadoSeccion, Parrafos, HaloDeFondo
+  eventos/              la agenda (servidor). agenda.tsx = lista agrupada por mes; un
+                        evento SE DESPLIEGA EN MÓVIL (`<details>` nativo, cero JS) y NO
+                        se despliega en escritorio, con las mismas piezas de contenido
+                        definidas una sola vez. personas.tsx = ponentes/mentores/jurados,
+                        con pila de caras cuando son muchos
   site-header.tsx       barra superior (cliente: cambia al hacer scroll)
   site-footer.tsx       pie
   pointer-parallax.tsx  cliente: publica la posición del cursor en variables CSS
@@ -125,12 +138,17 @@ lib/
   sheets/               cliente de Google Sheets, helpers de filas y traducción de
                         enlaces de Drive a imágenes servibles. COMPARTIDO
   sponsors/             tipos, esquemas Zod, lector, caché y contenido de reserva
-  eventos/types.ts      contrato de datos para la Fase 2. Todavía sin usar
+  eventos/              lo mismo para la agenda, MENOS contenido de reserva (a propósito).
+                        fechas.ts es el parseo de las celdas de fecha: léelo antes de
+                        tocarlo, tiene más trampas de las que parece
+  iniciales.ts          iniciales de un nombre, para los avatares sin foto
   utils.ts              cn()
 
 scripts/
   prepare-assets.mjs    `pnpm assets`: genera public/brand/, og.jpg y og-sponsors.jpg
   probar-sponsors.mjs   `pnpm probar:sponsors`: prueba el lector sin tocar la interfaz
+  probar-eventos.mjs    `pnpm probar:eventos`: comprueba el parseo de fechas y dice qué
+                        eventos se publicarían hoy y cuáles se descartaron y por qué
 
 deploy/
   nginx/                configuración del proxy inverso
@@ -224,7 +242,7 @@ Detalle completo en [`docs/identidad-visual.md`](docs/identidad-visual.md).
 | `docs/esencia.md`           | el propósito del programa. Fuente de verdad de los textos    |
 | `docs/desarrollo.md`        | el equipo dev (principiantes en web/Next.js)                 |
 | `docs/despliegue.md`        | quien administra la MV Ubuntu                                |
-| `docs/arquitectura.md`      | decisiones técnicas + plan de la Fase 2 (Google Sheets)      |
+| `docs/arquitectura.md`      | decisiones técnicas + cómo se leen las dos hojas de Sheets   |
 | `docs/identidad-visual.md`  | colores, tipografías, uso de la marca                        |
 
 Si cambias algo que una de estas describe, actualízala en el mismo cambio.
@@ -233,19 +251,25 @@ Si cambias algo que una de estas describe, actualízala en el mismo cambio.
 
 ## 7. Estado y siguiente paso
 
-**Hecho**: portada, sección "Qué es", identidad visual aplicada, Docker, nginx, docs, y
-la página `/sponsors` con su lectura desde Google Sheets.
+**Hecho**: portada, sección "Qué es", identidad visual aplicada, Docker, nginx, docs, la
+página `/sponsors` con su lectura desde Google Sheets, y la **agenda de eventos** leída de
+su propia hoja.
 
-Con `/sponsors` llegó la **capa compartida de Sheets** (`lib/sheets/`, validación con Zod,
-caché con `unstable_cache` y `/api/revalidate` con lista blanca de etiquetas). Está
-descrita en `docs/arquitectura.md` §3.0 y **hay que reusarla, no duplicarla**.
+Las dos lecturas comparten la **capa de Sheets** (`lib/sheets/`, validación con Zod, caché
+con `unstable_cache` y `/api/revalidate` con lista blanca de etiquetas), descrita en
+`docs/arquitectura.md` §3.0. **Hay que reusarla, no duplicarla.**
 
-**Siguiente (Fase 2)**: leer los eventos desde Google Sheets con caché y recién entonces
-mostrar la agenda. El contrato de datos está en `lib/eventos/types.ts`; lo que falta es
-solo su capa propia (rangos, esquemas y envoltorio de caché). Ver `docs/arquitectura.md`
-§3.5.
+Dos diferencias deliberadas entre ambas, y las dos están razonadas en el código:
 
-**Pendiente menor de `/sponsors`**: la hoja de estilos `@media print` (§3.0.2 de
+- eventos **no tiene contenido de reserva** (`lib/eventos/contenido.ts`);
+- eventos lee un rango **ancho** (`A1:Z200`) y elige columnas por nombre, mientras que
+  sponsors pide columnas exactas (`lib/eventos/sheets.ts`). El equipo tiene que poder
+  reordenar columnas sin romper la web. La condición para que eso sea seguro es que
+  `lib/eventos/esquemas.ts` siga construyendo los objetos campo por campo: **nunca metas
+  un `...fila` ahí**, o las columnas internas de la hoja acabarían en el navegador.
+
+**Pendiente**: llenar la pestaña `Info Personas (Web)` (hoy está vacía, así que las
+tarjetas salen sin ponentes), la hoja de estilos `@media print` de `/sponsors` (§3.0.2 de
 `docs/arquitectura.md`) y las fotos de la galería.
 
 ---
@@ -261,3 +285,13 @@ solo su capa propia (rangos, esquemas y envoltorio de caché). Ver `docs/arquite
   respétalo.
 - Escribe código que se parezca al de al lado. Este repo lo van a leer estudiantes que
   están aprendiendo Next.js: prioriza lo legible sobre lo ingenioso.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

@@ -1,6 +1,7 @@
 import { ArrowUpRight } from 'lucide-react'
 
 import { EncabezadoSeccion, Seccion } from '@/components/sponsors/piezas'
+import { iniciales } from '@/lib/iniciales'
 import { copy } from '@/lib/site-config'
 import { assetPublico } from '@/lib/site-url'
 import { texto } from '@/lib/sponsors/textos'
@@ -123,14 +124,4 @@ function Retrato({ testimonio }: { testimonio: Testimonio }) {
       {iniciales(testimonio.autor)}
     </span>
   )
-}
-
-/** Hasta dos iniciales. Con nombres de una sola palabra devuelve una, y está bien. */
-function iniciales(nombre: string): string {
-  return nombre
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((palabra) => palabra[0]?.toUpperCase() ?? '')
-    .join('')
 }

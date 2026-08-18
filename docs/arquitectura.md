@@ -1,8 +1,7 @@
 # Arquitectura y decisiones técnicas
 
-Por qué el proyecto está hecho así, y el plan de lo que falta. Si vas a implementar la
-Fase 2 (eventos), la §3 es tu documento — y buena parte de lo que necesitas ya está
-construido: ver §3.0.
+Por qué el proyecto está hecho así. Si vas a tocar cualquiera de las dos lecturas de
+Google Sheets —`/sponsors` o `/agenda`—, la §3 es tu documento.
 
 ---
 
@@ -90,9 +89,8 @@ Los pasos de nginx y la advertencia sobre `robots.txt` en subdirectorios están 
 
 **Next.js 16 con App Router.** Es lo que ya usaba el proyecto. Para una landing es más de
 lo necesario, pero da render en servidor (bueno para SEO y para compartir el link),
-optimización automática, y —lo que de verdad pesa— permite que la Fase 2 se añada sin
-cambiar de tecnología: la lectura de Google Sheets con caché es algo que Next resuelve de
-forma nativa.
+optimización automática, y —lo que de verdad pesa— la lectura de Google Sheets con caché
+es algo que Next resuelve de forma nativa, sin traer ni una pieza de infraestructura más.
 
 **Tailwind CSS v4, con los tokens en CSS.** En la v4 el sistema de diseño se declara en
 CSS (`@theme`, `@utility`) en vez de en un archivo de configuración de JavaScript. Eso
@@ -124,15 +122,28 @@ pnpm instalados: solo Docker.
 Bugle está iluminado para oscuro. En un tema claro habría que recalibrar toda la paleta
 para un resultado peor. Un solo set de tokens, sin `prefers-color-scheme`.
 
-### Por qué no se muestran los eventos
+### Por qué los eventos no se escriben en el repo
 
 Decisión de producto, no limitación técnica. El programa se planifica en una hoja de
 cálculo que se mueve cada semana: fechas tentativas, lugares por confirmar, ponentes sin
 cerrar. Publicar eso y luego cambiarlo quema credibilidad, y mantenerlo a mano en el
 código garantiza que se desincronice.
 
-Así que la web no dice nada de eventos hasta que pueda decirlo leyendo la hoja. Mientras
-tanto, el canal de anuncios es el grupo de WhatsApp, que es a donde apuntan todos los CTA.
+Así que la web solo dice de eventos lo que puede decir leyendo la hoja. Nada de fechas
+cableadas, y **nada de contenido de reserva** para la agenda: si la hoja no se puede leer,
+la lista no se pinta. Una fecha vieja es peor que ninguna fecha, y el canal de anuncios de
+respaldo sigue siendo el grupo de WhatsApp, que es a donde apuntan todos los CTA.
+
+Ojo con la diferencia entre sección y página, porque cambia lo que hay que construir: una
+sección que se queda sin datos devuelve `null` y desaparece, y con eso basta. **Una ruta
+no puede desaparecer** — `/agenda` sigue en el menú y en el sitemap aunque no haya ni un
+evento, así que necesita estado vacío propio, y ese estado tiene que ofrecer una salida en
+vez de dejar a quien llegó en una página muerta.
+
+Lo que sí es incierto y **no se publica** es el lugar: la hoja lo guarda como referencia
+interna («Pabellón V o A o donde sea») porque eso se decide tarde y se actualiza mejor en
+la propia página de Luma del evento. La web da nombre, tipo, cuándo, de qué va, quién
+participa y el botón para inscribirse.
 
 ---
 
@@ -152,31 +163,31 @@ Ver [`AGENTS.md`](../AGENTS.md) §3 para el mapa completo. En corto:
 
 ## 3. Contenido desde Google Sheets
 
-### 3.0 Lo que YA está construido (y hay que reusar, no duplicar)
+### 3.0 La capa compartida (hay que reusarla, no duplicarla)
 
-La página de patrocinio trajo consigo la primera integración real con Sheets. Se diseñó
-**para ser compartida** con la Fase 2 de eventos: en `lib/sheets/` no hay una sola línea
-específica de patrocinio.
+La página de patrocinio trajo la primera integración con Sheets, y se diseñó **para ser
+compartida**. La agenda de eventos la reusa entera: en `lib/sheets/` no hay una sola línea
+específica de ninguna de las dos.
 
 | Archivo | Qué hace | ¿Compartido? |
 | --- | --- | --- |
 | `lib/sheets/cliente.ts` | Autenticación con la cuenta de servicio y `batchGet` a la API REST | **Sí** |
 | `lib/sheets/filas.ts` | Matriz cruda → filas con nombre; `mostrable`, `orden`, tildes | **Sí** |
 | `app/api/revalidate/route.ts` | Refresco a demanda con secreto y lista blanca `['eventos','sponsors']` | **Sí** |
-| `lib/sponsors/esquemas.ts` | Validación Zod y transformación fila → tipo | patrón a copiar |
-| `lib/sponsors/sheets.ts` | Los rangos concretos de la hoja de patrocinio | solo sponsors |
-| `lib/sponsors/contenido.ts` | `unstable_cache` + mezcla con el contenido de reserva | patrón a copiar |
-| `scripts/probar-sponsors.mjs` | Prueba el lector sin tocar la interfaz | patrón a copiar |
+| `lib/sheets/imagenes.ts` | Enlaces de Drive → imágenes servibles (logos y fotos) | **Sí** |
+| `lib/sponsors/*` | Rangos, esquemas, caché y reserva de `/sponsors` | solo sponsors |
+| `lib/eventos/*` | Lo mismo para la agenda, más `fechas.ts` | solo eventos |
+| `scripts/probar-*.mjs` | Prueban cada lector sin tocar la interfaz | uno por hoja |
 
-Lo que la Fase 2 tiene que escribir es solo su capa propia: los rangos de su hoja, sus
-esquemas, y su envoltorio de caché con la etiqueta `eventos` (que **ya** está en la lista
-blanca de la ruta de revalidación).
+Cada hoja escribe solo su capa propia: sus rangos, sus esquemas y su envoltorio de caché
+con su etiqueta (`sponsors` o `eventos`, las dos en la lista blanca de la ruta de
+revalidación). Si aparece una tercera hoja, va por el mismo camino.
 
-**Dos hojas, no una.** Patrocinio usa `GOOGLE_SHEETS_SPONSORS_ID` y eventos usará
-`GOOGLE_SHEETS_ID`. Están separadas para poder dar permiso de edición del material de
-sponsors a gente que no debe tocar la agenda. Comparten las credenciales, pero **el
+**Dos hojas, no una.** Patrocinio usa `GOOGLE_SHEETS_SPONSORS_ID` y eventos usa
+`GOOGLE_SHEETS_EVENTS_ID`. Están separadas para poder dar permiso de edición del material
+de sponsors a gente que no debe tocar la agenda. Comparten las credenciales, pero **el
 permiso de lectura no se hereda**: hay que invitar al correo de la cuenta de servicio en
-cada hoja por separado.
+cada hoja por separado. Es el paso que más se olvida, y da un 403.
 
 **Cómo se comporta sin credenciales.** `obtenerContenidoSponsors()` comprueba las
 credenciales *antes* de entrar en la caché, así que en local no se intenta hablar con
@@ -254,8 +265,9 @@ Restricciones:
 
 - La hoja tiene columnas internas que **no** se publican (`Observaciones`, correos,
   responsables, links a docs internos).
-- Tiene eventos a medio planificar que no deben salir: de ahí la columna
-  **`Mostrable en web`**, que es el interruptor editorial.
+- Tiene eventos a medio planificar que no deben salir: de ahí la columna **`Mostrable`**,
+  que es el interruptor editorial. Se llama exactamente así en las dos hojas, porque
+  `lib/sheets/filas.ts` la usa además para localizar la fila de cabecera.
 - La web no puede llamar a la API de Google en cada visita: sería lento, frágil, y
   chocaría con las cuotas.
 
@@ -462,10 +474,11 @@ Reglas:
    resto del código trabaja con `Evento` bien formado.
 2. Una fila inválida **se descarta y se registra en el log**; no rompe la página. Es
    preferible una web con 9 eventos que una web caída por el décimo.
-3. Se descarta todo lo que tenga `Mostrable en web` en falso, **antes** de cualquier otra
-   cosa.
-4. Nunca se leen las columnas internas. La forma más segura es leer un rango explícito de
-   columnas, no la hoja entera.
+3. Se descarta todo lo que tenga `Mostrable` en falso, **antes** de cualquier otra cosa.
+   Una celda vacía cuenta como «no»: una fila a medio escribir nunca se publica sola.
+4. Las columnas internas nunca llegan al navegador. En `/sponsors` eso se consigue leyendo
+   un rango de columnas explícito; en eventos, donde el rango es ancho a propósito (§3.5),
+   lo garantiza el mapeo campo por campo de `lib/eventos/esquemas.ts`.
 
 La validación es con **Zod** (ya es dependencia). `lib/sponsors/esquemas.ts` es el ejemplo
 a copiar: un esquema por pestaña que declara solo lo imprescindible, y un `filasValidas()`
@@ -478,18 +491,30 @@ Y una regla que no está en la lista de arriba porque no es de datos sino de seg
 `http(s)` (y `mailto:` en los textos), y de un nombre de archivo se toma solo la última
 parte. Quien edita la hoja no es necesariamente quien despliega.
 
-### 3.5 Orden de implementación sugerido
+### 3.5 Cómo quedó la lectura de eventos
 
-Buena parte ya está hecha (§3.0). Para eventos queda:
+`lib/eventos/` calca la estructura de `lib/sponsors/` (`types` → `esquemas` → `sheets` →
+`contenido`) sobre la capa compartida de §3.0, con **tres diferencias deliberadas**:
 
-1. Los rangos de su hoja y sus esquemas Zod, reusando `lib/sheets/`.
-2. Su envoltorio de caché con la etiqueta `eventos` (la ruta de revalidación ya la
-   contempla).
-3. Probarlo con `scripts/`, copiando `probar-sponsors.mjs`, sin tocar la interfaz.
-4. **Solo entonces**, la interfaz: sección de agenda, tarjetas de evento, estados vacíos.
-5. Los estados vacíos importan tanto como el caso feliz: sin eventos, con fecha tentativa
-   en vez de fecha, sin lugar confirmado, sin link de inscripción. La hoja va a estar en
-   ese estado la mayor parte del tiempo.
+1. **No hay contenido de reserva.** Ver arriba: una fecha vieja es peor que ninguna.
+2. **El rango es ancho** (`A1:Z200`) y las columnas se eligen por nombre, no por posición,
+   porque el equipo reordena columnas en la hoja sin avisar. Eso hace que columnas internas
+   lleguen a la memoria del servidor; lo que impide que salgan al navegador es que
+   `lib/eventos/esquemas.ts` construye cada objeto campo por campo. **Un `...fila` ahí
+   filtraría los correos del equipo al HTML público.**
+3. **Hay un módulo solo para las fechas** (`lib/eventos/fechas.ts`), porque una fecha mal
+   leída es el único fallo de este proyecto que no se ve: no rompe nada, no sale en
+   consola, y solo se nota cuando alguien se presenta el día equivocado. Ese módulo NO usa
+   `Date` para mostrar —lo haría depender de la zona horaria del servidor— y admite cuatro
+   grados de certeza, de `2026-08-20 12:00` a «solo sé que es en setiembre».
+
+Se comprueba con `pnpm probar:eventos`, que ejecuta el mismo código que la web: primero
+una tabla de casos de fechas, después la hoja real diciendo qué se publicaría hoy y qué se
+descartó y por qué.
+
+**Los estados vacíos importan tanto como el caso feliz**, y la hoja va a estar así la
+mayor parte del tiempo: sin fecha, sin descripción, sin nadie asignado, sin enlace de
+inscripción. Todos están cubiertos y ninguno deja hueco en la tarjeta.
 
 ### 3.5.1 Tres trampas comprobadas al conectar la hoja de verdad
 

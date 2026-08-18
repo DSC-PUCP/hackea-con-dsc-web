@@ -61,14 +61,19 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-3.5 sm:gap-4 md:px-6">
         <LogoEnlace destino={enLaPortada ? '#top' : '/'} />
 
-        <div className="flex shrink-0 items-center gap-3 sm:gap-5">
+        <div className="flex shrink-0 items-center gap-2.5 sm:gap-5">
           {/*
             Visible SIEMPRE, también en móvil. Antes era `hidden sm:flex` y por debajo de
             640 px el menú entero desaparecía: `/sponsors` no tenía ni un solo camino
             desde un teléfono. Cabe porque el menú son solo rutas — ver `navegacion` en
             lib/site-config.ts.
+
+            Los espacios se aprietan en móvil (`gap-3.5` en vez de `gap-5`) desde que el
+            menú tiene DOS entradas. A 390 px la barra va justa: logotipo + Agenda +
+            Patrocinio + el botón de WhatsApp en modo icono. Si hiciera falta una tercera
+            entrada, ya no cabe y toca desplegable — no se resuelve apretando más.
           */}
-          <nav aria-label="Páginas del sitio" className="flex items-center gap-5">
+          <nav aria-label="Páginas del sitio" className="flex items-center gap-3.5 sm:gap-5">
             {navegacion.map((enlace) => {
               const destino = resolverDestino(enlace.href)
 
@@ -87,8 +92,9 @@ export function SiteHeader() {
                 <Link
                   key={enlace.href}
                   href={destino}
-                  // Ahora que el menú es una sola entrada, entrar a /sponsors y ver
-                  // «Patrocinio» ahí arriba sin ninguna marca es desorientador.
+                  // Marca en qué página estás. Con dos entradas importa más que con una:
+                  // «Agenda» y «Patrocinio» juntas sin ninguna señal de cuál está activa
+                  // dejan al lector sin saber dónde aterrizó.
                   aria-current={ruta === destino ? 'page' : undefined}
                   className={CLASE_ENLACE}
                 >
