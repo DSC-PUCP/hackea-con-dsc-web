@@ -155,9 +155,18 @@ function FilaDeEvento({ evento, variante }: { evento: Evento; variante: Variante
               />
             </summary>
 
-            {/* `pl-16` alinea el detalle con el título, no con el bloque de fecha: así la
-                columna de números se sigue leyendo de arriba abajo con filas abiertas. */}
-            <div className="pl-16">
+            {/*
+              `pl-16` alinea el detalle con el título, no con el bloque de fecha: así la
+              columna de números se sigue leyendo de arriba abajo con filas abiertas.
+
+              El `pb-5` es lo que separa el detalle del botón de abajo, y va ACÁ y no en el
+              botón por una razón concreta: este panel **solo existe cuando la fila está
+              abierta**. Puesto en el botón habría que elegir un único hueco para los dos
+              estados, y no hay ninguno que sirva — cerrada, el botón va pegado a su fila
+              porque es parte de ella; abierta, sin este aire quedaba tocando la última
+              cara del bloque de personas, como si fuera una fila más de la lista.
+            */}
+            <div className="pb-4 pl-16">
               <Detalle evento={evento} />
             </div>
           </details>
