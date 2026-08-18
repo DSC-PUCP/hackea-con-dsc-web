@@ -32,7 +32,7 @@ que está escrito exactamente para eso.
 | [`docs/desarrollo.md`](docs/desarrollo.md) | **Empieza aquí si vas a programar.** Guía desde cero, sin asumir experiencia en web. |
 | [`docs/despliegue.md`](docs/despliegue.md) | Poner y mantener la web en la MV Ubuntu: Docker, nginx, HTTPS, resolución de problemas. |
 | [`docs/identidad-visual.md`](docs/identidad-visual.md) | Colores, tipografías, Bugle, el chevron, tono de los textos. |
-| [`docs/arquitectura.md`](docs/arquitectura.md) | Por qué está hecho así, y el plan de la Fase 2 (eventos desde Google Sheets). |
+| [`docs/arquitectura.md`](docs/arquitectura.md) | Por qué está hecho así, y cómo se leen las dos hojas de Google Sheets. |
 | [`docs/esencia.md`](docs/esencia.md) | El propósito del programa. Fuente de verdad de cualquier texto. |
 | [`AGENTS.md`](AGENTS.md) | Contexto para agentes de IA que trabajen en el repo. |
 

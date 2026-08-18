@@ -1,6 +1,6 @@
 /**
- * De la matriz cruda que devuelve Google a filas con nombre. COMPARTIDO con la futura
- * Fase 2 de eventos: acá no hay nada de patrocinio.
+ * De la matriz cruda que devuelve Google a filas con nombre. COMPARTIDO por patrocinio y
+ * eventos: acá no hay nada específico de ninguno de los dos.
  *
  * La regla que gobierna todo este archivo: **la hoja la editan personas**. Va a haber
  * celdas en blanco, mayúsculas inconsistentes, tildes puestas y quitadas, y espacios

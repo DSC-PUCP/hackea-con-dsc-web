@@ -216,7 +216,11 @@ Cómo se crea la cuenta de servicio: `docs/arquitectura.md` §3.2. Dos avisos op
 - **No son `NEXT_PUBLIC_*`**, así que se leen en ejecución: para cambiarlas basta
   reiniciar el contenedor, no hace falta reconstruir la imagen.
 
-`GOOGLE_SHEETS_ID` (la agenda de eventos) sigue siendo de la Fase 2 y todavía no se usa.
+Son **dos hojas y dos variables**: `GOOGLE_SHEETS_SPONSORS_ID` para `/sponsors` y
+`GOOGLE_SHEETS_EVENTS_ID` para la agenda de la portada. Comparten credenciales, pero el
+permiso **no se hereda**: hay que invitar al correo de la cuenta de servicio, en modo
+Lector, **en cada una de las dos**. Si falta, Google responde 403 y la sección afectada
+desaparece sin más explicación que una línea en el log.
 
 ---
 

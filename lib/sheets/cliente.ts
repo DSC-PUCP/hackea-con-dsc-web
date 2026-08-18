@@ -1,6 +1,6 @@
 /**
- * Cliente de lectura de Google Sheets. COMPARTIDO: lo va a usar también la Fase 2 de
- * eventos, así que acá no hay nada específico de patrocinio.
+ * Cliente de lectura de Google Sheets. COMPARTIDO por las dos hojas del proyecto
+ * —patrocinio y eventos—, así que acá no hay nada específico de ninguna.
  *
  * ── Por qué no se usa el paquete `googleapis` ────────────────────────────────────────
  * Todo lo que este proyecto necesita de Google es UNA llamada de solo lectura
