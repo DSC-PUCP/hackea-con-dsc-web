@@ -55,6 +55,17 @@ ENV NEXT_OUTPUT=standalone
 ARG NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 
+# Los identificadores de Google (analítica y verificación de Search Console) siguen la
+# misma regla: son NEXT_PUBLIC_*, se incrustan al compilar, y por eso tienen que llegar
+# como ARG. Si se pasan solo como variables del contenedor, la imagen sale sin ellos y
+# el sitio deja de medir sin decir nada. Ver docs/analitica-y-seo.md.
+#
+# Las dos son opcionales: vacías, el build funciona igual y el sitio no manda datos.
+ARG NEXT_PUBLIC_GA_ID
+ENV NEXT_PUBLIC_GA_ID=${NEXT_PUBLIC_GA_ID}
+ARG NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+ENV NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=${NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION}
+
 # Produce .next/standalone: la app con solo las dependencias que de verdad usa.
 RUN pnpm build
 

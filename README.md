@@ -31,6 +31,7 @@ que está escrito exactamente para eso.
 | --- | --- |
 | [`docs/desarrollo.md`](docs/desarrollo.md) | **Empieza aquí si vas a programar.** Guía desde cero, sin asumir experiencia en web. |
 | [`docs/despliegue.md`](docs/despliegue.md) | Poner y mantener la web en la MV Ubuntu: Docker, nginx, HTTPS, resolución de problemas. |
+| [`docs/analitica-y-seo.md`](docs/analitica-y-seo.md) | Medir visitas y salir en Google. Paso a paso desde cero, sin asumir nada de Google Cloud. |
 | [`docs/identidad-visual.md`](docs/identidad-visual.md) | Colores, tipografías, Bugle, el chevron, tono de los textos. |
 | [`docs/arquitectura.md`](docs/arquitectura.md) | Por qué está hecho así, y cómo se leen las dos hojas de Google Sheets. |
 | [`docs/esencia.md`](docs/esencia.md) | El propósito del programa. Fuente de verdad de cualquier texto. |

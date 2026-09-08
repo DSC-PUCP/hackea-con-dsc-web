@@ -17,6 +17,11 @@ services:
         # NEXT_PUBLIC_* se incrustan en el bundle al compilar, no al arrancar. Si se
         # cambia el dominio, hay que reconstruir (`--build`), no solo reiniciar.
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        # Analítica y verificación de Google. Opcionales: sin ellas el sitio va igual,
+        # solo que no mide y no puede reclamarse en Search Console. Mismo aviso que
+        # arriba — hay que reconstruir, no reiniciar. Ver docs/analitica-y-seo.md.
+        NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
+        NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION:-}
 
     image: hackwithdsc-web:latest
     container_name: hackwithdsc-web

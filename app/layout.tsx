@@ -1,3 +1,4 @@
+import { GoogleAnalytics } from '@next/third-parties/google'
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Outfit, Poppins, Space_Grotesk } from 'next/font/google'
@@ -6,6 +7,7 @@ import { PointerParallax } from '@/components/pointer-parallax'
 import { ScrollReveal } from '@/components/scroll-reveal'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
+import { idDeGoogleAnalytics, verificacionDeGoogle } from '@/lib/google'
 import { site, themeColor } from '@/lib/site-config'
 import { assetPublico, urlDelSitio } from '@/lib/site-url'
 import './globals.css'
@@ -57,6 +59,28 @@ export const metadata: Metadata = {
   keywords: [...site.seo.keywords],
   applicationName: site.name,
   authors: [{ name: site.organizerFull }],
+  /*
+   * La portada es la ÚNICA página que no traía canonical, y era justo la que más lo
+   * necesita: es la que se comparte, la que Google visita primero y la que va a existir
+   * en dos dominios a la vez el día de la mudanza al de la universidad. Sin ella, Google
+   * decide por su cuenta cuál de las dos versiones indexa, y puede elegir la vieja.
+   *
+   * `/agenda` y `/sponsors` ya declaran el suyo en su propio `page.tsx`; esto completa el
+   * juego. Sale de `urlDelSitio` por lo mismo que allá: el dominio no se escribe a mano
+   * en ningún sitio.
+   */
+  alternates: {
+    canonical: urlDelSitio,
+  },
+  /*
+   * Prueba de propiedad para Google Search Console. Se imprime como
+   * `<meta name="google-site-verification" content="...">`.
+   *
+   * Es `undefined` mientras no haya variable configurada — y NO un objeto con la cadena
+   * vacía dentro — porque un `content=""` Search Console lo lee como una verificación
+   * que falló, no como una que todavía no se ha hecho. Ver lib/google.ts.
+   */
+  verification: verificacionDeGoogle ? { google: verificacionDeGoogle } : undefined,
   openGraph: {
     type: 'website',
     locale: 'es_PE',
@@ -148,7 +172,28 @@ export default function RootLayout({
         {children}
         <SiteFooter />
 
+        {/*
+          Las DOS analíticas del sitio, y sí, miden lo mismo a propósito:
+
+           · `<Analytics />` es la de Vercel. Viene incluida con el hosting, no usa
+             cookies y da lo básico (visitas por página, de dónde llegan). Deja de existir
+             el día que el sitio se mude a la MV de la universidad.
+           · `<GoogleAnalytics />` es GA4, en la cuenta de DSC. Es la que sobrevive a esa
+             mudanza, la que el equipo puede compartir con quien quiera, y la que se
+             enlaza con Search Console para ver por qué búsquedas llega la gente.
+
+          Las dos van condicionadas a producción por el mismo motivo: en desarrollo uno
+          recarga la portada cincuenta veces por hora, y esas cincuenta visitas falsas
+          ensucian los datos reales. Para probar que GA de verdad emite, hay que hacer
+          `pnpm build && pnpm start` — eso ya es "producción" para Node.
+
+          GA4 se salta además el `if` si no hay ID configurado, así que un despliegue de
+          prueba de otra persona nunca manda datos a la propiedad de DSC.
+        */}
         {process.env.NODE_ENV === 'production' && <Analytics />}
+        {process.env.NODE_ENV === 'production' && idDeGoogleAnalytics && (
+          <GoogleAnalytics gaId={idDeGoogleAnalytics} />
+        )}
       </body>
     </html>
   )
