@@ -267,6 +267,8 @@ export const copy = {
     proximamente: 'Inscripción próximamente',
     /** En los eventos ya pasados, donde «Inscribirme» sería mentira. */
     verEnLuma: 'Ver en Luma',
+    /** `aria-label` del botón de compartir: va seguido de «: <nombre del evento>». */
+    compartir: 'Compartir evento',
     /*
      * Cortos a propósito: van en la misma línea que el tipo de evento, arriba de la
      * ficha, y ahí compiten por el ancho con el título. «Solo para la comunidad PUCP»

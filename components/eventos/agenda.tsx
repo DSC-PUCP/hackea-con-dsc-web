@@ -1,6 +1,7 @@
-import { ArrowUpRight, ChevronDown } from 'lucide-react'
+import { ArrowUpRight, ChevronDown, Share2 } from 'lucide-react'
 
 import { Personas } from '@/components/eventos/personas'
+import { enlaceWhatsAppDeEvento } from '@/lib/eventos/compartir'
 import { fechaCompacta, formatearCuando, grupoDeMes, notaDeFecha } from '@/lib/eventos/fechas'
 import type { Evento, TipoEvento } from '@/lib/eventos/types'
 import { copy } from '@/lib/site-config'
@@ -98,7 +99,19 @@ export function SeccionDeEventos({
 
             <ul className="mt-2">
               {grupo.eventos.map((evento) => (
-                <li key={evento.id} className="border-b border-border/70 last:border-b-0">
+                <li
+                  key={evento.id}
+                  id={`evento-${evento.id}`}
+                  // El salto de fragmento (enlace de "Compartir") tiene que librar el
+                  // header fijo Y el rótulo de mes `sticky` de arriba. El primero ya lo
+                  // cubre `scroll-padding-top: 5.5rem` en globals.css, pero los dos se
+                  // SUMAN (no se toma el máximo) — medido con DevTools: `scroll-mt-36`
+                  // (144px) sobre los 88px de `scroll-padding-top` dejaba la fila a 232px
+                  // del borde, un hueco enorme. El rótulo de mes mide 32px de alto y
+                  // empieza a 64px (`top-16`), así que su borde inferior está a 96px: con
+                  // esto sobran ~40px sobre esos 96px, que es lo que hace falta.
+                  className="scroll-mt-10 border-b border-border/70 last:border-b-0"
+                >
                   <FilaDeEvento evento={evento} variante={variante} />
                 </li>
               ))}
@@ -178,8 +191,9 @@ function FilaDeEvento({ evento, variante }: { evento: Evento; variante: Variante
         )}
 
         {/* Fuera del `<details>` a propósito: se ve con la fila cerrada. */}
-        <div className="pt-1 pb-4 pl-16">
+        <div className="flex items-center gap-3 pt-1 pb-4 pl-16">
           <Inscripcion evento={evento} variante={variante} />
+          <Compartir evento={evento} />
         </div>
       </div>
 
@@ -191,8 +205,9 @@ function FilaDeEvento({ evento, variante }: { evento: Evento; variante: Variante
           <Encabezado evento={evento} />
           <Detalle evento={evento} />
 
-          <div className="mt-5">
+          <div className="mt-5 flex items-center gap-3">
             <Inscripcion evento={evento} variante={variante} />
+            <Compartir evento={evento} />
           </div>
         </div>
       </div>
@@ -387,6 +402,30 @@ function Inscripcion({ evento, variante }: { evento: Evento; variante: Variante 
         aria-hidden
         className="size-4 transition-transform group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-0.5"
       />
+    </a>
+  )
+}
+
+/**
+ * Compartir el evento por WhatsApp. Un solo `<a>` de servidor, sin JavaScript: el mensaje
+ * ya viene armado en el `href` (ver `lib/eventos/compartir.ts`). Se ve siempre, pase lo que
+ * pase con la inscripción — compartir un evento no depende de si todavía se puede uno
+ * anotar.
+ *
+ * Icono solo, sin texto: es una acción secundaria al lado de "Inscribirme" y no debe
+ * competirle el ancho. El nombre del evento va en el `aria-label`, mismo criterio que el
+ * `sr-only` de `Inscripcion`.
+ */
+function Compartir({ evento }: { evento: Evento }) {
+  return (
+    <a
+      href={enlaceWhatsAppDeEvento(evento, copy.agenda.sinFecha)}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${copy.agenda.compartir}: ${evento.nombre}`}
+      className="inline-flex shrink-0 items-center justify-center rounded-full border border-input bg-card/50 p-2.5 text-muted-foreground transition-colors hover:border-brand-blue/50 hover:bg-card hover:text-foreground"
+    >
+      <Share2 aria-hidden className="size-4" />
     </a>
   )
 }
