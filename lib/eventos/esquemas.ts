@@ -124,6 +124,9 @@ const esquemaEvento = z.object({
  */
 const TIPOS: readonly [string, TipoEvento][] = [
   ['hackathon', 'hackathon'],
+  // Sinónimo de hackathon: mismo color, la etiqueta sigue siendo el texto crudo de la
+  // celda («Competencia»), así que esto no cambia lo que se lee, solo cómo se pinta.
+  ['competencia', 'hackathon'],
   ['taller', 'taller'],
   ['ponencia', 'ponencia'],
   ['networking', 'networking'],
