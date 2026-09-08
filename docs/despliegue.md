@@ -12,7 +12,7 @@ El proyecto tiene **dos destinos**:
 ## 0. Vercel (rama `main`)
 
 No requiere trabajo de infraestructura: Vercel construye y despliega a cada push. Solo
-hay **cuatro cosas** que revisar en el panel del proyecto:
+hay **cinco cosas** que revisar en el panel del proyecto:
 
 1. **Variable de entorno `NEXT_PUBLIC_SITE_URL`** — **opcional.** Si no se define, el
    sitio detecta solo el dominio de Vercel (`VERCEL_PROJECT_PRODUCTION_URL`), así que la
@@ -46,6 +46,20 @@ hay **cuatro cosas** que revisar en el panel del proyecto:
 
    Al pegar `GOOGLE_PRIVATE_KEY`, que quede **en una sola línea**, con los `\n` literales
    tal como vienen del JSON de Google.
+
+5. **Las variables de Google Analytics y Search Console** (`NEXT_PUBLIC_GA_ID`,
+   `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`) — **opcionales también.** Sin ellas el sitio no
+   mide visitas y no puede reclamarse en Search Console, pero funciona igual.
+
+   Van marcadas **solo para Production**, nunca para Preview: si no, las ramas de prueba
+   del equipo mandan visitas falsas a la propiedad de Analytics.
+
+   Son `NEXT_PUBLIC_*`, así que **guardar no basta: hay que redesplegar**. Es el fallo
+   más común al configurarlas, porque el síntoma —Google diciendo "no encuentro la
+   etiqueta"— parece un error de copiado.
+
+   Paso a paso completo, escrito sin asumir experiencia con productos de Google:
+   [`docs/analitica-y-seo.md`](analitica-y-seo.md).
 
 Lo que **no** hay que hacer en Vercel: subir el `.env`, ni configurar nginx, ni nada de
 Docker. Todo eso es exclusivo de la MV.
@@ -215,6 +229,26 @@ Cómo se crea la cuenta de servicio: `docs/arquitectura.md` §3.2. Dos avisos op
   del despliegue. `.dockerignore` ya lo excluye de la imagen.
 - **No son `NEXT_PUBLIC_*`**, así que se leen en ejecución: para cambiarlas basta
   reiniciar el contenedor, no hace falta reconstruir la imagen.
+
+### Las variables de Google Analytics y Search Console
+
+También opcionales:
+
+```ini
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=la-cadena-que-da-search-console
+```
+
+Cómo se obtienen: [`analitica-y-seo.md`](analitica-y-seo.md).
+
+A diferencia de las de Sheets, estas **sí son `NEXT_PUBLIC_*`**: se incrustan al
+compilar. Aquí eso significa `docker compose up -d --build`, no `restart`. El
+`docker-compose.yml` ya las pasa como argumentos de construcción.
+
+⚠️ Al mudar el sitio a este servidor cambia el dominio, y para Google eso es **otro
+sitio**: hay que crear una propiedad nueva en Search Console y poner acá su cadena de
+verificación, que es distinta de la de Vercel. Está explicado en `analitica-y-seo.md`,
+sección «Cuando la web se mude al dominio de la PUCP».
 
 Son **dos hojas y dos variables**: `GOOGLE_SHEETS_SPONSORS_ID` para `/sponsors` y
 `GOOGLE_SHEETS_EVENTS_ID` para la agenda de la portada. Comparten credenciales, pero el
