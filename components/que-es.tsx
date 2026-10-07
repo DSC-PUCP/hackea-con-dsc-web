@@ -1,211 +1,96 @@
-import { MessageCircle } from 'lucide-react'
-
-import { BrandIcon, Chevron, type BrandIconName } from '@/components/brand/icons'
-import { copy, formatos, links, pilares, type BrandColor } from '@/lib/site-config'
+import { Chevron } from '@/components/brand/icons'
+import { Formatos } from '@/components/portada/formatos'
+import { Llamado } from '@/components/portada/llamado'
+import { Pilares } from '@/components/portada/pilares'
+import { copy } from '@/lib/site-config'
 
 /**
- * Mapa de color de marca → clases de Tailwind.
+ * "Qué es Hack with DSC": todo lo que va después del hero en la portada.
  *
- * Existe porque Tailwind analiza el código en busca de nombres de clase completos: si
- * se armara la clase con plantillas (`text-brand-${color}`), Tailwind no la vería y no
- * generaría el CSS. Cada color de `formatos` en lib/site-config.ts necesita su entrada
- * acá.
+ * Se lee como un póster de arriba abajo, en cinco golpes:
+ *   1. el titular (`titulo`), que abre sin rótulo encima — es la frase la que presenta
+ *   2. el lema enmarcado entre dos chevrons gigantes
+ *   3. los tres formatos, como las barras de la pieza 2, con Bugle asomándose
+ *   4. los pilares, como stickers pegados con desorden a propósito
+ *   5. el cierre y el botón, en el bloque morado a sangre que desemboca en el pie
+ *
+ * Sin halos de fondo a propósito: la niebla queda para el hero. Acá el color fuerte
+ * llega por bloques sólidos (barras, stickers, el bloque morado), que es lo que hace que
+ * se lea como póster y no como una plantilla oscura más.
+ *
+ * `overflow-x-clip` y no `overflow-hidden`: los chevrons y las barras se cortan contra
+ * los costados de la pantalla, pero Bugle tiene que poder salirse del bloque morado
+ * hacia ARRIBA. `clip` recorta solo en horizontal y, a diferencia de `hidden`, no
+ * convierte la sección en un contenedor con scroll propio.
  */
-const clasesPorColor = {
-  blue: {
-    icono: 'text-brand-blue',
-    halo: 'bg-brand-blue/12',
-    borde: 'group-hover:border-brand-blue/45',
-  },
-  purple: {
-    icono: 'text-brand-purple',
-    halo: 'bg-brand-purple/12',
-    borde: 'group-hover:border-brand-purple/45',
-  },
-  red: {
-    icono: 'text-brand-red',
-    halo: 'bg-brand-red/12',
-    borde: 'group-hover:border-brand-red/45',
-  },
-} satisfies Record<BrandColor, { icono: string; halo: string; borde: string }>
-
 export function QueEs() {
   return (
-    <section id="que-es" className="relative isolate scroll-mt-24 overflow-hidden">
-      {/* Un halo tenue detrás de la sección, para que no sea un rectángulo plano. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="glow-purple absolute top-[-10%] left-1/2 size-[46rem] max-w-[140vw] -translate-x-1/2 opacity-40" />
-      </div>
-
-      <div className="mx-auto max-w-6xl px-5 py-24 md:px-6 md:py-32">
-        {/* ── Encabezado ────────────────────────────────────────────────────── */}
-        <div className="max-w-3xl">
-          <p
-            data-reveal
-            className="flex items-center gap-2.5 font-subtitle text-xs font-semibold tracking-[0.2em] text-brand-green uppercase"
-          >
-            <Chevron dir="right" className="h-3 w-auto" />
-            {copy.queEs.eyebrow}
-          </p>
-
-          <h2
-            data-reveal
-            style={{ '--reveal-delay': '80ms' } as React.CSSProperties}
-            className="mt-5 font-display text-3xl leading-[1.1] font-extrabold tracking-tight text-balance sm:text-4xl lg:text-5xl"
-          >
-            {copy.queEs.titulo}
-          </h2>
-
-          <p
-            data-reveal
-            style={{ '--reveal-delay': '160ms' } as React.CSSProperties}
-            className="mt-6 text-base leading-relaxed text-pretty text-muted-foreground lg:text-lg"
-          >
-            {copy.queEs.intro}
-          </p>
-        </div>
-
-        {/* ── La cita que resume el propósito ───────────────────────────────── */}
-        <figure
+    <section id="que-es" aria-label={copy.queEs.aria} className="scroll-mt-24 overflow-x-clip">
+      {/* ── 1. Apertura ─────────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-6xl px-5 pt-24 md:px-6 md:pt-36">
+        <h2
           data-reveal
-          style={{ '--reveal-delay': '220ms' } as React.CSSProperties}
-          className="relative mt-12 max-w-3xl border-l-2 border-brand-purple pl-6 md:pl-8"
+          className="font-poster text-[2.05rem] leading-[1.08] font-extrabold tracking-tight uppercase sm:text-5xl lg:text-[4.25rem]"
         >
-          <blockquote className="font-display text-xl leading-snug font-bold text-balance sm:text-2xl">
-            <span className="text-brand-gradient">“</span>
-            {copy.queEs.cita}
-            <span className="text-brand-gradient">”</span>
-          </blockquote>
-        </figure>
+          {/*
+            Cada frase en su línea, como en un póster. La primera va apagada: es lo que
+            NO somos, y la segunda es la que se tiene que quedar en la cabeza.
+          */}
+          {frases(copy.queEs.titulo).map((frase, indice) => (
+            <span
+              key={frase}
+              className={`block ${indice === 0 ? 'text-brand-light/45' : 'text-brand-light'}`}
+            >
+              {frase}{' '}
+            </span>
+          ))}
+        </h2>
 
-        {/* ── Los tres formatos ─────────────────────────────────────────────── */}
-        <h3
-          data-reveal
-          className="mt-20 font-display text-2xl font-extrabold tracking-tight sm:text-3xl"
-        >
-          {copy.queEs.formatosTitulo}
-        </h3>
-
-        <ul className="mt-8 grid gap-5 md:grid-cols-3">
-          {formatos.map((formato, indice) => {
-            const clases = clasesPorColor[formato.color]
-
-            return (
-              <li
-                key={formato.id}
-                data-reveal
-                style={{ '--reveal-delay': `${indice * 110}ms` } as React.CSSProperties}
-                className="group"
-              >
-                <div
-                  className={`brand-card h-full border border-border p-7 transition-all duration-300 group-hover:-translate-y-1.5 ${clases.borde}`}
-                >
-                  <span
-                    className={`inline-flex size-12 items-center justify-center rounded-xl ${clases.halo}`}
-                  >
-                    <BrandIcon
-                      name={formato.icon satisfies BrandIconName}
-                      className={`h-5 w-auto ${clases.icono}`}
-                    />
-                  </span>
-
-                  <h4 className="mt-5 font-display text-xl font-bold tracking-tight">
-                    {formato.titulo}
-                  </h4>
-                  <p className="mt-2.5 leading-relaxed text-muted-foreground">
-                    {formato.descripcion}
-                  </p>
-                </div>
-              </li>
-            )
-          })}
-        </ul>
-
-        {/* ── Los cuatro pilares ────────────────────────────────────────────── */}
-        <div className="mt-24">
-          <p
-            data-reveal
-            className="flex items-center gap-2.5 font-subtitle text-xs font-semibold tracking-[0.2em] text-brand-blue uppercase"
-          >
-            <Chevron dir="right" className="h-3 w-auto" />
-            {copy.queEs.pilaresEyebrow}
-          </p>
-
-          <h3
-            data-reveal
-            style={{ '--reveal-delay': '80ms' } as React.CSSProperties}
-            className="mt-5 max-w-2xl font-display text-2xl font-extrabold tracking-tight text-balance sm:text-3xl"
-          >
-            {copy.queEs.pilaresTitulo}
-          </h3>
-
-          <ol className="mt-10 grid gap-x-10 gap-y-9 sm:grid-cols-2">
-            {pilares.map((pilar, indice) => (
-              <li
-                key={pilar.titulo}
-                data-reveal
-                style={{ '--reveal-delay': `${indice * 90}ms` } as React.CSSProperties}
-                className="flex gap-5 border-t border-border pt-6"
-              >
-                <span
-                  aria-hidden
-                  className="font-display text-2xl font-extrabold tabular-nums text-brand-purple/50"
-                >
-                  {String(indice + 1).padStart(2, '0')}
-                </span>
-                <div>
-                  <h4 className="font-display text-lg font-bold tracking-tight">
-                    {pilar.titulo}
-                  </h4>
-                  <p className="mt-2 leading-relaxed text-muted-foreground">
-                    {pilar.descripcion}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        {/* ── Cierre ────────────────────────────────────────────────────────── */}
         <p
           data-reveal
-          className="mt-24 max-w-3xl font-display text-2xl leading-tight font-extrabold text-balance sm:text-4xl"
+          style={{ '--reveal-delay': '120ms' } as React.CSSProperties}
+          className="mt-8 max-w-2xl text-base leading-relaxed text-pretty text-muted-foreground md:mt-10 lg:text-lg"
         >
-          {copy.queEs.cierre.antes}{' '}
-          <span className="text-brand-green">{copy.queEs.cierre.destacado}</span>{' '}
-          {copy.queEs.cierre.despues}
+          {copy.queEs.intro}
         </p>
-
-        {/* ── Llamada a la acción ───────────────────────────────────────────── */}
-        <div
-          data-reveal
-          className="brand-card mt-12 flex flex-col gap-7 border border-border p-8 md:flex-row md:items-center md:justify-between md:p-10"
-        >
-          <div className="max-w-xl">
-            <h3 className="font-display text-xl font-extrabold tracking-tight sm:text-2xl">
-              {copy.cta.titulo}
-            </h3>
-            <p className="mt-3 leading-relaxed text-muted-foreground">
-              {copy.cta.descripcion}
-            </p>
-          </div>
-
-          <div className="shrink-0">
-            <a
-              href={links.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-brand inline-flex w-full items-center justify-center gap-2.5 rounded-full px-7 py-3.5 font-subtitle text-base font-semibold md:w-auto"
-            >
-              <MessageCircle className="size-5" aria-hidden />
-              {copy.cta.boton}
-            </a>
-            <p className="mt-3 text-center font-subtitle text-xs text-muted-foreground md:text-right">
-              {copy.cta.nota}
-            </p>
-          </div>
-        </div>
       </div>
+
+      {/* ── 2. El marco: ❰ lema ❱ ───────────────────────────────────────────── */}
+      {/*
+        Los chevrons van a tamaño mural y a color pleno: en el hero son una textura casi
+        invisible; acá son el recurso que firma la sección. Los márgenes negativos los
+        empujan fuera de la pantalla en móvil, donde se recortan contra el canto.
+      */}
+      <div
+        data-reveal
+        className="my-24 flex items-center justify-center gap-3 md:my-36 md:gap-8 lg:gap-12"
+      >
+        <Chevron
+          dir="left"
+          className="-ml-12 h-44 w-auto shrink-0 text-brand-red sm:-ml-8 sm:h-60 lg:-ml-14 lg:h-[24rem]"
+        />
+        <p className="min-w-0 text-center font-poster text-[1.85rem] leading-[1.05] font-extrabold uppercase text-balance sm:text-4xl md:text-5xl lg:text-[4.5rem]">
+          {copy.queEs.marco}
+        </p>
+        <Chevron
+          dir="right"
+          className="-mr-12 h-44 w-auto shrink-0 text-brand-purple sm:-mr-8 sm:h-60 lg:-mr-14 lg:h-[24rem]"
+        />
+      </div>
+
+      {/* ── 3. Formatos ─────────────────────────────────────────────────────── */}
+      <Formatos />
+
+      {/* ── 4. Pilares ──────────────────────────────────────────────────────── */}
+      <Pilares />
+
+      {/* ── 5. Cierre + llamada a la acción ─────────────────────────────────── */}
+      <Llamado />
     </section>
   )
+}
+
+/** Parte un texto en frases, cortando después de cada punto. */
+function frases(texto: string) {
+  return texto.split(/(?<=\.)\s+/)
 }

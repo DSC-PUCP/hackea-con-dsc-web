@@ -1,5 +1,6 @@
 import { ArrowUpRight, ChevronDown, Share2 } from 'lucide-react'
 
+import { Chevron } from '@/components/brand/icons'
 import { Personas } from '@/components/eventos/personas'
 import { enlaceWhatsAppDeEvento } from '@/lib/eventos/compartir'
 import { fechaCompacta, formatearCuando, grupoDeMes, notaDeFecha } from '@/lib/eventos/fechas'
@@ -29,6 +30,12 @@ import { copy } from '@/lib/site-config'
  * envoltorios distintos (`<details>` en móvil, un bloque normal en escritorio) sobre las
  * MISMAS piezas de contenido, que están definidas una sola vez más abajo. Cambiar cómo se
  * ve un evento se hace en `Encabezado`, `Detalle` o `BloqueDeFecha`, y vale para los dos.
+ *
+ * ── Cuánta personalidad lleva una fila ───────────────────────────────────────────────
+ * Poca, y en sitios fijos: el tipo es un sticker de color, el día va en letra de póster
+ * dentro de un talón de ticket, y el botón tiene sombra dura. Nada más. La lista se
+ * recorre buscando una fecha; si cada fila fuera un póster entero, el ojo no encontraría
+ * la columna de días.
  *
  * ── Por qué `<details>` y no un acordeón de React ────────────────────────────────────
  * Porque abrir y cerrar ya lo sabe hacer el navegador. Mismo patrón que los testimonios
@@ -63,10 +70,10 @@ export function SeccionDeEventos({
   return (
     <section id={id} className="scroll-mt-24">
       {/*
-        Un escalón por debajo del `<h1>` de la página (que es `text-4xl sm:text-5xl`), y
-        a propósito. Estos rótulos no son títulos que compitan: solo dicen qué subconjunto
-        viene debajo —«Próximos eventos», «Ya pasaron»— y con el tamaño anterior se leían
-        como un segundo encabezado de página a dos dedos del primero.
+        Varios escalones por debajo del `<h1>` de la página (el título de póster), y a
+        propósito. Estos rótulos no son títulos que compitan: solo dicen qué subconjunto
+        viene debajo —«Próximos eventos», «Ya fueron»— y más grandes se leían como un
+        segundo encabezado de página a dos dedos del primero.
       */}
       <h2
         data-reveal
@@ -85,20 +92,34 @@ export function SeccionDeEventos({
         </p>
       ) : null}
 
-      <div className={`mt-8 ${variante === 'pasado' ? 'opacity-70' : ''}`}>
+      <div className="mt-8">
         {agruparPorMes(eventos).map((grupo) => (
           <div key={grupo.clave} className="mb-10 last:mb-0">
             {/*
               `sticky` para que, mientras se recorre agosto, el rótulo «Agosto 2026» siga
               a la vista. En una lista de doce eventos de tres meses es lo que evita
               perder el hilo. `top-16` lo deja justo debajo del header fijo.
+
+              Los chevrons de marca lo enmarcan (rojo abre, morado cierra) y el filete
+              que sigue hasta el borde dice «todo lo de abajo es de este mes». Ojo al
+              tocarlo: su alto —32 px, del `py-2` y el `text-xs`— entra en la cuenta del
+              `scroll-mt` de cada fila. Los chevrons son de `h-3` y no lo cambian.
+
+              En los pasados el rótulo se apaga con el color del texto y no con `opacity`
+              en un contenedor: con opacidad, el fondo del rótulo `sticky` también se
+              volvía transparente y las filas se veían a través al hacer scroll.
             */}
-            <h3 className="sticky top-16 z-10 -mx-1 bg-background/85 px-1 py-2 font-subtitle text-xs font-semibold tracking-[0.2em] text-brand-blue uppercase backdrop-blur-sm">
+            <h3
+              className={`sticky top-16 z-10 -mx-1 flex items-center gap-2.5 bg-background/85 px-1 py-2 font-subtitle text-xs font-semibold tracking-[0.2em] uppercase backdrop-blur-sm ${variante === 'pasado' ? 'text-muted-foreground' : ''}`}
+            >
+              <Chevron dir="left" className="h-3 w-auto text-brand-red" />
               {grupo.rotulo}
+              <Chevron dir="right" className="h-3 w-auto text-brand-purple" />
+              <span aria-hidden className="ml-1.5 h-px flex-1 bg-border" />
             </h3>
 
             <ul className="mt-2">
-              {grupo.eventos.map((evento) => (
+              {grupo.eventos.map((evento, indice) => (
                 <li
                   key={evento.id}
                   id={`evento-${evento.id}`}
@@ -110,9 +131,17 @@ export function SeccionDeEventos({
                   // del borde, un hueco enorme. El rótulo de mes mide 32px de alto y
                   // empieza a 64px (`top-16`), así que su borde inferior está a 96px: con
                   // esto sobran ~40px sobre esos 96px, que es lo que hace falta.
-                  className="scroll-mt-10 border-b border-border/70 last:border-b-0"
+                  className="relative scroll-mt-10 border-b border-border/70 last:border-b-0"
                 >
-                  <FilaDeEvento evento={evento} variante={variante} />
+                  <FilaDeEvento
+                    evento={evento}
+                    variante={variante}
+                    giro={GIROS[indice % GIROS.length]}
+                  />
+
+                  {variante === 'pasado' ? (
+                    <Sello giro={GIROS_SELLO[indice % GIROS_SELLO.length]} />
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -122,6 +151,17 @@ export function SeccionDeEventos({
     </section>
   )
 }
+
+/**
+ * Giros de los stickers de tipo, por posición dentro del mes. Leves y alternando de lado,
+ * para que dos filas seguidas nunca queden torcidas igual: un sticker pegado a mano no
+ * sale dos veces con el mismo ángulo. Por posición y no por tipo, porque con tres
+ * talleres seguidos el giro por tipo los dejaba en fila india, idénticos.
+ */
+const GIROS = ['-2deg', '1.5deg', '-1deg', '2.5deg']
+
+/** El sello va más torcido que las etiquetas: un sello de goma se pone a la rápida. */
+const GIROS_SELLO = ['-8deg', '6deg', '-5deg', '9deg']
 
 /**
  * Agrupa conservando el orden en que vienen los eventos, que ya es el correcto: por fecha
@@ -145,7 +185,15 @@ function agruparPorMes(eventos: Evento[]) {
 // La fila: dos envoltorios, las mismas piezas
 // ═════════════════════════════════════════════════════════════════════════════════════
 
-function FilaDeEvento({ evento, variante }: { evento: Evento; variante: Variante }) {
+function FilaDeEvento({
+  evento,
+  variante,
+  giro,
+}: {
+  evento: Evento
+  variante: Variante
+  giro: string
+}) {
   /*
    * Un evento del que solo se sabe el nombre y la fecha no tiene nada que desplegar, y
    * entonces en móvil NO se pinta como desplegable: sería un chevron que promete algo y
@@ -153,15 +201,23 @@ function FilaDeEvento({ evento, variante }: { evento: Evento; variante: Variante
    */
   const hayDetalle = Boolean(evento.descripcion || tieneGente(evento))
 
+  /*
+   * Los pasados se apagan acá, en el contenido de la fila, y no en la `<li>`: el sello
+   * «Ya fue» es hermano de esto y tiene que verse a todo color encima de la fila apagada.
+   * `saturate` además de `opacity` porque los stickers de tipo, a puro color, seguían
+   * gritando a través del 60 %.
+   */
+  const apagada = variante === 'pasado' ? 'opacity-60 saturate-[.55]' : ''
+
   return (
-    <>
+    <div className={apagada}>
       {/* ── Móvil: fila compacta que se despliega ─────────────────────────────────── */}
       <div className="md:hidden">
         {hayDetalle ? (
           <details className="group">
             <summary className="flex cursor-pointer list-none items-start gap-4 py-4 [&::-webkit-details-marker]:hidden">
               <BloqueDeFecha evento={evento} />
-              <Encabezado evento={evento} />
+              <Encabezado evento={evento} giro={giro} />
               <ChevronDown
                 aria-hidden
                 className="mt-1 size-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
@@ -169,8 +225,10 @@ function FilaDeEvento({ evento, variante }: { evento: Evento; variante: Variante
             </summary>
 
             {/*
-              `pl-16` alinea el detalle con el título, no con el bloque de fecha: así la
-              columna de números se sigue leyendo de arriba abajo con filas abiertas.
+              `pl-18` alinea el detalle con el título, no con el bloque de fecha: así la
+              columna de números se sigue leyendo de arriba abajo con filas abiertas. Es
+              el ancho del bloque (`w-14`) más el `gap-4` de la fila: 56 + 16 = 72 px. Si
+              cambia uno de los dos, cambia esto (y el `pl-18` del botón, más abajo).
 
               El `pb-4` es lo que separa el detalle del botón de abajo, y va ACÁ y no en el
               botón por una razón concreta: este panel **solo existe cuando la fila está
@@ -179,39 +237,39 @@ function FilaDeEvento({ evento, variante }: { evento: Evento; variante: Variante
               porque es parte de ella; abierta, sin este aire quedaba tocando la última
               cara del bloque de personas, como si fuera una fila más de la lista.
             */}
-            <div className="pb-4 pl-16">
+            <div className="pb-4 pl-18">
               <Detalle evento={evento} />
             </div>
           </details>
         ) : (
           <div className="flex items-start gap-4 py-4">
             <BloqueDeFecha evento={evento} />
-            <Encabezado evento={evento} />
+            <Encabezado evento={evento} giro={giro} />
           </div>
         )}
 
         {/* Fuera del `<details>` a propósito: se ve con la fila cerrada. */}
-        <div className="flex items-center gap-3 pt-1 pb-4 pl-16">
+        <div className="flex items-center gap-3 pt-1 pb-5 pl-18">
           <Inscripcion evento={evento} variante={variante} />
           <Compartir evento={evento} />
         </div>
       </div>
 
       {/* ── Escritorio: todo a la vista, sin desplegable y sin chevron ────────────── */}
-      <div className="hidden gap-6 py-6 md:flex">
+      <div className="hidden gap-7 py-7 md:flex">
         <BloqueDeFecha evento={evento} />
 
         <div className="min-w-0 flex-1">
-          <Encabezado evento={evento} />
+          <Encabezado evento={evento} giro={giro} />
           <Detalle evento={evento} />
 
-          <div className="mt-5 flex items-center gap-3">
+          <div className="mt-6 flex items-center gap-3">
             <Inscripcion evento={evento} variante={variante} />
             <Compartir evento={evento} />
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
@@ -220,21 +278,24 @@ function tieneGente(evento: Evento): boolean {
 }
 
 /**
- * Color de marca por tipo de evento.
+ * Sticker de color por tipo de evento. Los mismos colores que los formatos de la portada
+ * (taller azul, ponencia morado, hackathon rojo), para que el color diga el tipo antes de
+ * leerlo.
  *
  * Los nombres de clase van COMPLETOS, igual que en `clasesPorColor` de
- * components/que-es.tsx y por el mismo motivo: Tailwind busca clases literales en el
- * código, y `text-brand-${color}` no genera ningún CSS.
+ * components/portada/pilares.tsx y por el mismo motivo: Tailwind busca clases literales en el
+ * código, y `sticker-${color}` no genera ningún CSS.
  *
  * `otro` existe porque la celda `Tipo` es texto libre y siempre aparece un formato nuevo
- * a mitad del programa. Sin esta entrada, un «Mesa redonda» dejaría la fila sin color.
+ * a mitad del programa. Sin esta entrada, un «Mesa redonda» dejaría la fila sin color; con
+ * ella sale en el sticker claro, que no se confunde con ninguno de los tres formatos.
  */
-const COLOR_POR_TIPO: Record<TipoEvento, string> = {
-  taller: 'text-brand-blue',
-  ponencia: 'text-brand-purple',
-  hackathon: 'text-brand-red',
-  networking: 'text-brand-green',
-  otro: 'text-muted-foreground',
+const STICKER_POR_TIPO: Record<TipoEvento, string> = {
+  taller: 'sticker-azul',
+  ponencia: 'sticker-morado',
+  hackathon: 'sticker-rojo',
+  networking: 'sticker-verde',
+  otro: 'sticker-claro',
 }
 
 /**
@@ -247,14 +308,19 @@ const COLOR_POR_TIPO: Record<TipoEvento, string> = {
  * en components/sponsors/testimonios.tsx. Si esta pieza deja de servir para el móvil, esa
  * restricción desaparece — pero mientras se comparta, manda.
  */
-function Encabezado({ evento }: { evento: Evento }) {
+function Encabezado({ evento, giro }: { evento: Evento; giro: string }) {
   const nota = notaDeFecha(evento.cuando, copy.agenda.sinFecha)
 
   return (
     <span className="min-w-0 flex-1">
-      <span className="flex flex-wrap items-baseline gap-x-2 font-subtitle text-xs font-semibold tracking-[0.14em] uppercase">
+      <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
         {evento.tipoEtiqueta ? (
-          <span className={COLOR_POR_TIPO[evento.tipo]}>{evento.tipoEtiqueta}</span>
+          <span
+            className={`etiqueta-sticker ${STICKER_POR_TIPO[evento.tipo]} px-1.5 py-px font-subtitle text-[0.68rem] font-bold tracking-[0.1em] uppercase`}
+            style={{ '--sticker-giro': giro } as React.CSSProperties}
+          >
+            {evento.tipoEtiqueta}
+          </span>
         ) : null}
 
         {/*
@@ -262,7 +328,7 @@ function Encabezado({ evento }: { evento: Evento }) {
           nada. Mejor callar que arriesgarse a decirle a alguien de fuera que no puede venir.
         */}
         {evento.permiteExternos !== null ? (
-          <span className="font-medium tracking-normal text-muted-foreground normal-case">
+          <span className="font-subtitle text-xs font-medium text-muted-foreground">
             {evento.permiteExternos ? copy.agenda.abiertoExternos : copy.agenda.soloPucp}
           </span>
         ) : null}
@@ -274,7 +340,7 @@ function Encabezado({ evento }: { evento: Evento }) {
         del evento como si no estuviera dentro de ningún mes. La jerarquía completa es
         h1 página → h2 lista → h3 mes → h4 evento. El aspecto no cambia: manda la clase.
       */}
-      <h4 className="mt-1 font-display text-base leading-snug font-bold text-pretty sm:text-lg">
+      <h4 className="mt-2 font-display text-base leading-snug font-bold text-pretty sm:text-lg md:text-xl">
         {evento.nombre}
       </h4>
 
@@ -316,9 +382,18 @@ function Detalle({ evento }: { evento: Evento }) {
 }
 
 /**
- * El bloque de día. Ancho FIJO (`w-14`), y eso es lo que hace legible la lista: la
- * columna de números queda alineada y el ojo la recorre sin leer nada más. Si el ancho
- * dependiera del contenido, un «set» y un «3» descuadrarían la columna entera.
+ * El bloque de día, como el talón de un ticket. Ancho FIJO (`w-14`, `w-20` en escritorio),
+ * y eso es lo que hace legible la lista: la columna de números queda alineada y el ojo la
+ * recorre sin leer nada más. Si el ancho dependiera del contenido, un «set» y un «3»
+ * descuadrarían la columna entera.
+ *
+ * El talón es solo la línea punteada de la derecha, que baja todo el alto de la fila
+ * (`self-stretch`): es el troquel por donde se corta la entrada. Nada de muescas ni
+ * cartón de fondo — con eso cada fila ya era una ilustración.
+ *
+ * El día va en letra de póster: es el dato que se busca al recorrer la lista, y la letra
+ * ancha lo hace legible de reojo. Con `uppercase` porque a veces no es un número sino el
+ * mes («oct», cuando la hoja solo sabe el mes) y `font-poster` se usa solo en mayúsculas.
  *
  * Lleva la hora dentro para no gastar una línea aparte en el dato más repetido de la
  * agenda. La fecha completa va en `title`, para quien dude de qué día de la semana es
@@ -329,13 +404,15 @@ function BloqueDeFecha({ evento }: { evento: Evento }) {
 
   return (
     <span
-      className="w-14 shrink-0 text-center"
+      className="w-14 shrink-0 self-stretch border-r-2 border-dashed border-border pr-2 text-center md:w-20 md:pr-4"
       title={formatearCuando(evento.cuando, copy.agenda.sinFecha)}
     >
-      <span className="block font-display text-2xl leading-none font-extrabold">{principal}</span>
+      <span className="block font-poster text-[1.35rem] leading-none font-bold uppercase md:text-[1.9rem]">
+        {principal}
+      </span>
 
       {secundario ? (
-        <span className="mt-1 block font-subtitle text-xs text-muted-foreground uppercase">
+        <span className="mt-1.5 block font-subtitle text-xs font-medium tracking-[0.1em] text-muted-foreground uppercase">
           {secundario}
         </span>
       ) : null}
@@ -394,7 +471,7 @@ function Inscripcion({ evento, variante }: { evento: Evento; variante: Variante 
       href={evento.inscripcion}
       target="_blank"
       rel="noopener noreferrer"
-      className="group/cta inline-flex items-center justify-center gap-2 rounded-full border border-input bg-card/50 px-5 py-2.5 font-subtitle text-sm font-semibold transition-colors hover:border-brand-blue/50 hover:bg-card"
+      className="btn-sombra group/cta inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 font-subtitle text-sm font-bold"
     >
       {copy.agenda.inscribirme}
       {etiqueta}
@@ -423,9 +500,36 @@ function Compartir({ evento }: { evento: Evento }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${copy.agenda.compartir}: ${evento.nombre}`}
-      className="inline-flex shrink-0 items-center justify-center rounded-full border border-input bg-card/50 p-2.5 text-muted-foreground transition-colors hover:border-brand-blue/50 hover:bg-card hover:text-foreground"
+      className="inline-flex shrink-0 items-center justify-center rounded-lg border border-input bg-card/50 p-2.5 text-muted-foreground transition-colors hover:border-brand-light/40 hover:bg-card hover:text-foreground"
     >
       <Share2 aria-hidden className="size-4" />
     </a>
+  )
+}
+
+/**
+ * El sello «Ya fue» sobre cada evento pasado, como un sello de goma estampado encima de
+ * la fila. Va a todo color sobre la fila apagada: es lo primero que tiene que leerse.
+ *
+ * Es hermano del contenido de la fila (no hijo) por dos motivos: la fila se apaga con
+ * `opacity` y el sello no debe apagarse con ella, y en móvil el contenido vive dentro de
+ * un `<summary>`, donde un sello absoluto se movería al abrir la fila.
+ *
+ * Arriba a la derecha en escritorio, a la altura del título, que es donde cae la vista
+ * al recorrer la lista. En móvil esa esquina es del chevron del desplegable, así que baja
+ * a la línea del enlace de Luma, que siempre deja libre la derecha.
+ *
+ * `aria-hidden`: lo que dice ya lo dice el rótulo de la lista («Ya fueron»), y leído en
+ * cada fila sería ruido.
+ */
+function Sello({ giro }: { giro: string }) {
+  return (
+    <span
+      aria-hidden
+      className="etiqueta-sticker sticker-claro pointer-events-none absolute right-1 bottom-5 px-2 py-0.5 font-poster text-[0.7rem] font-bold tracking-[0.06em] uppercase md:top-7 md:right-2 md:bottom-auto md:text-xs"
+      style={{ '--sticker-giro': giro } as React.CSSProperties}
+    >
+      {copy.agenda.selloPasado}
+    </span>
   )
 }

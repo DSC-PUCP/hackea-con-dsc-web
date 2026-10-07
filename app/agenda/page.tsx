@@ -1,10 +1,12 @@
+import { MessageCircle } from 'lucide-react'
 import type { Metadata } from 'next'
+import Image from 'next/image'
 
 import { Chevron } from '@/components/brand/icons'
 import { SeccionDeEventos } from '@/components/eventos/agenda'
 import { obtenerAgenda } from '@/lib/eventos/contenido'
 import { copy, links, seoAgenda, site } from '@/lib/site-config'
-import { urlDelSitio } from '@/lib/site-url'
+import { assetPublico, urlDelSitio } from '@/lib/site-url'
 
 /**
  * Metadatos ESTÁTICOS, no `generateMetadata` leyendo la hoja.
@@ -63,91 +65,85 @@ export default async function Page() {
 
   return (
     <main>
-      <section id="top" className="relative isolate overflow-hidden">
+      <section id="top" className="relative isolate overflow-hidden border-b border-border/70">
         {/*
           ── Fondo ──────────────────────────────────────────────────────────────────────
-          Las mismas cinco capas que el hero de la portada y el de `/sponsors`, y en el
-          mismo orden: rejilla, glows que respiran, chevron mural y grano. No es adorno
-          repetido por copiar — es lo que hace que las tres páginas se lean como el mismo
-          sitio. La primera versión de esta página tenía un solo glow estático y se notaba
-          de inmediato: parecía otra web.
+          Las mismas capas que el hero de la portada y el de `/sponsors` —rejilla, glow que
+          respira, chevron mural y grano—, que es lo que hace que las tres páginas se lean
+          como el mismo sitio. Pero más ligeras: acá el protagonista visual es Bugle y el
+          título de póster, y con dos halos detrás la cabecera se volvía niebla. Queda uno
+          solo, el azul, que es el color con el que se rotula la agenda.
 
           El reparto de `parallax-*` entre capas es el que da la profundidad; van en ramas
           distintas del árbol que el contenido porque `enter` y `parallax` animan las dos
           `translate`, y en un mismo elemento se pisan.
-
-          Acá manda el azul —el color con el que se rotula la agenda— y el morado queda de
-          apoyo, al revés que en `/sponsors`.
         */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
           <div className="bg-brand-grid parallax-back absolute inset-[-2rem]" />
 
-          <div className="glow-blue animate-breathe parallax-mid absolute top-[-26%] left-[-12%] size-[40rem] max-w-[130vw]" />
-          <div className="glow-purple animate-breathe parallax-back absolute top-[-16%] right-[-14%] size-[34rem] max-w-[130vw] [animation-delay:-4s]" />
+          <div className="glow-blue animate-breathe parallax-mid absolute top-[-30%] left-[-14%] size-[40rem] max-w-[130vw]" />
 
           <Chevron
-            dir="right"
-            className="parallax-front absolute right-[-3rem] bottom-[-2rem] h-[14rem] w-auto text-brand-blue/[0.035] lg:h-[20rem]"
+            dir="left"
+            className="parallax-front absolute top-[18%] left-[-3.5rem] h-[14rem] w-auto text-brand-red/[0.05] lg:h-[20rem]"
           />
 
           <div className="bg-brand-noise absolute inset-0" />
         </div>
 
-        <div className="mx-auto max-w-5xl px-5 pt-32 pb-10 md:px-6 md:pt-40 md:pb-14">
-          <p className="enter flex items-center gap-2.5 font-subtitle text-xs font-semibold tracking-[0.2em] text-brand-blue uppercase">
-            <Chevron dir="right" className="h-3 w-auto" />
-            {copy.agenda.eyebrow}
-          </p>
+        <div className="mx-auto grid max-w-5xl grid-cols-1 px-5 md:grid-cols-[minmax(0,1fr)_auto] md:gap-8 md:px-6">
+          <div className={`pt-32 md:pt-40 md:pb-16 ${hayAlgo ? 'pb-12' : 'pb-4'}`}>
+            {/*
+              El único momento de la página en letra de póster. Sin rótulo «Agenda» encima:
+              el menú ya marca dónde estás, y el rótulo era la mitad del molde genérico
+              (rótulo + título + párrafo gris) que se repetía en todas las páginas.
+            */}
+            <h1 className="enter font-poster text-[1.7rem] leading-[1.08] font-extrabold tracking-tight text-balance uppercase sm:text-4xl lg:text-[2.85rem]">
+              {copy.agenda.titulo}
+            </h1>
 
-          <h1
-            className="enter mt-5 font-display text-4xl leading-[1.05] font-extrabold tracking-tight text-balance sm:text-5xl"
-            style={{ '--enter-delay': '80ms' } as React.CSSProperties}
-          >
-            {copy.agenda.titulo}
-          </h1>
-
-          <p
-            className="enter mt-6 max-w-2xl text-base leading-relaxed text-pretty text-muted-foreground lg:text-lg"
-            style={{ '--enter-delay': '160ms' } as React.CSSProperties}
-          >
-            {hayAlgo ? copy.agenda.intro : copy.agenda.vacio.descripcion}
-          </p>
-
-          {hayAlgo ? null : (
-            <a
-              href={links.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-brand enter mt-8 inline-flex items-center justify-center gap-2.5 rounded-full px-7 py-3.5 font-subtitle text-base font-semibold"
-              style={{ '--enter-delay': '240ms' } as React.CSSProperties}
+            <p
+              className="enter mt-6 max-w-xl text-base leading-relaxed text-pretty text-muted-foreground lg:text-lg"
+              style={{ '--enter-delay': '100ms' } as React.CSSProperties}
             >
-              {copy.cta.boton}
-            </a>
-          )}
+              {hayAlgo ? copy.agenda.intro : copy.agenda.vacio.descripcion}
+            </p>
+
+            {hayAlgo ? null : (
+              <a
+                href={links.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-brand enter mt-8 inline-flex items-center justify-center gap-2.5 rounded-full px-7 py-3.5 font-subtitle text-base font-semibold"
+                style={{ '--enter-delay': '200ms' } as React.CSSProperties}
+              >
+                <MessageCircle className="size-5" aria-hidden />
+                {copy.cta.boton}
+              </a>
+            )}
+          </div>
+
+          <BugleRevisando vacio={!hayAlgo} />
         </div>
       </section>
 
+      {/*
+        Fondo tinta limpio, sin halo. Hubo uno tenue detrás de la lista para que no se
+        leyera como un vacío plano, pero sumado a los de la cabecera era niebla: el color
+        de la lista ahora lo ponen los stickers de tipo y los botones, no el fondo.
+
+        El `pt` no es decorativo: sin él, el primer rótulo de lista quedaba pegado al borde
+        de la cabecera, como si fuera parte de ella.
+      */}
       {hayAlgo ? (
-        <div className="relative isolate overflow-hidden">
-          {/*
-            Un halo tenue detrás de la lista. La lista es larga —doce eventos más los que
-            ya pasaron— y sin nada detrás el fondo se lee como un vacío plano en cuanto
-            dejas atrás el hero. Es el mismo recurso que usan las secciones de
-            `/sponsors`; acá va bajo y a la derecha para no competir con los glows de
-            arriba.
-          */}
-          <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-            <div className="glow-purple absolute top-[10%] right-[-20%] size-[38rem] max-w-[140vw] opacity-25" />
+        <>
+          <div className="mx-auto max-w-5xl px-5 pt-12 md:px-6 md:pt-16">
+            <SeccionDeEventos id="proximos" titulo={copy.agenda.tituloProximos} eventos={proximos} />
           </div>
 
-          {/*
-            El `pt` no es decorativo: el hero cierra con `pb-10 md:pb-14`, y sin nada más
-            el primer rótulo de lista quedaba pegado a la entradilla, como si fuera parte
-            de ella. Con esto se lee como lo que es, el comienzo de otra cosa.
-          */}
-          <div className="mx-auto max-w-5xl space-y-16 px-5 pt-6 pb-24 md:px-6 md:pt-10 md:pb-32">
-            <SeccionDeEventos id="proximos" titulo={copy.agenda.tituloProximos} eventos={proximos} />
+          <AvisoDelGrupo />
 
+          <div className="mx-auto max-w-5xl px-5 pb-24 md:px-6 md:pb-32">
             <SeccionDeEventos
               id="pasados"
               titulo={copy.agenda.tituloPasados}
@@ -156,8 +152,109 @@ export default async function Page() {
               variante="pasado"
             />
           </div>
-        </div>
+        </>
       ) : null}
     </main>
+  )
+}
+
+/**
+ * La salida al grupo, ENTRE las dos listas: justo donde se acaban las fechas que todavía
+ * sirven y empieza el archivo. Es el momento exacto en que alguien piensa «¿y después
+ * qué?», y la respuesta es que las fechas nuevas se anuncian primero en el grupo.
+ *
+ * Al final de la página no servía: ahí ya solo se llega recorriendo eventos pasados.
+ *
+ * Es una barra de póster (la de la pieza 2) y no un bloque morado: la agenda es una página
+ * de consulta, y un bloque a sangre de lado a lado le partía la lista en dos. La barra
+ * sangra solo hacia la derecha y por la izquierda arranca en la misma vertical que la
+ * lista, con la misma cuenta que los formatos de la portada: `--borde` es donde empieza el
+ * contenido del `max-w-5xl` centrado (32rem de medio ancho menos 1.5rem de relleno).
+ */
+function AvisoDelGrupo() {
+  return (
+    <div
+      style={{ '--borde': 'max(1.25rem, calc(50% - 30.5rem))' } as React.CSSProperties}
+      className="my-20 md:my-24"
+    >
+      <div
+        data-reveal
+        className="barra-poster ml-[var(--borde)] flex flex-col gap-6 rounded-r-none! py-8 pr-[var(--borde)] pl-6 md:flex-row md:items-center md:justify-between md:gap-10 md:py-10 md:pl-10"
+      >
+        <div className="max-w-xl">
+          <h2 className="font-display text-2xl leading-tight font-extrabold tracking-tight text-balance md:text-3xl">
+            {copy.cta.titulo}
+          </h2>
+          <p className="mt-3 leading-relaxed text-pretty text-brand-light/90">
+            {copy.cta.descripcion}
+          </p>
+        </div>
+
+        <a
+          href={links.whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-tinta inline-flex shrink-0 items-center justify-center gap-2.5 rounded-full px-7 py-4 font-subtitle text-base font-semibold"
+        >
+          <MessageCircle className="size-5" aria-hidden />
+          {copy.cta.boton}
+        </a>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Bugle de espaldas, mirando su pantalla holográfica: «revisando el calendario».
+ *
+ * Va ESPEJADO (`-scale-x-100`). El arte original mira a la derecha, y en la columna de la
+ * derecha eso lo dejaba de espaldas a la página, mirando fuera del cuadro. Espejado mira
+ * hacia el título y la lista, que es la regla de siempre en un póster: el personaje mira
+ * hacia dentro. El código de su pantalla queda al revés, pero a este tamaño no se lee.
+ *
+ * Se corta en recto por el borde inferior de la cabecera (el `mb` negativo lo saca de la
+ * sección y el `overflow-hidden` lo recorta), como Bugle en la pieza 2 de `referencias/`:
+ * no flota en el aire, está parado detrás del borde.
+ *
+ * En móvil, con eventos, NO sale: el teléfono ya llega a la lista con media pantalla de
+ * título, y un Bugle encima la empujaría fuera del primer pantallazo, que es donde tiene
+ * que estar la próxima fecha. En el estado vacío sí sale, y abajo del texto: ahí no hay
+ * lista que empujar y la página necesita algo más que un párrafo.
+ *
+ * Mismo anidado que en `components/hero.tsx`: `enter` y `parallax-*` mueven los dos
+ * `translate` y en un solo elemento se pisarían.
+ */
+function BugleRevisando({ vacio }: { vacio: boolean }) {
+  return (
+    <div
+      className={`pointer-events-none self-end ${vacio ? 'mx-auto -mb-16 w-[min(70vw,15rem)] md:mx-0' : 'hidden md:block md:-mb-14'} md:w-[14rem] lg:-mb-16 lg:w-[17rem]`}
+    >
+      <div className="enter" style={{ '--enter-delay': '160ms' } as React.CSSProperties}>
+        <div className="parallax-mid relative">
+          {/*
+            En el estado vacío, el título que explica por qué no hay nada va pegado como
+            sticker sobre Bugle: es lo que él está mirando en su pantalla.
+          */}
+          {vacio ? (
+            <p
+              className="sticker sticker-verde absolute top-[22%] -left-6 z-10 max-w-[11rem] px-3 py-2 font-subtitle text-sm leading-tight font-bold md:-left-16"
+              style={{ '--sticker-giro': '-6deg' } as React.CSSProperties}
+            >
+              {copy.agenda.vacio.titulo}
+            </p>
+          ) : null}
+
+          <Image
+            src={assetPublico('/brand/bugle-hacker.webp')}
+            alt={copy.agenda.bugleAlt}
+            width={684}
+            height={879}
+            priority
+            sizes="(min-width: 1024px) 17rem, (min-width: 768px) 14rem, 70vw"
+            className="bugle-shadow w-full -scale-x-100"
+          />
+        </div>
+      </div>
+    </div>
   )
 }

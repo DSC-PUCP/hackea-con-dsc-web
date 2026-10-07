@@ -21,6 +21,8 @@
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
   --font-subtitle: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  /* Letra "de póster": ancha, solo en mayúsculas y solo en momentos clave. */
+  --font-poster: var(--font-unbounded), var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
 
   /* Marca */
   --color-brand-purple: var(--brand-purple);
@@ -368,6 +370,145 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════════
+   Recursos firma
+   ───────────────────────────────────────────────────────────────────────────────
+   Lo que hace que la web se lea como Hack with DSC y no como una plantilla oscura
+   más. Salen de las piezas publicadas (referencias/public_1/) y son TRES, a
+   propósito: las barras de póster, los stickers y los chevrons gigantes. Un cuarto
+   recurso diluiría a los otros tres. Ver docs/identidad-visual.md §5.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Tonos derivados que usan los recursos firma. Viven aquí y no en :root porque solo
+   tienen sentido para estas utilidades; siguen saliendo de los 6 tokens. */
+:root {
+  /* El azul profundo con el que arrancan las barras de la pieza 2. */
+  --barra-desde: color-mix(in oklab, var(--brand-blue) 55%, var(--brand-purple));
+  /* El magenta con el que terminan: morado tirando a rojo. */
+  --barra-hasta: color-mix(in oklab, var(--brand-purple) 72%, var(--brand-red));
+  /* La "sombra" maciza de debajo de cada barra: un azul casi tinta. */
+  --barra-sombra: color-mix(in oklab, var(--brand-blue) 32%, var(--brand-ink));
+}
+
+/* ── 1. Barra de póster ────────────────────────────────────────────────────────
+   La de la pieza 2 (Talleres / Ponencias / Hackathones): degradado azul → morado →
+   magenta y una sombra MACIZA desplazada hacia abajo, sin difuminar. Esa sombra dura
+   es lo que la separa de una tarjeta de SaaS: se ve impresa, no flotando.
+   El componente decide hacia qué lado sangra (la pieza alterna izquierda y derecha):
+   con `rounded-l-none` o `rounded-r-none` y márgenes negativos hasta el borde. */
+@utility barra-poster {
+  border-radius: var(--radius-2xl);
+  background-image: linear-gradient(100deg, var(--barra-desde), var(--brand-purple) 55%, var(--barra-hasta));
+  color: var(--brand-light);
+  box-shadow: 0 0.6rem 0 0 var(--barra-sombra);
+}
+
+/* ── 2. Stickers ───────────────────────────────────────────────────────────────
+   Como los de una laptop: fondo de color, borde claro de "troquel", sombra dura y un
+   giro leve. Al pasar el cursor se enderezan y suben, como si los despegaras.
+   El giro sale de `--sticker-giro` (el componente lo alterna para que no queden
+   todos torcidos igual) y los colores de una de las variantes `sticker-*`.
+   La transición cae bajo la regla de `prefers-reduced-motion` del final. */
+@utility sticker {
+  --sticker-fondo: var(--brand-light);
+  --sticker-tinta: var(--brand-ink);
+  position: relative;
+  border-radius: var(--radius-xl);
+  background-color: var(--sticker-fondo);
+  color: var(--sticker-tinta);
+  border: 3px solid var(--brand-light);
+  box-shadow: 0.35rem 0.4rem 0 0 color-mix(in oklab, var(--brand-ink) 70%, transparent);
+  rotate: var(--sticker-giro, -2deg);
+  transition:
+    rotate 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    translate 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s ease;
+
+  &:hover {
+    rotate: 0deg;
+    translate: 0 -4px;
+    box-shadow: 0.5rem 0.65rem 0 0 color-mix(in oklab, var(--brand-ink) 70%, transparent);
+  }
+}
+
+/* Variantes de color. Texto tinta sobre los claros, claro sobre los oscuros: los
+   cuatro pasan AA. El borde de troquel es SIEMPRE claro, como un sticker de verdad. */
+@utility sticker-claro {
+  --sticker-fondo: var(--brand-light);
+  --sticker-tinta: var(--brand-ink);
+}
+@utility sticker-verde {
+  --sticker-fondo: var(--brand-green);
+  --sticker-tinta: var(--brand-ink);
+}
+@utility sticker-morado {
+  --sticker-fondo: var(--brand-purple);
+  --sticker-tinta: var(--brand-light);
+}
+@utility sticker-rojo {
+  --sticker-fondo: var(--brand-red);
+  --sticker-tinta: var(--brand-ink);
+}
+@utility sticker-azul {
+  --sticker-fondo: var(--brand-blue);
+  --sticker-tinta: var(--brand-ink);
+}
+
+/* Sticker chico, para etiquetas en línea (tipo de evento, "Ya fue"). Mismo lenguaje,
+   sin la sombra grande ni el hover: va dentro de texto y no tiene que llamar la
+   atención más que el título al que acompaña. */
+@utility etiqueta-sticker {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--brand-light);
+  background-color: var(--sticker-fondo, var(--brand-light));
+  color: var(--sticker-tinta, var(--brand-ink));
+  box-shadow: 0.15rem 0.2rem 0 0 color-mix(in oklab, var(--brand-ink) 70%, transparent);
+  rotate: var(--sticker-giro, -2deg);
+}
+
+/* ── 3. Bloque de color ────────────────────────────────────────────────────────
+   Una sección entera en morado plano. Es la ruptura deliberada del fondo tinta: con
+   halos en todas partes la página se vuelve una niebla uniforme, y un bloque macizo
+   es lo que la hace sentirse póster. Uno por página como máximo, o deja de romper.
+   Texto claro: ~4.6:1 sobre el morado, AA para texto normal. */
+@utility bloque-morado {
+  background-color: var(--brand-purple);
+  color: var(--brand-light);
+}
+
+/* Botón para usar ENCIMA de un bloque de color, donde `btn-brand` (que es morado) se
+   perdería. Tinta con sombra dura: el mismo lenguaje impreso que las barras. */
+@utility btn-tinta {
+  background-color: var(--brand-ink);
+  color: var(--brand-light);
+  box-shadow: 0.3rem 0.35rem 0 0 color-mix(in oklab, var(--brand-ink) 45%, transparent);
+  transition:
+    translate 0.25s ease,
+    box-shadow 0.25s ease;
+
+  &:hover {
+    translate: -2px -2px;
+    box-shadow: 0.45rem 0.55rem 0 0 color-mix(in oklab, var(--brand-ink) 45%, transparent);
+  }
+}
+
+/* Subrayado de rotulador detrás de una palabra clave. Para resaltar SIN cambiar el
+   color del texto. El color sale de `--marcador` (por defecto, el verde de energía,
+   que es exactamente su rol en las piezas: la frase que remata). */
+@utility marcador {
+  background-image: linear-gradient(
+    transparent 58%,
+    color-mix(in oklab, var(--marcador, var(--brand-green)) 55%, transparent) 58%,
+    color-mix(in oklab, var(--marcador, var(--brand-green)) 55%, transparent) 92%,
+    transparent 92%
+  );
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding-inline: 0.1em;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
    Entrada al cargar (solo para la portada)
    ══════════════════════════════════════════════════════════════════════════════ */
 
@@ -491,6 +632,145 @@
   }
   50% {
     background-position: 100% 50%;
+  }
+}
+
+/* ── agenda ── */
+
+/* Botón de acción repetida sobre el fondo tinta («Inscribirme» en cada evento). Claro
+   con sombra dura morada: el lenguaje impreso de las barras y los stickers. No es
+   `btn-brand` porque ese es EL botón de la página (uno o dos por pantalla); repetido en
+   cada fila, su degradado con halo convertía la lista en una fila de neones. Tampoco
+   `btn-tinta`, que es para encima de un bloque de color y sobre tinta desaparece. */
+@utility btn-sombra {
+  background-color: var(--brand-light);
+  color: var(--brand-ink);
+  box-shadow: 0.25rem 0.3rem 0 0 var(--brand-purple);
+  transition:
+    translate 0.25s ease,
+    box-shadow 0.25s ease;
+
+  &:hover {
+    translate: -2px -2px;
+    box-shadow: 0.4rem 0.5rem 0 0 var(--brand-purple);
+  }
+}
+
+/* ── pie-y-extras ──────────────────────────────────────────────────────────────
+   El huevo de pascua del código Konami (↑↑↓↓←→←→BA). components/konami.tsx pone
+   `data-konami` en <html> unos segundos; la escena la monta components/konami-escena.tsx
+   y TODO lo que se ve sale de acá. Mientras el atributo no está, la escena no pinta nada
+   ni ocupa sitio: es una capa fija, transparente y que no recibe clics. */
+@utility konami-escena {
+  position: fixed;
+  inset: 0;
+  /* Por encima del header (z-50): es un momento, no tiene que competir con nada. */
+  z-index: 70;
+  pointer-events: none;
+  /* Bugle entra y sale por fuera de la pantalla. Sin esto, su caja a medio salir
+     crearía scroll horizontal mientras cruza. */
+  overflow: hidden;
+}
+
+/* Bugle corriendo. Arranca entero fuera por la izquierda (-100% de su propio ancho) y
+   termina entero fuera por la derecha (100vw). `display: none` mientras no toca: así la
+   imagen, que es perezosa, ni se descarga hasta que alguien se sabe el código. */
+@utility konami-bugle {
+  display: none;
+  position: absolute;
+  left: 0;
+  bottom: 4vh;
+  width: clamp(10rem, 30vw, 24rem);
+  translate: -100% 0;
+
+  [data-konami] & {
+    display: block;
+    animation: hwd-konami-cruce 2.6s cubic-bezier(0.45, 0.05, 0.4, 1) 0.15s both;
+  }
+}
+
+/* El trote: un saltito arriba y abajo mientras cruza, en un elemento aparte para no
+   pelearse con el `translate` del cruce. */
+@utility konami-trote {
+  [data-konami] & {
+    animation: hwd-konami-trote 0.32s ease-in-out infinite alternate;
+  }
+}
+
+/* La zona del mensaje es la región `role="status"`: está SIEMPRE en el árbol (vacía a
+   efectos prácticos) para que el lector de pantalla anuncie el texto cuando aparece. Si
+   la región misma apareciera y desapareciera, muchos lectores no dirían nada. */
+@utility konami-zona {
+  position: absolute;
+  inset-inline: 0;
+  bottom: calc(4vh + clamp(10rem, 30vw, 24rem) * 0.72 + 1.5rem);
+  display: flex;
+  justify-content: center;
+  padding-inline: 1rem;
+}
+
+/* El mensaje: oculto (y fuera del árbol de accesibilidad) hasta que el código se
+   completa. Entra de golpe como un sticker que se pega y se va justo antes de que el
+   componente quite el atributo (5.2 s en total, ver DURACION_MS). */
+@utility konami-mensaje {
+  display: none;
+  max-width: 34rem;
+  text-align: center;
+
+  [data-konami] & {
+    display: block;
+    animation: hwd-konami-mensaje 5.2s ease both;
+  }
+}
+
+@keyframes hwd-konami-cruce {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 100vw 0;
+  }
+}
+
+@keyframes hwd-konami-trote {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -7%;
+  }
+}
+
+@keyframes hwd-konami-mensaje {
+  0% {
+    opacity: 0;
+    scale: 0.6;
+  }
+  6% {
+    opacity: 1;
+    scale: 1.06;
+  }
+  10% {
+    scale: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Con menos movimiento: Bugle no cruza y el mensaje aparece quieto. Hay que decirlo
+   acá y no fiarse de la regla general del final, porque esa acorta las animaciones a
+   0.01 ms y el mensaje saltaría directo a su último fotograma, que es invisible. */
+@media (prefers-reduced-motion: reduce) {
+  [data-konami] .konami-bugle {
+    display: none;
+  }
+
+  [data-konami] .konami-mensaje {
+    animation: none;
   }
 }
 

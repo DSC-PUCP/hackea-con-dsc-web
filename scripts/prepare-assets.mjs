@@ -29,24 +29,46 @@ const trimmed = (file) => sharp(`${SRC}/${file}`).trim({ background: '#00000000'
 
 await mkdir(OUT, { recursive: true })
 
-// ── Bugle, la mascota. Es el heroe visual de la portada. ────────────────────────
-// 1400px de ancho: se muestra a ~700px como maximo, asi que cubre pantallas 2x.
-log(
-  'bugle-cyberpunk.webp',
-  await trimmed('bugle cybperpunk.png')
-    .resize({ width: 1400, withoutEnlargement: true })
-    .webp({ quality: 86, effort: 6 })
-    .toFile(`${OUT}/bugle-cyberpunk.webp`),
-)
+// ── Bugle, la mascota ──────────────────────────────────────────────────────────
+// Todas sus poses viven en `identidad-visual/bugle/`, con nombres sin tildes ni
+// espacios: los generadores de imagenes los entregan con nombres descriptivos en
+// español, y esos acentos se rompen al pasar por git en Windows y por Docker.
+const BUGLE = 'bugle'
 
-// Bugle "de espaldas" con la pantalla holografica. No se usa en la portada todavia;
-// queda listo para la futura seccion de eventos.
+/** Una pose de Bugle, recortada y optimizada. `ancho` es el maximo servido (2x). */
+const poseDeBugle = async (origen, destino, ancho) =>
+  log(
+    destino,
+    await trimmed(`${BUGLE}/${origen}`)
+      .resize({ width: ancho, withoutEnlargement: true })
+      .webp({ quality: 86, effort: 6 })
+      .toFile(`${OUT}/${destino}`),
+  )
+
+// Corriendo: el heroe de la portada. Se muestra a ~700px como maximo.
+await poseDeBugle('bugle-corriendo.png', 'bugle-cyberpunk.webp', 1400)
+// De espaldas con la pantalla holografica: la cabecera de /agenda.
+await poseDeBugle('bugle-hacker.png', 'bugle-hacker.webp', 1200)
+// Señalando hacia la izquierda: apunta al boton del bloque de llamada a la accion.
+await poseDeBugle('bugle-senalando.png', 'bugle-senalando.webp', 1100)
+// Rascandose la cabeza junto a una pantalla roja vacia: la pagina 404.
+await poseDeBugle('bugle-perdido.png', 'bugle-perdido.webp', 1100)
+
+// Asomandose por un borde. El original trae dibujada la arista de la "pared" por la
+// que se asoma: una linea negra vertical de 12px pegada al lado derecho (x ≥ 1082).
+// Se corta ANTES de recortar la transparencia, para que el arte quede con un borde
+// recto que se pueda pegar al canto de un contenedor y parezca salir de detras.
 log(
-  'bugle-hacker.webp',
-  await trimmed('bugle atras.png')
-    .resize({ width: 1200, withoutEnlargement: true })
+  'bugle-asomado.webp',
+  await sharp(
+    await sharp(`${SRC}/${BUGLE}/bugle-asomado.png`)
+      .extract({ left: 0, top: 0, width: 1082, height: 1402 })
+      .toBuffer(),
+  )
+    .trim({ background: '#00000000', threshold: 0 })
+    .resize({ width: 800, withoutEnlargement: true })
     .webp({ quality: 86, effort: 6 })
-    .toFile(`${OUT}/bugle-hacker.webp`),
+    .toFile(`${OUT}/bugle-asomado.webp`),
 )
 
 // ── Logotipo ───────────────────────────────────────────────────────────────────
@@ -151,7 +173,7 @@ const guardarOg = (imagen, destino) =>
     { cx: '66%', cy: '48%', r: '52%', color: PURPURA, opacidad: 0.46 },
   ])
 
-  const bugle = await trimmed('bugle cybperpunk.png')
+  const bugle = await trimmed(`${BUGLE}/bugle-corriendo.png`)
     .resize({ height: 520, withoutEnlargement: true })
     .png()
     .toBuffer({ resolveWithObject: true })
@@ -191,7 +213,7 @@ const guardarOg = (imagen, destino) =>
           font-weight="bold" letter-spacing="7" fill="${VERDE}">PATROCINIO</text>
   </svg>`)
 
-  const bugle = await trimmed('bugle cybperpunk.png')
+  const bugle = await trimmed(`${BUGLE}/bugle-corriendo.png`)
     .resize({ height: 460, withoutEnlargement: true })
     .png()
     .toBuffer({ resolveWithObject: true })

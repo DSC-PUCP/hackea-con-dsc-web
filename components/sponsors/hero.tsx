@@ -63,9 +63,14 @@ export function HeroSponsors({
         <div className="glow-purple animate-breathe parallax-mid absolute top-[-30%] right-[-10%] size-[40rem] max-w-[130vw]" />
         <div className="glow-blue animate-breathe parallax-back absolute top-[-18%] left-[-16%] size-[34rem] max-w-[130vw] [animation-delay:-4s]" />
 
+        {/*
+          El chevron gigante de la portada, en versión contenida: uno solo, recortado
+          por el borde derecho y en un morado apagado. En escritorio ocupa el lado que
+          el texto deja libre; en móvil queda detrás del texto, por eso es tan tenue.
+        */}
         <Chevron
           dir="right"
-          className="parallax-front absolute right-[-3rem] bottom-[-2rem] h-[14rem] w-auto text-brand-purple/[0.035] lg:h-[20rem]"
+          className="parallax-front absolute top-[18%] right-[-7rem] h-[22rem] w-auto text-brand-purple/[0.07] md:right-[-4rem] lg:top-[12%] lg:right-[-2rem] lg:h-[30rem] lg:text-brand-purple/[0.16]"
         />
 
         <div className="bg-brand-noise absolute inset-0" />
@@ -73,17 +78,32 @@ export function HeroSponsors({
 
       {/* ── Contenido ───────────────────────────────────────────────────────── */}
       <div className="mx-auto max-w-6xl px-5 md:px-6">
-        <div className="max-w-3xl">
+        <div className="max-w-4xl">
+          {/*
+            El rótulo enmarcado por los chevrons del logotipo, ❰ rojo y ❱ morado, en vez
+            de una píldora con una viñeta diminuta: es el mismo gesto del wordmark.
+          */}
           {eyebrow ? (
-            <p className="enter inline-flex items-center gap-2.5 rounded-full border border-brand-purple/30 bg-brand-purple/10 px-3.5 py-1.5 font-subtitle text-[0.7rem] font-semibold tracking-[0.22em] text-brand-purple uppercase">
-              <Chevron dir="right" className="h-2.5 w-auto" />
+            <p className="enter inline-flex items-center gap-3 font-subtitle text-xs font-semibold tracking-[0.22em] text-foreground/85 uppercase">
+              <Chevron dir="left" className="h-4 w-auto text-brand-red" />
               {eyebrow}
+              <Chevron dir="right" className="h-4 w-auto text-brand-purple" />
             </p>
           ) : null}
 
+          {/*
+            EL momento `font-poster` de la página, y el único: el título en la letra ancha
+            y en mayúsculas, como el titular de la pieza 2. El resto de títulos de
+            /sponsors va en `font-display`; repetirla le quitaría el peso.
+
+            Las mayúsculas las pone el CSS y no la hoja: el equipo escribe el título
+            normal y, si algún día cambia la tipografía, no hay que reescribirlo.
+            Tamaños medidos con el título actual (~50 caracteres): dos líneas en 1440 y
+            cuatro en 390. Un título bastante más largo pediría bajar un paso.
+          */}
           <h1
             style={{ '--enter-delay': '90ms' } as React.CSSProperties}
-            className="enter mt-7 font-display text-3xl leading-[1.08] font-extrabold tracking-tight text-balance sm:text-4xl lg:text-5xl"
+            className="enter mt-7 font-poster text-[1.6rem] leading-[1.12] font-bold tracking-tight text-balance uppercase sm:text-4xl lg:text-[3.1rem]"
           >
             {titulo}
           </h1>

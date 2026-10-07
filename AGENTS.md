@@ -44,7 +44,7 @@ Este es **el** principio del repo, pedido explícitamente por el dueño del proy
 | Enlaces                   | `lib/site-config.ts` → `links`       | los `null` se ocultan solos en la interfaz                 |
 | Navegación                | `lib/site-config.ts` → `navegacion`  | —                                                          |
 | Datos de secciones        | `lib/site-config.ts`                 | `formatos`, `pilares`, `cintaPalabras`                     |
-| Tipografías               | `app/layout.tsx` + `globals.css`     | 3 variables CSS: `--font-display/-subtitle/-sans`          |
+| Tipografías               | `app/layout.tsx` + `globals.css`     | 4 variables CSS: `--font-display/-subtitle/-sans/-poster`  |
 
 Corolarios prácticos:
 
@@ -91,8 +91,10 @@ bloque `prefers-color-scheme`. No añadas uno.
 ### 2.4 Accesibilidad y movimiento
 
 Todo el movimiento se apaga con `prefers-reduced-motion`; ya está resuelto en
-`globals.css` y en los dos componentes de cliente. Si añades una animación, comprueba
-que caiga bajo esa regla.
+`globals.css` y en los componentes de cliente. Si añades una animación, comprueba que
+caiga bajo esa regla. Ojo con las que tienen que TERMINAR visibles (el mensaje del Konami):
+la regla general las acorta a 0.01 ms y saltan a su último fotograma, así que necesitan su
+propio bloque de `prefers-reduced-motion`, como el de `globals.css`.
 
 Sin JavaScript la página se ve **completa**: las animaciones de aparición solo esconden
 contenido si existe la clase `js` en `<html>` (la pone un script en línea en el
@@ -105,11 +107,14 @@ contenido si existe la clase `js` en `<html>` (la pone un script en línea en el
 ```
 app/
   layout.tsx            tipografías, metadatos, clase `js`, y el ARMAZÓN COMÚN:
-                        header, pie, PointerParallax y ScrollReveal
+                        header, pie, PointerParallax, ScrollReveal y los huevos de
+                        pascua (Konami + KonamiEscena)
   page.tsx              la portada `/`: solo su <main> con Hero + QueEs
   agenda/page.tsx       la agenda `/agenda`: lee la hoja UNA vez y reparte entre las
-                        dos secciones. Tiene estado vacío porque una ruta no se esconde
+                        dos listas, con el aviso del grupo (barra de póster) en medio.
+                        Tiene estado vacío porque una ruta no se esconde
   sponsors/page.tsx     la página de patrocinio `/sponsors`: solo su <main>
+  not-found.tsx         la 404: Bugle perdido, con el «404» puesto encima como texto
   globals.css           SISTEMA DE DISEÑO (colores, utilidades, animaciones)
   sitemap.ts robots.ts  qué indexan los buscadores
   api/health/route.ts   GET /api/health, lo usa el healthcheck de Docker
@@ -117,9 +122,13 @@ app/
 
 components/
   hero.tsx              portada (servidor)
-  que-es.tsx            "Qué es Hack with DSC" (servidor)
+  que-es.tsx            "Qué es Hack with DSC" (servidor): el titular y el lema entre
+                        chevrons gigantes, y monta las tres piezas de portada/
+  portada/              formatos.tsx = las barras de póster que sangran alternando de
+                        lado, con Bugle asomado; pilares.tsx = los stickers;
+                        llamado.tsx = el bloque morado del cierre con Bugle señalando
   sponsors/             las secciones de /sponsors (todas de servidor)
-                        piezas.tsx = Seccion, EncabezadoSeccion, Parrafos, HaloDeFondo
+                        piezas.tsx = Seccion, EncabezadoSeccion, Parrafos
   eventos/              la agenda (servidor). agenda.tsx = lista agrupada por mes; un
                         evento SE DESPLIEGA EN MÓVIL (`<details>` nativo, cero JS) y NO
                         se despliega en escritorio, con las mismas piezas de contenido
@@ -127,9 +136,13 @@ components/
                         la forma se decide POR ROL, no por el total, y todos conservan su
                         enlace a LinkedIn
   site-header.tsx       barra superior (cliente: cambia al hacer scroll)
-  site-footer.tsx       pie
+  site-footer.tsx       pie, rematado por el mural ❰ HACK WITH DSC ❱
   pointer-parallax.tsx  cliente: publica la posición del cursor en variables CSS
   scroll-reveal.tsx     cliente: pone data-visible al entrar en pantalla
+  konami.tsx            cliente: saludo de consola + escucha el código Konami y pone
+                        `data-konami` en <html> unos segundos. No dibuja nada
+  konami-escena.tsx     servidor: Bugle cruzando y el mensaje. Invisible hasta que
+                        existe `data-konami`; lo anima el CSS (bloque pie-y-extras)
   brand/icons.tsx       chevron del logo + iconos macizos de los 3 formatos
   brand/redes.tsx       logotipos de las redes de DSC PUCP, en SVG. Están dibujados a
                         mano porque lucide-react YA NO trae iconos de marca: importar
@@ -166,19 +179,21 @@ internals/              hoja de planificación. INTERNO, fuera de git
 
 ### Componentes de servidor vs. de cliente
 
-Solo hay **tres** componentes de cliente: `site-header`, `pointer-parallax` y
-`scroll-reveal`. Todo el resto es de servidor.
+Solo hay **cuatro** componentes de cliente: `site-header`, `pointer-parallax`,
+`scroll-reveal` y `konami`. Todo el resto es de servidor, incluida la escena del Konami.
 
-El patrón que lo permite: los dos últimos no renderizan nada. Publican estado
-(posición del cursor en variables CSS; atributo `data-visible`) y el CSS decide qué se
-mueve. Así una sección de servidor consigue animación con solo poner `data-reveal`.
+El patrón que lo permite: los tres últimos no renderizan nada. Publican estado
+(posición del cursor en variables CSS; atributo `data-visible`; atributo `data-konami`)
+y el CSS decide qué se mueve. Así una sección de servidor consigue animación con solo
+poner `data-reveal`, y la escena del Konami es HTML de servidor que solo se ve cuando el
+atributo existe.
 
 **Mantén ese patrón.** Antes de añadir `'use client'` a una sección, pregúntate si el
 efecto se puede lograr con una variable CSS o un atributo puesto desde fuera.
 
 ### Añadir una página nueva
 
-Los tres van montados en `app/layout.tsx`, junto con el header y el pie. Así que **una
+Todo eso va montado en `app/layout.tsx`, junto con el header y el pie. Así que **una
 página nueva es solo su `<main>`** — hereda armazón y movimiento sin hacer nada:
 
 ```tsx
@@ -225,17 +240,28 @@ Detalle completo en [`docs/identidad-visual.md`](docs/identidad-visual.md).
 
 - **Colores**: tinta `#0F0D1C` · claro `#F1F1F4` · morado `#813DF5` · azul `#3D90F5` ·
   rojo `#F53D5C` · verde `#64DA2C`. Muestreados de la lámina oficial.
-- **Chevrons** `❰ ❱`: el elemento gráfico más reconocible. Rojo el que abre, morado el
-  que cierra. Úsalos.
-- **Bugle**: la mascota, un ave cyberpunk con capucha. Es el protagonista de la
-  portada. Hay una segunda pose sin usar (`bugle-hacker.webp`) reservada para la futura
-  sección de eventos.
-- **El logotipo se sirve como imagen**, no como texto, porque las tipografías de marca
-  (Agrandir Grand, CY Grotesk STD) son comerciales y no están en el repo. Sustitutos
-  libres en uso: Outfit (títulos), Space Grotesk (subtítulos), Poppins (contenido, es
-  la de marca).
-- **Tono de los textos**: directo, técnico, sin corporativismo y sin exagerar. "Del
-  localhost al link", no "sinergias disruptivas". Español de Perú.
+- **Dirección**: póster de evento / streetwear, intensidad 3 de 5. Titulares cortos con
+  punto, un detalle humano por sección, contención en el resto. Nada del molde
+  «rótulo con chevron → H2 → párrafo gris» repetido en cada sección.
+- **Tres recursos firma** (utilidades de `globals.css`, sección «Recursos firma»):
+  `barra-poster` (la barra de la pieza 2, con sombra maciza, sangrando a un borde),
+  stickers (`sticker`, `sticker-<color>`, `etiqueta-sticker`) y **chevrons** `❰ ❱`
+  gigantes recortados por el borde. Rojo el que abre, morado el que cierra. No añadas un
+  cuarto recurso.
+- **Apoyos**: `bloque-morado` (máximo uno por página), `btn-tinta` (encima de color),
+  `btn-sombra` (acción repetida sobre tinta), `marcador`. Halos, rejilla y grano solo en
+  las cabeceras; el resto, tinta limpia.
+- **Bugle**: la mascota, un ave cyberpunk con capucha. Cinco poses en `public/brand/`,
+  una por página (corriendo, hacker, asomado, señalando, perdido). Se puede recortar
+  contra un borde, nunca en el aire, y siempre mira o señala hacia dentro.
+- **Tipografía**: el logotipo se sirve como imagen, porque las de marca (Agrandir Grand,
+  CY Grotesk STD) son comerciales. Sustitutos libres: Outfit (títulos), Space Grotesk
+  (subtítulos), Poppins (contenido, es la de marca). Y **Unbounded** (`font-poster`)
+  para el póster: **solo en mayúsculas y solo en momentos clave**.
+- **Voz de los textos**: «nosotros», cercana, español de Perú con jerga suave («chamba»,
+  «de una»), humor de programador en dosis de guiño (uno por sección). Directo y técnico:
+  «Del localhost al link», no «sinergias disruptivas». La voz cambia cómo se dice, no qué
+  se promete: los hechos salen de `docs/esencia.md`. `/sponsors` va más sobrio.
 
 ---
 
@@ -256,8 +282,9 @@ Si cambias algo que una de estas describe, actualízala en el mismo cambio.
 ## 7. Estado y siguiente paso
 
 **Hecho**: portada, sección "Qué es", identidad visual aplicada, Docker, nginx, docs, la
-página `/sponsors` con su lectura desde Google Sheets, y la **agenda de eventos** leída de
-su propia hoja.
+página `/sponsors` con su lectura desde Google Sheets, la **agenda de eventos** leída de
+su propia hoja, y el **rediseño de personalidad** (recursos firma, letra de póster, voz
+nueva, más Bugle, 404 propia y huevos de pascua).
 
 Las dos lecturas comparten la **capa de Sheets** (`lib/sheets/`, validación con Zod, caché
 con `unstable_cache` y `/api/revalidate` con lista blanca de etiquetas), descrita en
