@@ -31,7 +31,7 @@ export const site = {
    */
 
   seo: {
-    title: 'Hack with DSC — Del código al siguiente nivel',
+    title: 'Hack with DSC, menos diapositivas, más código que corre',
     description:
       'El programa de talleres, ponencias y hackathons del Developer Student Club PUCP. ' +
       'Aprende haciendo, construye software con estándares profesionales y crece con una ' +
