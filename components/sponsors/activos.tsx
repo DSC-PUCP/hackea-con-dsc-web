@@ -23,6 +23,15 @@ const iconosPorClave = {
   contenido: BookOpen,
 } satisfies Record<IconoActivo, React.ComponentType<{ className?: string }>>
 
+/**
+ * Qué ofrecemos: las piezas con las que se arma una alianza.
+ *
+ * Antes eran tres tarjetas con borde degradado e icono en un cuadradito tintado, el molde
+ * de cualquier landing. Ahora cada pieza es una columna abierta con la barra de póster
+ * de la pieza 2 reducida a filete: el mismo degradado azul → morado → magenta y la misma
+ * sombra maciza, a la escala de una regla. Es el eco más chico posible del recurso
+ * firma, y por eso cabe en una página de traje.
+ */
 export function Activos({ activos, textos }: { activos: Activo[]; textos: Textos }) {
   if (activos.length === 0) return null
 
@@ -31,9 +40,9 @@ export function Activos({ activos, textos }: { activos: Activo[]; textos: Textos
 
   return (
     <Seccion id="que-ofrecemos">
-      <EncabezadoSeccion titulo={titulo} intro={intro} acento="green" />
+      <EncabezadoSeccion titulo={titulo} intro={intro} />
 
-      <ul className="mt-12 grid gap-5 md:grid-cols-3">
+      <ul className="mt-12 grid gap-x-10 gap-y-12 md:grid-cols-3 lg:mt-14">
         {activos.map((activo, indice) => {
           const Icono = activo.icono ? iconosPorClave[activo.icono] : null
 
@@ -42,22 +51,22 @@ export function Activos({ activos, textos }: { activos: Activo[]; textos: Textos
               key={activo.id}
               data-reveal
               style={{ '--reveal-delay': `${indice * 110}ms` } as React.CSSProperties}
-              className="group"
             >
-              <div className="brand-card h-full border border-border p-7 transition-all duration-300 group-hover:-translate-y-1.5 group-hover:border-brand-purple/45">
-                {Icono ? (
-                  <span className="inline-flex size-12 items-center justify-center rounded-xl bg-brand-purple/12">
-                    <Icono className="size-5 text-brand-purple" />
-                  </span>
-                ) : null}
+              {/*
+                La sombra se reescribe con `!` porque la de `barra-poster` (0.6rem) está
+                pensada para una barra de 4rem de alto: bajo un filete de 8px se leería
+                como una segunda barra. Es la misma sombra maciza, a escala.
+              */}
+              <span
+                aria-hidden
+                className="barra-poster block h-2 rounded-full shadow-[0_0.3rem_0_0_var(--barra-sombra)]!"
+              />
 
-                <h3 className="mt-5 font-display text-xl font-bold tracking-tight">
-                  {activo.titulo}
-                </h3>
-                <p className="mt-2.5 leading-relaxed text-muted-foreground">
-                  {activo.descripcion}
-                </p>
-              </div>
+              <h3 className="mt-7 flex items-center gap-3 font-display text-xl font-bold tracking-tight">
+                {Icono ? <Icono className="size-5 shrink-0 text-brand-green" /> : null}
+                {activo.titulo}
+              </h3>
+              <p className="mt-3 leading-relaxed text-muted-foreground">{activo.descripcion}</p>
             </li>
           )
         })}

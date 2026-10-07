@@ -1,8 +1,10 @@
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Outfit, Poppins, Space_Grotesk } from 'next/font/google'
+import { Outfit, Poppins, Space_Grotesk, Unbounded } from 'next/font/google'
 
+import { Konami } from '@/components/konami'
+import { KonamiEscena } from '@/components/konami-escena'
 import { PointerParallax } from '@/components/pointer-parallax'
 import { ScrollReveal } from '@/components/scroll-reveal'
 import { SiteFooter } from '@/components/site-footer'
@@ -23,6 +25,11 @@ import './globals.css'
  *   CY Grotesk STD  →  Space Grotesk  (grotesca técnica, buen carácter en versalitas)
  *   Poppins         →  Poppins        (es la de marca: coincide exacto)
  *
+ * Y una cuarta, que NO sustituye a ninguna: **Unbounded**, la letra "de póster". Es ancha,
+ * como Agrandir Grand en las piezas publicadas, y solo se usa en mayúsculas en los
+ * momentos clave (utilidad `font-poster`). Ponerla en todos los títulos los volvería un
+ * grito continuo: su fuerza depende de que aparezca poco.
+ *
  * El logotipo NO usa ninguna de estas: se sirve como imagen, así que el wordmark de
  * marca siempre sale exacto sin importar la tipografía del texto.
  *
@@ -39,6 +46,12 @@ const outfit = Outfit({
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-space-grotesk',
+  display: 'swap',
+})
+
+const unbounded = Unbounded({
+  subsets: ['latin'],
+  variable: '--font-unbounded',
   display: 'swap',
 })
 
@@ -128,7 +141,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`dark ${outfit.variable} ${spaceGrotesk.variable} ${poppins.variable}`}
+      className={`dark ${outfit.variable} ${spaceGrotesk.variable} ${unbounded.variable} ${poppins.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -171,6 +184,15 @@ export default function RootLayout({
         <SiteHeader />
         {children}
         <SiteFooter />
+
+        {/*
+          Los huevos de pascua: el saludo de consola y el código Konami. `Konami` solo
+          escucha el teclado y pone `data-konami` en <html>; `KonamiEscena` es lo que se
+          ve, y no pinta nada hasta que ese atributo existe. Van en el layout para que el
+          código funcione en cualquier página.
+        */}
+        <Konami />
+        <KonamiEscena />
 
         {/*
           Las DOS analíticas del sitio, y sí, miden lo mismo a propósito:

@@ -1,6 +1,7 @@
 import { assetPublico } from '@/lib/site-url'
 import type { Evento, Persona, Rol } from '@/lib/eventos/types'
 import { iniciales } from '@/lib/iniciales'
+import { copy } from '@/lib/site-config'
 
 /**
  * Quién participa en un evento.
@@ -41,17 +42,11 @@ import { iniciales } from '@/lib/iniciales'
 const DETALLE_HASTA = 3
 
 /**
- * Rótulos por rol, en formas que no marcan género.
- *
- * «Ponentes», «mentores» y «jurados» en masculino plural es lo que dice la hoja —son
- * nombres de columna, y ahí da igual—, pero en la web se lee a personas concretas. Los
- * sustantivos colectivos («Mentoría», «Jurado») dicen lo mismo sin obligar a elegir.
+ * Rótulos por rol. Los textos viven en `copy.agenda.roles` (lib/site-config.ts), en
+ * formas que no marcan género; el `Record<Rol, …>` está para que un rol nuevo en los
+ * tipos sin su rótulo no compile.
  */
-const ROTULOS: Record<Rol, string> = {
-  ponentes: 'A cargo de',
-  mentores: 'Mentoría',
-  jurados: 'Jurado',
-}
+const ROTULOS: Record<Rol, string> = copy.agenda.roles
 
 export function Personas({ evento }: { evento: Evento }) {
   const grupos = (['ponentes', 'mentores', 'jurados'] as const)
@@ -181,7 +176,7 @@ function Enlazada({
       rel="noopener noreferrer"
       // Sin esto, quien navegue saltando de enlace en enlace oye once veces el nombre a
       // secas y no sabe a dónde va ninguno.
-      aria-label={`${persona.nombre} en LinkedIn`}
+      aria-label={`${persona.nombre} ${copy.agenda.enLinkedin}`}
       title={titulo}
       className={className}
     >

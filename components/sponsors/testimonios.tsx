@@ -1,5 +1,6 @@
 import { ArrowUpRight } from 'lucide-react'
 
+import { Chevron } from '@/components/brand/icons'
 import { EncabezadoSeccion, Seccion } from '@/components/sponsors/piezas'
 import { iniciales } from '@/lib/iniciales'
 import { copy } from '@/lib/site-config'
@@ -26,41 +27,49 @@ export function Testimonios({
 }) {
   if (testimonios.length === 0) return null
 
+  /*
+   * Sin tarjetas: cada testimonio es una cita abierta con un filete encima, y la abre
+   * un ❰ rojo grande en vez de unas comillas. El chevron del logotipo es, literalmente,
+   * una comilla angular —las « » del castellano—, así que acá hace de signo tipográfico
+   * y no de adorno. La cita va primero y la firma después, como en una revista: lo que
+   * convence es lo que dijeron, no quién lo dijo.
+   */
   return (
     <Seccion id="testimonios">
-      <EncabezadoSeccion titulo={texto(textos, 'testimonios.titulo')} acento="red" />
+      <EncabezadoSeccion titulo={texto(textos, 'testimonios.titulo')} />
 
-      <ul className="mt-10 grid items-start gap-5 md:grid-cols-2">
+      <ul className="mt-12 grid items-start gap-x-10 gap-y-12 md:grid-cols-2 lg:mt-14 lg:grid-cols-3">
         {testimonios.map((testimonio, indice) => (
           <li
             key={`${testimonio.autor}-${indice}`}
             data-reveal
-            style={{ '--reveal-delay': `${(indice % 2) * 110}ms` } as React.CSSProperties}
+            style={{ '--reveal-delay': `${(indice % 3) * 110}ms` } as React.CSSProperties}
           >
-            <figure className="brand-card h-full border border-border p-7">
-              <figcaption className="flex items-center gap-4">
+            <figure className="border-t border-border pt-7">
+              <Chevron dir="left" className="h-8 w-auto text-brand-red" />
+
+              <Cita texto={testimonio.texto} />
+
+              <figcaption className="mt-6 flex items-center gap-4">
                 <Retrato testimonio={testimonio} />
                 <div className="min-w-0">
                   <p className="font-display font-bold tracking-tight">{testimonio.autor}</p>
                   {testimonio.rol ? (
                     <p className="text-sm text-muted-foreground">{testimonio.rol}</p>
                   ) : null}
+                  {testimonio.url ? (
+                    <a
+                      href={testimonio.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-flex items-center gap-1 font-subtitle text-sm font-semibold text-brand-blue transition-colors hover:text-brand-purple"
+                    >
+                      {copy.sponsors.verPublicacion}
+                      <ArrowUpRight className="size-3.5" aria-hidden />
+                    </a>
+                  ) : null}
                 </div>
               </figcaption>
-
-              <Cita texto={testimonio.texto} />
-
-              {testimonio.url ? (
-                <a
-                  href={testimonio.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-5 inline-flex items-center gap-1.5 font-subtitle text-sm font-semibold text-brand-blue transition-colors hover:text-brand-purple"
-                >
-                  {copy.sponsors.verPublicacion}
-                  <ArrowUpRight className="size-4" aria-hidden />
-                </a>
-              ) : null}
             </figure>
           </li>
         ))}
@@ -78,13 +87,13 @@ export function Testimonios({
  */
 function Cita({ texto }: { texto: string }) {
   if (texto.length <= LARGO_QUE_MERECE_RECORTE) {
-    return <blockquote className="mt-5 leading-relaxed text-muted-foreground">{texto}</blockquote>
+    return <blockquote className="mt-4 text-lg leading-relaxed text-foreground/90">{texto}</blockquote>
   }
 
   return (
-    <details className="mt-5">
+    <details className="mt-4">
       <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-        <span className="texto-recortado leading-relaxed text-muted-foreground">{texto}</span>
+        <span className="texto-recortado text-lg leading-relaxed text-foreground/90">{texto}</span>
         <span className="mt-3 block font-subtitle text-sm font-semibold text-brand-purple">
           <span className="solo-cerrado">{copy.sponsors.verMas}</span>
           <span className="solo-abierto">{copy.sponsors.verMenos}</span>

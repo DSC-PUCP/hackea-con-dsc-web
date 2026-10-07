@@ -44,28 +44,23 @@ const CLASE_ENLACE =
 
 export function SiteFooter() {
   return (
-    <footer className="relative">
-      {/*
-        Filete con el degradado del logotipo: rojo → morado → azul. Hace de separador,
-        así que el pie NO lleva `border-t`: el borde gris se dibujaba encima y dejaba
-        el degradado invisible.
-      */}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-brand-red via-brand-purple to-brand-blue"
-      />
+    /*
+      Sin filete degradado arriba, a propósito. En la portada y en `/sponsors` el pie va
+      pegado al bloque morado del cierre, y una línea roja → morada → azul justo en esa
+      costura se peleaba con el morado macizo. El corte morado → tinta ya separa solo; en
+      las páginas que acaban en tinta, el `border-t` gris hace el trabajo sin hacer ruido.
 
-      <div className="mx-auto max-w-6xl px-5 py-12 md:px-6">
-        <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+      `overflow-hidden` es lo que recorta el mural de abajo por el borde inferior.
+    */
+    <footer className="relative overflow-hidden border-t border-border">
+      <div className="mx-auto max-w-6xl px-5 pt-14 pb-10 md:px-6 md:pt-16">
+        <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <Chevron dir="left" className="h-4 w-auto text-brand-red" />
-              <span className="font-display text-lg font-extrabold tracking-tight">
-                {site.name}
-              </span>
-              <Chevron dir="right" className="h-4 w-auto text-brand-purple" />
-            </div>
-            <p className="mt-3 max-w-sm leading-relaxed text-muted-foreground">
+            {/*
+              El nombre ya no va acá en chiquito: lo dice el mural de abajo, en grande. Lo
+              que abre el pie es la frase, como en el resto de secciones.
+            */}
+            <p className="max-w-sm font-display text-xl leading-snug font-bold text-balance md:text-2xl">
               {copy.footer.tagline}
             </p>
 
@@ -86,7 +81,7 @@ export function SiteFooter() {
               de DSC PUCP» y el ratón lo enseña al pasar por encima.
             */}
             {redes.length > 0 ? (
-              <div className="mt-6">
+              <div className="mt-7">
                 <p className={CLASE_TITULO}>{copy.footer.tituloRedesDsc}</p>
 
                 <ul className="mt-3 flex flex-wrap gap-2">
@@ -98,7 +93,7 @@ export function SiteFooter() {
                         rel="noopener noreferrer"
                         aria-label={copy.footer.redAria(red.label)}
                         title={copy.footer.redAria(red.label)}
-                        className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-brand-purple/45 hover:bg-card hover:text-foreground"
+                        className="flex size-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-brand-purple hover:bg-brand-purple hover:text-brand-light"
                       >
                         <red.Icono className="size-4" />
                       </a>
@@ -155,12 +150,36 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-1.5 border-t border-border pt-6 font-subtitle text-xs text-muted-foreground sm:flex-row sm:justify-between">
+        <div className="mt-12 flex flex-col gap-1.5 border-t border-border pt-6 font-subtitle text-xs text-muted-foreground sm:flex-row sm:justify-between">
           <p>
             {site.organizerFull} · {copy.footer.credito}
           </p>
           <p>© {new Date().getFullYear()} {site.name}</p>
         </div>
+      </div>
+
+      {/*
+        El mural: ❰ HACK WITH DSC ❱ a todo el ancho, recortado por el borde inferior como
+        un letrero pintado que sigue más allá de la pantalla. Es el remate de TODAS las
+        páginas, así que es el sitio donde el recurso firma de los chevrons aparece en su
+        tamaño máximo.
+
+        El tamaño va en `vw` y no en `rem` porque lo que importa es que llene el ancho de
+        lado a lado en cualquier pantalla; el valor está medido para que la línea entera
+        quepa sin saltar. Es `aria-hidden` porque es decoración: el nombre ya lo dice el
+        © de arriba, y un lector de pantalla no gana nada oyéndolo dos veces.
+
+        NO lleva `data-reveal`, y no es descuido: el observador solo dispara cuando el
+        elemento sube por encima del 10% inferior de la pantalla, y el mural, al ser lo
+        último de la página, nunca llega a subir tanto. Se quedaba invisible para siempre.
+      */}
+      <div
+        aria-hidden
+        className="-mb-[0.22em] flex items-center justify-center gap-[0.14em] px-[1.5vw] font-poster text-[8.2vw] leading-none font-black whitespace-nowrap uppercase select-none"
+      >
+        <Chevron dir="left" className="h-[0.78em] w-auto shrink-0 text-brand-red" />
+        <span>{site.name}</span>
+        <Chevron dir="right" className="h-[0.78em] w-auto shrink-0 text-brand-purple" />
       </div>
     </footer>
   )

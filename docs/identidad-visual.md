@@ -75,6 +75,23 @@ que se usan sustitutos libres del mismo género:
 
 Poppins coincide exacto: es la de marca y está en Google Fonts.
 
+Y una cuarta que **no sustituye a ninguna**:
+
+| Rol    | En uso         | Variable CSS    | Utilidad      |
+| ------ | -------------- | --------------- | ------------- |
+| Póster | **Unbounded**  | `--font-poster` | `font-poster` |
+
+Es ancha y pesada, como Agrandir Grand en las piezas publicadas, y es la voz de póster de
+la web. Dos reglas, y las dos importan:
+
+- **Solo en MAYÚSCULAS** (`uppercase`). En minúsculas pierde todo el carácter.
+- **Solo en momentos clave**: el titular de cada página (`/agenda`, `/sponsors`), las
+  frases grandes de la portada («Menos diapositivas…», el lema entre chevrons, el cierre
+  del bloque morado), los nombres de los formatos, el día de cada evento en la agenda, el
+  «404» y el mural del pie. El resto de títulos siguen en `font-display`. Ponerla en todos
+  los encabezados convertiría la página en un grito continuo: su fuerza depende de que
+  aparezca poco.
+
 **Outfit** para títulos: geométrica, altura de x parecida, pesos de 100 a 900. Es el
 sustituto libre más cercano a Agrandir en proporciones y en carácter.
 
@@ -86,6 +103,7 @@ las etiquetas, la cinta que se desplaza).
 
 ```tsx
 <h2 className="font-display font-extrabold tracking-tight">…</h2>   {/* títulos */}
+<h2 className="font-poster font-extrabold uppercase">…</h2>         {/* momento clave */}
 <p className="font-subtitle uppercase tracking-[0.2em]">…</p>       {/* etiquetas */}
 <p>…</p>                                                            {/* contenido: por defecto */}
 ```
@@ -122,30 +140,47 @@ familia, no hay nada más que tocar.
 `❰ ❱` es el elemento gráfico más reconocible de la marca: los dos corchetes angulares que
 abrazan el wordmark. **Rojo el que abre, morado el que cierra.** Siempre en ese orden.
 
-Está dibujado en SVG en [`components/brand/icons.tsx`](../components/brand/icons.tsx) y se
-usa en cuatro sitios:
+Está dibujado en SVG en [`components/brand/icons.tsx`](../components/brand/icons.tsx)
+(componente `Chevron`). Es uno de los tres recursos firma (§5) y trabaja a dos escalas:
 
-- flanqueando el nombre en la barra superior y en el pie;
-- como viñeta de los "eyebrow" de sección;
-- como separador en la cinta que se desplaza;
-- en tamaño mural, al 7% de opacidad, en el fondo de la portada.
+**Protagonista, a color pleno.** Gigante y recortado por el borde de la pantalla, como un
+marco:
 
-Ese último uso es el que hace que la portada se sienta de la marca aunque el logotipo sea
-pequeño.
+- el lema de la portada, «Del apunte al deploy», entre dos chevrons de pantalla entera;
+- el mural `❰ HACK WITH DSC ❱` que remata el pie de **todas** las páginas, recortado por el
+  borde inferior como un letrero que sigue más allá de la pantalla.
+
+**Textura o puntuación, en pequeño:**
+
+- flanqueando el nombre en la barra superior;
+- como viñeta de los enlaces del pie y como separador en la cinta que se desplaza;
+- enmarcando el rótulo de cada mes en la agenda;
+- como comilla de apertura de los testimonios de `/sponsors`;
+- en tamaño mural pero casi invisible (3-16% de opacidad) en el fondo de las cabeceras.
+
+Lo que ya **no** hace: ser la viñeta de un rótulo encima de cada título de sección. Ese
+molde (rótulo con chevron → título → párrafo gris) se repetía en todas las secciones y
+era la mitad de lo que hacía que la web pareciera una plantilla.
 
 ---
 
 ## 4. Bugle
 
 La mascota: un ave cyberpunk con capucha, guantes y botas con luces. Es el protagonista de
-la portada.
+la portada y aparece en cada página, siempre con un gesto que lleva la vista a algo.
 
-| Archivo                          | Pose                                   | Uso                          |
-| -------------------------------- | -------------------------------------- | ---------------------------- |
-| `public/brand/bugle-cyberpunk.webp` | corriendo hacia adelante            | portada                      |
-| `public/brand/bugle-hacker.webp`    | de espaldas, con pantalla holográfica | **sin usar**, reservado para la futura sección de eventos |
+| Archivo (`public/brand/`) | Pose                                                 | Dónde                                    |
+| ------------------------- | ---------------------------------------------------- | ---------------------------------------- |
+| `bugle-cyberpunk.webp`    | corriendo hacia adelante                             | hero de la portada; cruza la pantalla con el código Konami |
+| `bugle-hacker.webp`       | de espaldas, con pantalla holográfica                | cabecera de `/agenda` (espejado, para que mire hacia dentro) |
+| `bugle-asomado.webp`      | asomándose desde el borde DERECHO, cortado en recto  | junto a los formatos de la portada       |
+| `bugle-senalando.webp`    | de pie, señalando hacia la IZQUIERDA del cuadro      | bloque morado de la portada y de `/sponsors`, señalando el botón |
+| `bugle-perdido.webp`      | rascándose la cabeza junto a una pantalla roja vacía | la 404 (el «404» va encima, como texto)   |
 
-En la portada lleva tres cosas encima, y las tres importan:
+En `/sponsors` aparece una sola vez, en el cierre: más le restaría seriedad a una página que
+lee marketing.
+
+En el hero de la portada lleva tres cosas encima, y las tres importan:
 
 - **`bugle-shadow`** — una sombra de color debajo, para que no parezca un sticker pegado
   sobre el fondo.
@@ -157,16 +192,82 @@ propiedad `translate` y se pisarían.
 
 ### Reglas de uso
 
-- Nunca lo recortes, ni le cambies el color, ni lo pongas sobre un fondo claro (está
-  iluminado para oscuro).
-- Siempre con una aura (`glow-purple`) detrás. Sin ella flota sin peso.
+- **Recortarlo sí, pero contra un borde**, nunca en el aire. `bugle-asomado` está cortado en
+  recto para pegarse al canto de la pantalla; `bugle-hacker` se corta por el borde inferior
+  de la cabecera de la agenda, como si estuviera parado detrás. Un Bugle cortado flotando
+  en medio de la página se ve como un error.
+- **Mira o señala hacia dentro**, hacia el texto o el botón, nunca fuera del cuadro. Si el
+  arte mira al lado equivocado, se espeja (`-scale-x-100`).
+- No le cambies el color ni lo pongas sobre un fondo claro: está iluminado para oscuro. El
+  bloque morado le sirve, porque es su color.
+- Sobre tinta, con `bugle-shadow` o un halo detrás; sin eso flota sin peso. Sobre el bloque
+  morado no le hace falta.
 - Es un personaje, no un icono: no lo uses en tamaño pequeño ni como viñeta.
+- Siempre con `next/image` y la ruta pasada por `assetPublico()` (`lib/site-url.ts`).
 
 ---
 
-## 5. Los assets se generan, no se editan
+## 5. Recursos firma
 
-Los originales viven en `identidad-visual/` (PNG de 1080×1350, con transparencia). Lo que
+Lo que hace que la web se lea como Hack with DSC y no como una plantilla oscura más. Salen
+de las piezas publicadas (`referencias/public_1/`) y son **tres**, a propósito: un cuarto
+diluiría a los otros. Todos son utilidades de `app/globals.css` (sección «Recursos firma»).
+
+La dirección es **póster de evento / streetwear, intensidad 3 de 5**: titulares cortos con
+punto, un detalle humano por sección y contención en el resto.
+
+### 5.1 La barra de póster — `barra-poster`
+
+La de la pieza 2 (Talleres / Ponencias / Hackathones): degradado azul → morado → magenta y
+una **sombra maciza desplazada hacia abajo, sin difuminar**. Esa sombra dura es lo que la
+separa de una tarjeta de SaaS: se ve impresa, no flotando.
+
+Sangra hasta un borde de la pantalla, y el componente decide cuál (`rounded-l-none!` o
+`rounded-r-none!`). Del otro lado arranca en la misma vertical que el contenido, con la
+variable `--borde` (ver `components/portada/formatos.tsx`). Se usa en los formatos de la
+portada (alternando de lado, como en la pieza), en el aviso del grupo de `/agenda`, en el
+nivel destacado de `/sponsors` y, en fino, como filete sobre cada beneficio de esa página.
+
+### 5.2 Stickers — `sticker`, `sticker-<color>`, `etiqueta-sticker`
+
+Como los de una laptop: fondo de color, borde claro de troquel, sombra dura y un giro leve
+(`--sticker-giro`, que el componente alterna para que no queden todos torcidos igual). Al
+pasar el cursor se enderezan y suben.
+
+- Variantes: `sticker-claro`, `-verde`, `-morado`, `-rojo`, `-azul`. Las cinco pasan AA.
+- `etiqueta-sticker` es la versión chica, en línea, con las mismas variantes: el tipo de
+  evento en la agenda, el sello «Ya fue», «Muchos eventos» en el bloque morado, el
+  distintivo «Destacado».
+- En la agenda el color dice el tipo: taller azul, ponencia morado, hackathon rojo,
+  networking verde.
+- Los pilares de la portada son stickers grandes, pegados «con desorden a propósito».
+
+### 5.3 Chevrons gigantes
+
+Ver §3.
+
+### Lo que acompaña a los tres
+
+| Utilidad        | Qué es                                                                  |
+| --------------- | ----------------------------------------------------------------------- |
+| `bloque-morado` | Una sección entera en morado plano. **Máximo una por página**, o deja de romper. Hoy: el cierre de la portada y el de `/sponsors` |
+| `btn-tinta`     | Botón tinta con sombra dura, para usar ENCIMA de un bloque o una barra de color, donde `btn-brand` se perdería |
+| `btn-sombra`    | Botón claro con sombra dura morada, para acciones repetidas sobre tinta («Inscribirme» en cada evento). `btn-brand` es EL botón de la página: repetido en cada fila, la lista se volvía una fila de neones |
+| `marcador`      | Rotulador detrás de una palabra (color con `--marcador`). Sobre morado no: se ensucia; ahí va un sticker |
+
+### Menos niebla
+
+Halos, rejilla y grano van **solo en las cabeceras** (los heroes de cada página y la 404).
+El resto de la página es fondo tinta limpio, y el color fuerte llega con bloques sólidos,
+barras y stickers. Con halos en todas las secciones la página entera se volvía una niebla
+uniforme.
+
+---
+
+## 6. Los assets se generan, no se editan
+
+Los originales viven en `identidad-visual/` (PNG con transparencia; las poses de Bugle, en
+`identidad-visual/bugle/`). Lo que
 sirve la web está en `public/brand/` y lo produce
 [`scripts/prepare-assets.mjs`](../scripts/prepare-assets.mjs):
 
@@ -181,6 +282,9 @@ Graph. Resultados:
 | ------------------------------ | ------ |
 | `bugle-cyberpunk.webp`         | 62 KB  |
 | `bugle-hacker.webp`            | 68 KB  |
+| `bugle-asomado.webp`           | 45 KB  |
+| `bugle-senalando.webp`         | 157 KB |
+| `bugle-perdido.webp`           | 206 KB |
 | `logo-hack-with-dsc.webp`      | 28 KB  |
 | `logo-hack-with-dsc-light.webp`| 34 KB  |
 | `noise.png`                    | 22 KB  |
@@ -219,7 +323,7 @@ Es de esas cosas que no se ven pero que se notan si las quitas.
 
 ---
 
-## 6. Movimiento
+## 7. Movimiento
 
 Todo el movimiento vive en `globals.css` y se apaga entero con `prefers-reduced-motion`.
 
@@ -231,6 +335,12 @@ Todo el movimiento vive en `globals.css` y se apaga entero con `prefers-reduced-
 | `animate-cue`     | la flecha "conoce el programa" | 2,2 s  |
 | `animate-flicker` | el punto verde del eyebrow   | 3,2 s    |
 | aparición al scroll | cualquier `[data-reveal]`  | 0,75 s   |
+| hover de stickers | `sticker` (se endereza y sube) | 0,35 s |
+| código Konami     | Bugle cruza la pantalla + mensaje | 5,2 s |
+
+El código Konami (↑↑↓↓←→←→BA) es un huevo de pascua: `components/konami.tsx` pone
+`data-konami` en `<html>` y la escena (`components/konami-escena.tsx`) la anima el CSS. Con
+menos movimiento, Bugle no cruza y el mensaje aparece quieto.
 
 Duraciones largas y desfasadas entre sí a propósito: varias animaciones lentas y fuera de
 fase se leen como una escena viva; varias rápidas y sincronizadas se leen como una página
@@ -242,17 +352,27 @@ celular de gama media.
 
 ---
 
-## 7. Tono de los textos
+## 8. La voz de los textos
 
 Todos los textos están en [`lib/site-config.ts`](../lib/site-config.ts), en `copy`.
 
-- **Directo y técnico.** "Del localhost al link", no "sinergias disruptivas".
-- **Sin exagerar.** Si no está en `docs/esencia.md` o en las piezas publicadas, no se
-  afirma. Nada de números inventados ni de promesas que el programa no hace.
-- **Español de Perú**, tratando de tú.
-- **Concreto.** "Compite, construye y demuestra todo tu talento en equipo" dice algo;
-  "potencia tu perfil profesional" no dice nada.
+- **Habla «nosotros», el equipo.** Cercana, tratando de tú, en español de Perú, con jerga
+  peruana suave («chamba», «de una», «chismear») cuando sale natural.
+- **Humor de programador en dosis de guiño**: uno por sección, no un chiste por frase.
+  «Si solo corre en tu máquina, no cuenta.», «Ni `git log` la encuentra.»
+- **Los títulos son frases cortas con punto, no rótulos.** «Las reglas de la casa.», no
+  «Nuestros pilares». Es la diferencia entre una página que habla y una que enumera.
+- **Directo y técnico.** «Del localhost al link», no «sinergias disruptivas».
+- **Los hechos no se inventan.** Todo lo que se afirma sale de `docs/esencia.md` o de las
+  piezas publicadas. La voz cambia cómo se dice, no qué se promete: nada de números
+  inventados ni de promesas que el programa no hace.
 
-La frase que cierra la sección — *"Un programa. **Muchos eventos.** Una comunidad que crece
-contigo."* — viene textual de la pieza oficial, con "Muchos eventos" en verde, igual que
-ahí. Es el remate de la marca: no la reescribas.
+Las frases de las piezas se pueden **reescribir** para la web, siempre que conserven su
+sentido. El cierre de la portada es el ejemplo: la pieza 2 dice *«Un programa. Muchos
+eventos. Una comunidad que crece contigo.»* y la web dice *«Un programa. **Muchos
+eventos.** Un solo grupo.»*, porque ahí el botón lleva al grupo de WhatsApp. «Muchos
+eventos» sigue en verde, igual que en la pieza.
+
+`/sponsors` es la excepción de tono: la lee una empresa, así que su contenido (que sale de
+la hoja) es sobrio, y de la voz nueva solo lleva la micro-copia y una dosis baja de los
+recursos firma.

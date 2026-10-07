@@ -195,27 +195,45 @@ export const copy = {
       'Bugle, la mascota de DSC PUCP: un ave con capucha y equipo cyberpunk, corriendo hacia adelante.',
   },
 
+  /*
+   * ── La voz de la web ─────────────────────────────────────────────────────────────
+   * Habla "nosotros", el equipo. Cercana, con jerga peruana suave ("chamba", "de una")
+   * y humor de programador en dosis de guiño: uno por sección, no un chiste por frase.
+   * Los HECHOS no se inventan: todo lo que se afirma sale de docs/esencia.md. La voz
+   * cambia cómo se dice, no qué se promete.
+   *
+   * Los títulos son frases cortas con punto y no rótulos ("Las reglas de la casa.", no
+   * "Nuestros pilares"). Es la diferencia entre una página que habla y una que enumera.
+   */
   queEs: {
-    eyebrow: 'Qué es Hack with DSC',
-    titulo: 'Un programa hecho para llevarte al siguiente nivel',
+    /** Rótulo accesible de la sección: ya no hay "eyebrow" visible que la nombre. */
+    aria: 'Qué es Hack with DSC',
+    /** Va en letra de póster, en mayúsculas. Es la frase que abre la portada después del hero. */
+    titulo: 'Menos diapositivas. Más código que corre.',
     intro:
-      'Hack with DSC es el programa de eventos del Developer Student Club PUCP para impulsar ' +
-      'la competitividad y las habilidades técnicas de quienes estudian tecnología o quieren ' +
-      'entrar al desarrollo de software y a la inteligencia artificial. En vez de más clases ' +
-      'teóricas, un ecosistema de aprendizaje y competición enfocado en la práctica intensiva.',
-    cita:
-      'Transformar el interés académico en capacidades técnicas aplicables, llevando a los ' +
-      'estudiantes desde el conocimiento teórico hasta la construcción de software con ' +
-      'estándares profesionales.',
-    formatosTitulo: 'Tres formatos, un mismo objetivo',
-    pilaresEyebrow: 'Sobre qué se construye',
-    pilaresTitulo: 'Cuatro pilares que sostienen todo el programa',
-    /** Cierre de la sección. `destacado` va en verde, igual que en la pieza gráfica. */
+      'Hack with DSC es el programa de eventos del Developer Student Club PUCP: talleres, ' +
+      'ponencias y hackathons para quienes estudian tecnología o quieren meterse al ' +
+      'desarrollo de software y a la IA. La idea es simple: que lo que aprendes en clase ' +
+      'termine siendo algo que funciona, que está en línea y que puedes defender.',
+    /** El lema que va enmarcado entre los dos chevrons gigantes: ❰ … ❱ */
+    marco: 'Del apunte al deploy',
+    formatosTitulo: 'Tres formas de entrarle.',
+    pilaresTitulo: 'Las reglas de la casa.',
+    pilaresIntro: 'Cuatro ideas que sostienen todo el programa. Las vas a escuchar seguido.',
+    /**
+     * Cierre de la sección: va en el bloque morado, en letra de póster. `destacado` se
+     * marca con el rotulador verde. Reescribe la frase de la pieza 2 ("Una comunidad que
+     * crece contigo") para que desemboque en el grupo, que es a donde lleva el botón.
+     */
     cierre: {
       antes: 'Un programa.',
       destacado: 'Muchos eventos.',
-      despues: 'Una comunidad que crece contigo.',
+      despues: 'Un solo grupo.',
     },
+    /** Texto alternativo de Bugle asomándose junto a los formatos. */
+    bugleAsomadoAlt: 'Bugle, la mascota, asomándose por el borde con cara de travesura.',
+    /** Texto alternativo de Bugle señalando el botón del bloque morado. */
+    bugleSenalandoAlt: 'Bugle, la mascota, señalando hacia el botón del grupo de WhatsApp.',
   },
 
   /**
@@ -243,19 +261,23 @@ export const copy = {
      */
     titulo: 'Todo el programa, fecha por fecha',
     intro:
-      'Talleres, ponencias y hackathons del programa. Cada uno se inscribe por su cuenta y ' +
-      'el cupo se llena rápido: abre el que te sirva y guárdate la fecha.',
+      'Talleres, ponencias y hackathons del programa. Cada uno se inscribe por separado y ' +
+      'los cupos vuelan: abre el que te sirva y agéndalo de una.',
+    /** Texto alternativo de Bugle de espaldas con su pantalla holográfica, en la cabecera. */
+    bugleAlt: 'Bugle, la mascota, de espaldas revisando una pantalla holográfica con código.',
 
     /*
      * Los dos rótulos de lista. Dicen QUÉ SUBCONJUNTO es cada una, no de qué va la
      * página: eso ya lo dijo el título de arriba. Son una pareja y hay que leerlos
-     * juntos — «Próximos eventos» / «Ya pasaron».
+     * juntos — «Próximos eventos» / «Ya fueron».
      */
     tituloProximos: 'Próximos eventos',
-    tituloPasados: 'Ya pasaron',
+    tituloPasados: 'Ya fueron',
     introPasados:
-      'Lo que ya ocurrió este ciclo. Las inscripciones están cerradas, pero la página de ' +
-      'cada uno sigue abierta si quieres ver de qué fue.',
+      'Lo que ya pasó este ciclo. Las inscripciones cerraron, pero la página de cada uno ' +
+      'sigue abierta por si quieres chismear de qué fue.',
+    /** Sello tipo sticker que va sobre cada evento pasado. */
+    selloPasado: 'Ya fue',
 
     /** Cuando la hoja todavía no tiene fecha. Ver lib/eventos/fechas.ts. */
     sinFecha: 'Fecha por confirmar',
@@ -278,6 +300,20 @@ export const copy = {
     soloPucp: 'Solo PUCP',
 
     /**
+     * Rótulos de quién participa, por rol. En formas que no marcan género: la hoja dice
+     * «ponentes/mentores/jurados» porque son nombres de columna, pero en la web se lee a
+     * personas concretas, y los colectivos («Mentoría», «Jurado») dicen lo mismo sin
+     * obligar a elegir. Ver components/eventos/personas.tsx.
+     */
+    roles: {
+      ponentes: 'A cargo de',
+      mentores: 'Mentoría',
+      jurados: 'Jurado',
+    },
+    /** `aria-label` del enlace de cada persona: va después de su nombre. */
+    enLinkedin: 'en LinkedIn',
+
+    /**
      * Estado vacío de la página.
      *
      * A diferencia de una sección, una PÁGINA no se puede esconder: si la hoja no se
@@ -294,18 +330,17 @@ export const copy = {
   },
 
   cta: {
-    titulo: 'No te pierdas ninguno',
+    titulo: 'Las fechas caen primero en el grupo.',
     descripcion:
-      'Los talleres, ponencias y hackathons del programa se anuncian primero en el grupo de ' +
-      'la comunidad. Entra ahí y te enteras antes que nadie, incluso antes de que la fecha ' +
-      'llegue a esta página.',
+      'Cada taller, ponencia y hackathon se anuncia en el WhatsApp de la comunidad antes que ' +
+      'en cualquier otro lado, incluida esta web. Entra y no te enteras tarde.',
     boton: 'Entrar al grupo de WhatsApp',
     nota: 'Abierto a toda la comunidad PUCP.',
   },
 
   footer: {
-    tagline: 'Un programa. Muchos eventos. Una comunidad que crece contigo.',
-    credito: 'Hecho con ⚡ por y para estudiantes.',
+    tagline: 'Del apunte al deploy. Talleres, ponencias y hackathons del DSC PUCP.',
+    credito: 'Hecho por y para estudiantes. Sí, también está desplegado.',
     /** Rótulos de las dos columnas de enlaces. Sin ellos se leen como una sola lista. */
     tituloSitio: 'El sitio',
     tituloRedes: 'Comunidad',
@@ -319,6 +354,35 @@ export const copy = {
     redAria: (red: string) => `${red} de DSC PUCP`,
     web: 'Web de DSC PUCP',
     correo: 'Escríbenos',
+  },
+
+  /** La página 404 (`app/not-found.tsx`). Bugle perdido junto a una pantalla roja vacía. */
+  noEncontrado: {
+    /** El "404" no está dibujado en la imagen: los generadores de imagen deforman el texto. */
+    codigo: '404',
+    titulo: 'Bugle buscó esta página por todos lados.',
+    descripcion:
+      'Ni `git log` la encuentra. Puede que el enlace esté mal escrito o que la página se ' +
+      'haya mudado.',
+    volver: 'Volver al inicio',
+    agenda: 'Ver la agenda',
+    bugleAlt: 'Bugle, la mascota, rascándose la cabeza junto a una pantalla roja vacía.',
+  },
+
+  /**
+   * El mensaje para quien abre las herramientas de desarrollo. Es para la gente que más
+   * nos interesa: la que mira cómo está hecho algo. Cada elemento es una línea; después
+   * de la última va el enlace al grupo.
+   */
+  consola: [
+    '❰ Hack with DSC ❱',
+    '¿Inspeccionando el código? Ya eres de los nuestros.',
+    'Los talleres, ponencias y hackathons se anuncian primero en el grupo:',
+  ],
+
+  /** El código Konami (↑↑↓↓←→←→BA): Bugle cruza corriendo la pantalla. */
+  konami: {
+    mensaje: 'Modo hacker activado. Ya te sabías el código, ¿no?',
   },
 
   /**
@@ -361,6 +425,8 @@ export const copy = {
      * Se evita empezar con una «O» suelta: en la tipografía del sitio se lee como un cero.
      */
     escribenos: 'También puedes escribirnos a',
+    /** Texto alternativo de Bugle en el bloque morado del cierre de `/sponsors`. */
+    bugleAlt: 'Bugle, la mascota, señalando hacia el botón para escribirnos.',
   },
 } as const
 
@@ -419,7 +485,9 @@ export const galeriaSponsors = [] as ReadonlyArray<{
 // ═════════════════════════════════════════════════════════════════════════════════
 
 /**
- * Los tres formatos del programa. Salen de la pieza gráfica oficial.
+ * Los tres formatos del programa. Salen de la pieza gráfica oficial (la 2 de
+ * referencias/public_1/): de ahí vienen el título y el `lema`. La `descripcion` es la
+ * versión de la web, reescrita con la voz del sitio.
  *
  * `icon` es el nombre de un icono de components/brand/icons.tsx.
  * `color` es un token de marca; el mapa de clases está en el componente que lo usa.
@@ -429,50 +497,71 @@ export const formatos = [
     id: 'talleres',
     icon: 'chevrons',
     titulo: 'Talleres',
-    descripcion: 'Aprende haciendo, con práctica real y mentoría cercana.',
+    /** La frase corta de la pieza 2. Va como antetítulo. */
+    lema: 'Aprende haciendo',
+    descripcion: 'Laptop abierta desde el minuto uno, y alguien al lado cuando algo se rompe.',
     color: 'blue',
   },
   {
     id: 'ponencias',
     icon: 'star',
     titulo: 'Ponencias',
-    descripcion: 'Conecta con expertos y perspectivas que amplían tu visión.',
+    lema: 'Conecta con expertos',
+    descripcion: 'Gente que ya lo hizo en la industria, contando lo que no viene en el sílabo.',
     color: 'purple',
   },
   {
     id: 'hackathons',
     icon: 'bolt',
     titulo: 'Hackathons',
-    descripcion: 'Compite, construye y demuestra todo tu talento en equipo.',
+    lema: 'Compite en equipo',
+    descripcion:
+      'Un problema, un equipo y el reloj en contra. Al final se presenta algo que corre, ' +
+      'no un PPT.',
     color: 'red',
   },
 ] as const
 
-/** Los pilares estratégicos del programa. Salen de docs/esencia.md. */
+/**
+ * Los pilares estratégicos del programa, como "reglas de la casa". Salen de
+ * docs/esencia.md: `nombre` es el nombre oficial del pilar (va chico, como etiqueta) y
+ * `titulo` es cómo lo diría alguien del equipo en el grupo. El fondo no cambia.
+ *
+ * `color` es la variante de sticker (`sticker-<color>` en globals.css). El mapa de
+ * clases está en el componente, por lo mismo que en `formatos`.
+ */
 export const pilares = [
   {
-    titulo: 'Adopción técnica y uso de IA',
+    nombre: 'Aplicabilidad real',
+    titulo: 'Si solo corre en tu máquina, no cuenta.',
     descripcion:
-      'Uso responsable, técnico y avanzado de IA generativa para acelerar el desarrollo, sin ' +
-      'perder de vista los fundamentos de la ingeniería y una arquitectura sólida.',
+      'Lo que construyes acá se despliega y tiene un link que puedes mandar. Del localhost ' +
+      'al link, que es justo lo que te van a pedir cuando busques chamba.',
+    color: 'claro',
   },
   {
-    titulo: 'Aplicabilidad real',
+    nombre: 'Adopción técnica y uso de IA',
+    titulo: 'Usa IA. Entiende lo que aceptas.',
     descripcion:
-      'Los proyectos no se quedan en localhost: se despliegan, escalan y funcionan. ' +
-      'Exactamente las capacidades que el mercado laboral pide.',
+      'Usamos IA generativa para avanzar más rápido, en serio y sin miedo. Lo que no se ' +
+      'negocia son los fundamentos: tienes que poder explicar cada línea que le aceptaste.',
+    color: 'verde',
   },
   {
-    titulo: 'Comunidad y networking',
+    nombre: 'Comunidad y networking',
+    titulo: 'Llegas por el taller, te quedas por la gente.',
     descripcion:
-      'Una red sólida entre estudiantes, mentores, docentes y aliados del sector ' +
-      'tecnológico y corporativo. Trabajo en equipo y vinculación profesional.',
+      'Estudiantes, mentores, docentes y aliados de la industria en el mismo sitio. Acá ' +
+      'conoces a tu próximo equipo de hackathon y a gente que ya está donde quieres llegar.',
+    color: 'morado',
   },
   {
-    titulo: 'Excelencia y pensamiento crítico',
+    nombre: 'Excelencia y pensamiento crítico',
+    titulo: '“Funciona” no basta.',
     descripcion:
-      'No basta con que el código funcione: cada decisión técnica tiene que venir con un ' +
-      'respaldo lógico y estructurado que puedas defender.',
+      'Cada decisión técnica tiene que tener un porqué que puedas defender frente a un ' +
+      'jurado, un mentor o tu yo de dentro de seis meses.',
+    color: 'azul',
   },
 ] as const
 
@@ -483,7 +572,7 @@ export const cintaPalabras = [
   'Hackathons',
   'Inteligencia Artificial',
   'Arquitectura de software',
-  'Del localhost a producción',
+  'Del localhost al link',
   'Comunidad',
   'Mentoría',
 ] as const
@@ -491,3 +580,4 @@ export const cintaPalabras = [
 export type Formato = (typeof formatos)[number]
 export type Pilar = (typeof pilares)[number]
 export type BrandColor = Formato['color']
+export type ColorDeSticker = Pilar['color']
