@@ -217,7 +217,7 @@ export const copy = {
       'termine siendo algo que funciona, que está en línea y que puedes defender.',
     /** El lema que va enmarcado entre los dos chevrons gigantes: ❰ … ❱ */
     marco: 'Del apunte al deploy',
-    formatosTitulo: 'Tres formas de entrarle.',
+    formatosTitulo: 'Tres formas de entrar',
     pilaresTitulo: 'Las reglas de la casa.',
     pilaresIntro: 'Cuatro ideas que sostienen todo el programa. Las vas a escuchar seguido.',
     /**
@@ -333,9 +333,9 @@ export const copy = {
     titulo: 'Las fechas caen primero en el grupo.',
     descripcion:
       'Cada taller, ponencia y hackathon se anuncia en el WhatsApp de la comunidad antes que ' +
-      'en cualquier otro lado, incluida esta web. Entra y no te enteras tarde.',
+      'en cualquier otro lado, incluida esta web. Entra para enterarte primero.',
     boton: 'Entrar al grupo de WhatsApp',
-    nota: 'Abierto a toda la comunidad PUCP.',
+    nota: 'Abierto a toda la comunidad universitaria',
   },
 
   footer: {
@@ -499,7 +499,7 @@ export const formatos = [
     titulo: 'Talleres',
     /** La frase corta de la pieza 2. Va como antetítulo. */
     lema: 'Aprende haciendo',
-    descripcion: 'Laptop abierta desde el minuto uno, y alguien al lado cuando algo se rompe.',
+    descripcion: 'Laptop abierta desde el minuto uno, con alguien al lado cuando algo se rompe.',
     color: 'blue',
   },
   {
