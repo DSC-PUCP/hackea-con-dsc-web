@@ -73,7 +73,8 @@ export const links = {
    * El grupo de la comunidad. Es de **Hack with DSC**: es a donde apuntan todos los CTA
    * del sitio y donde se anuncian los eventos antes que en ninguna parte.
    */
-  whatsapp: 'https://chat.whatsapp.com/JLlbloJJKu8L8O7vLLGFHn?s=cl&p=a&mlu=0&ilr=0',
+  whatsapp: 'https://chat.whatsapp.com/LTtmzZ6LkEpFYX6w6OFhrJ?s=cl&p=a&mlu=4&ilr=4',
+  instagram: 'https://www.instagram.com/dsc.pucp/',  
 } as const
 
 /**
@@ -339,8 +340,8 @@ export const copy = {
   },
 
   footer: {
-    tagline: 'Del apunte al deploy. Talleres, ponencias y hackathons del DSC PUCP.',
-    credito: 'Hecho por y para estudiantes. Sí, también está desplegado.',
+    tagline: 'Del apunte al deploy Talleres, ponencias y hackathons del DSC PUCP',
+    credito: 'Hecho con ⚡ por y para estudiantes',
     /** Rótulos de las dos columnas de enlaces. Sin ellos se leen como una sola lista. */
     tituloSitio: 'El sitio',
     tituloRedes: 'Comunidad',
