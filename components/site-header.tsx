@@ -13,7 +13,7 @@ import { copy, links, navegacion, site } from '@/lib/site-config'
  * las dos ramas del render (ancla y ruta) y tienen que verse idénticas.
  */
 const CLASE_ENLACE =
-  'font-subtitle text-sm text-muted-foreground transition-colors hover:text-foreground'
+  'inline-flex min-h-10 items-center whitespace-nowrap font-subtitle text-sm text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:text-brand-green'
 
 /**
  * Barra superior. La comparten todas las páginas (se monta en app/layout.tsx).
@@ -52,76 +52,45 @@ export function SiteHeader() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
         conScroll
-          ? 'border-b border-border bg-background/80 backdrop-blur-xl'
-          : 'border-b border-transparent bg-transparent'
+          ? 'border-border bg-background/95 backdrop-blur-xl'
+          : 'border-border/50 bg-background/90 md:border-transparent md:bg-transparent'
       }`}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-3.5 sm:gap-4 md:px-6">
+      {/* Dos filas en móvil mantienen los tres destinos visibles sin desplegable ni JS. */}
+      <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 px-5 pt-3 md:flex md:justify-between md:gap-7 md:px-6 md:py-3.5">
         <LogoEnlace destino={enLaPortada ? '#top' : '/'} />
-
-        <div className="flex shrink-0 items-center gap-2.5 sm:gap-5">
-          {/*
-            Visible SIEMPRE, también en móvil. Antes era `hidden sm:flex` y por debajo de
-            640 px el menú entero desaparecía: `/sponsors` no tenía ni un solo camino
-            desde un teléfono. Cabe porque el menú son solo rutas — ver `navegacion` en
-            lib/site-config.ts.
-
-            Los espacios se aprietan en móvil (`gap-3.5` en vez de `gap-5`) desde que el
-            menú tiene DOS entradas. A 390 px la barra va justa: logotipo + Agenda +
-            Patrocinio + el botón de WhatsApp en modo icono. Si hiciera falta una tercera
-            entrada, ya no cabe y toca desplegable — no se resuelve apretando más.
-          */}
-          <nav aria-label="Páginas del sitio" className="flex items-center gap-3.5 sm:gap-5">
-            {navegacion.map((enlace) => {
-              const destino = resolverDestino(enlace.href)
-
-              /*
-               * Las anclas puras se dejan como `<a>`, para que el salto sea scroll suave
-               * en el mismo documento. Lo que navega pasa por `next/link`, que además es
-               * quien aplica el `basePath` cuando el sitio vive en un subdirectorio: un
-               * `<a href="/sponsors">` a pelo apuntaría a la raíz del dominio compartido
-               * y daría 404. Ver `assetPublico()` en lib/site-url.ts, mismo problema.
-               */
-              return destino.startsWith('#') ? (
-                <a key={enlace.href} href={destino} className={CLASE_ENLACE}>
-                  {enlace.label}
-                </a>
-              ) : (
-                <Link
-                  key={enlace.href}
-                  href={destino}
-                  // Marca en qué página estás. Con dos entradas importa más que con una:
-                  // «Agenda» y «Patrocinio» juntas sin ninguna señal de cuál está activa
-                  // dejan al lector sin saber dónde aterrizó.
-                  aria-current={ruta === destino ? 'page' : undefined}
-                  className={CLASE_ENLACE}
-                >
-                  {enlace.label}
-                </Link>
-              )
-            })}
-          </nav>
-
-          <a
-            href={links.whatsapp}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={copy.header.comunidadAria}
-            title={copy.header.comunidadAria}
-            className="btn-brand inline-flex items-center gap-2 rounded-full px-2.5 py-2 font-subtitle text-sm font-semibold sm:px-4"
-          >
-            <MessageCircle className="size-4" aria-hidden />
-            {/*
-              El texto solo desde 640 px. En móvil el botón se queda con el icono: no es
-              una pérdida real, porque el hero trae el mismo destino en un botón grande a
-              media pantalla de distancia, y es lo que libera el sitio que necesita el
-              menú. La etiqueta accesible la pone el `aria-label` de arriba.
-            */}
-            <span className="hidden sm:inline">{copy.hero.ctaPrimario}</span>
-          </a>
-        </div>
+        <a
+          href={links.whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={copy.header.comunidadAria}
+          title={copy.header.comunidadAria}
+          className="btn-brand col-start-2 row-start-1 inline-flex min-h-10 items-center gap-2 rounded-full px-3 py-2 font-subtitle text-xs font-semibold md:order-last md:px-4 md:text-sm"
+        >
+          <MessageCircle className="size-4" aria-hidden />
+          <span>{copy.header.comunidadLabel}</span>
+        </a>
+        <nav aria-label={copy.header.navegacionAria} className="col-span-2 mt-2 flex min-w-0 items-center justify-between gap-3 border-t border-border py-2 md:mt-0 md:ml-auto md:justify-end md:gap-6 md:border-t-0 md:py-0">
+          {navegacion.map((enlace) => {
+            const destino = resolverDestino(enlace.href)
+            return destino.startsWith('#') ? (
+              <a key={enlace.href} href={destino} className={CLASE_ENLACE}>
+                {enlace.label}
+              </a>
+            ) : (
+              <Link
+                key={enlace.href}
+                href={destino}
+                aria-current={ruta === destino ? 'page' : undefined}
+                className={CLASE_ENLACE}
+              >
+                {enlace.label}
+              </Link>
+            )
+          })}
+        </nav>
       </div>
     </header>
   )
@@ -158,7 +127,7 @@ function LogoEnlace({ destino }: { destino: string }) {
   )
 
   const clase = 'group flex min-w-0 items-center gap-2'
-  const etiqueta = `${site.name} — ir al inicio`
+  const etiqueta = `${site.name} — ${copy.header.inicioAria}`
 
   return destino.startsWith('#') ? (
     <a href={destino} aria-label={etiqueta} className={clase}>

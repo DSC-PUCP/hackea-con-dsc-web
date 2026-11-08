@@ -134,7 +134,7 @@
   html {
     scroll-behavior: smooth;
     /* Compensa el header sticky cuando se navega con anclas (#que-es). */
-    scroll-padding-top: 5.5rem;
+    scroll-padding-top: 8rem;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -153,6 +153,48 @@
   :focus-visible {
     outline: 2px solid var(--brand-purple);
     outline-offset: 3px;
+  }
+}
+
+/* La segunda fila de navegación solo ocupa espacio en teléfonos. */
+@media (min-width: 768px) {
+  html {
+    scroll-padding-top: 5.5rem;
+  }
+}
+
+/* Las fotos son documento del evento: un borde limpio las integra sin añadir halos. */
+@utility recap-foto {
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--surface-1);
+}
+
+/* El premio se reconoce por un filete y un sticker, manteniendo el catálogo único. */
+@utility recap-proyecto {
+  border: 1px solid var(--border);
+  border-top: 3px solid color-mix(in oklab, var(--brand-purple) 50%, var(--brand-ink));
+  border-radius: 0.8rem;
+  background: var(--surface-1);
+}
+
+@utility recap-proyecto-principal {
+  border-top-color: var(--brand-green);
+  background: color-mix(in oklab, var(--brand-ink) 94%, var(--brand-green));
+}
+
+/* Las columnas conservan encuadres y proporciones: ninguna persona se corta por llenar una celda. */
+@utility recap-mosaico {
+  column-count: 2;
+  column-gap: 1rem;
+
+  & > li {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    column-count: 3;
   }
 }
 

@@ -15,7 +15,8 @@ y termine en el grupo de WhatsApp de la comunidad.
 
 El "por qué" del programa está en [`docs/esencia.md`](docs/esencia.md). Es la fuente
 para cualquier texto sobre propósito, pilares o tono. **No inventes claims** sobre el
-programa: si no está en `esencia.md` o en las piezas de `referencias/`, no va.
+programa: propósito y promesas salen de `esencia.md` o de `referencias/`; los resultados
+históricos salen del informe final y las evidencias curadas autorizadas del recap (§2.2).
 
 Stack: **Next.js 16** (App Router) · **React 19** · **Tailwind CSS v4** ·
 **TypeScript** · **pnpm** · **Docker** sobre una MV Ubuntu Server con nginx.
@@ -56,16 +57,17 @@ Corolarios prácticos:
 - Única excepción documentada: `themeColor` en `lib/site-config.ts`, porque los
   metadatos de Next no pueden leer una variable CSS. Está comentada como tal.
 
-### 2.2 No se muestra NADA de eventos todavía
+### 2.2 Agenda en Sheets; recap histórico curado en el repo
 
-El sitio tiene **tres páginas**: la portada (`Hero` + **"Qué es Hack with DSC"**, y nada
-más), `/agenda` y `/sponsors`.
+El sitio tiene **cuatro páginas**: la portada (cierre de 2026, resultados y explicación
+del programa), `/dsc-hack` (recap del evento final), `/agenda` y `/sponsors`
+(resultados y futuras colaboraciones).
 
 La agenda estuvo un tiempo en la portada y se movió a su propia ruta: es contenido que
 crece y que se comparte por su cuenta, y al final de la portada obligaba a recorrer el
 hero entero para ver una fecha.
 
-**Ninguna fecha, ponente ni enlace de inscripción se escribe en el repo.** Todo eso sale
+**Ninguna fecha, ponente ni enlace de inscripción de la agenda se escribe en el repo.** Todo eso sale
 de Google Sheets (`lib/eventos/`). Ojo con la diferencia entre sección y página: una
 sección puede devolver `null` y desaparecer, **una ruta no**. `/agenda` sigue existiendo
 aunque la hoja esté caída, así que tiene estado vacío propio con salida al WhatsApp.
@@ -74,6 +76,13 @@ Motivo: publicar fechas que después cambian quema credibilidad, y el programa s
 planifica en una hoja de cálculo que se mueve todas las semanas. Por eso tampoco hay
 contenido de reserva para eventos, al contrario que en `/sponsors` — una fecha vieja es
 peor que ninguna fecha.
+
+**Excepción aprobada: `/dsc-hack` es un recap histórico sin CMS.** Sus diez proyectos,
+premios, integrantes/LinkedIn, cifras y medios públicos curados viven en
+`lib/site-config.ts`; los assets optimizados, en `public/dsc-hack/`. Las fuentes y notas
+de curación quedan en `internals/dsc-hack/`, fuera del frontend. Extraer solo campos
+públicos explícitos: los correos, evaluaciones y anotaciones internas nunca se publican.
+Patrocinio conserva su CMS de Sheets y su reserva coherente con el cierre de 2026.
 
 `internals/` contiene la hoja de planificación real. **Es material interno**: sirve
 para entender la forma de los datos, no para copiar contenido a la web. Está en
@@ -113,6 +122,7 @@ app/
   agenda/page.tsx       la agenda `/agenda`: lee la hoja UNA vez y reparte entre las
                         dos listas, con el aviso del grupo (barra de póster) en medio.
                         Tiene estado vacío porque una ruta no se esconde
+  dsc-hack/page.tsx     recap histórico 2026: proyectos, resultados, fotos y reconocimiento
   sponsors/page.tsx     la página de patrocinio `/sponsors`: solo su <main>
   not-found.tsx         la 404: Bugle perdido, con el «404» puesto encima como texto
   globals.css           SISTEMA DE DISEÑO (colores, utilidades, animaciones)
@@ -135,6 +145,8 @@ components/
                         definidas una sola vez. personas.tsx = ponentes/mentores/jurados;
                         la forma se decide POR ROL, no por el total, y todos conservan su
                         enlace a LinkedIn
+  dsc-hack/             recap de servidor: catálogo único y medios opcionales; las fotos
+                        se amplían con enlaces nativos, sin depender de JavaScript
   site-header.tsx       barra superior (cliente: cambia al hacer scroll)
   site-footer.tsx       pie, rematado por el mural ❰ HACK WITH DSC ❱
   pointer-parallax.tsx  cliente: publica la posición del cursor en variables CSS
@@ -222,6 +234,7 @@ pnpm dev            # desarrollo en http://localhost:3000
 pnpm build          # build de producción (falla si hay errores de tipos: es a propósito)
 pnpm typecheck      # solo tipos, más rápido que el build
 pnpm assets         # regenerar public/brand/ y las dos imágenes de Open Graph
+pnpm assets:recap   # regenerar Open Graph del recap desde su foto y contenido público
 pnpm probar:sponsors             # lee la hoja de patrocinio e imprime qué entró y qué no
 pnpm probar:sponsors volcado.json  # lo mismo, contra un volcado, sin credenciales
 ```
@@ -299,9 +312,12 @@ Dos diferencias deliberadas entre ambas, y las dos están razonadas en el códig
   `lib/eventos/esquemas.ts` siga construyendo los objetos campo por campo: **nunca metas
   un `...fila` ahí**, o las columnas internas de la hoja acabarían en el navegador.
 
-**Pendiente**: llenar la pestaña `Info Personas (Web)` (hoy está vacía, así que las
-tarjetas salen sin ponentes), la hoja de estilos `@media print` de `/sponsors` (§3.0.2 de
-`docs/arquitectura.md`) y las fotos de la galería.
+**Cierre 2026**: `/dsc-hack` conserva diez proyectos curados, integrantes/perfiles,
+reconocimientos y fotos. Portada y patrocinio reflejan los resultados del programa;
+patrocinio mantiene CMS y reserva con modalidades abiertas de colaboración.
+
+**Pendiente**: completar los perfiles que falten en `Info Personas (Web)` y la hoja de
+estilos `@media print` de `/sponsors` (§3.0.2 de `docs/arquitectura.md`).
 
 ---
 

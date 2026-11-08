@@ -101,6 +101,9 @@ deploy/              configuración del servidor
 En Next.js moderno la estructura de carpetas de `app/` **es** el mapa de rutas:
 
 - `app/page.tsx` → `/` (la portada)
+- `app/dsc-hack/page.tsx` → `/dsc-hack` (recap de la edición 2026)
+- `app/agenda/page.tsx` → `/agenda` (contenido de Sheets)
+- `app/sponsors/page.tsx` → `/sponsors` (colaboraciones, contenido de Sheets)
 - `app/api/health/route.ts` → `/api/health`
 - si creáramos `app/eventos/page.tsx` → `/eventos`
 
@@ -131,11 +134,12 @@ Un componente solo necesita ejecutarse **en el navegador** si tiene que reaccion
 algo que pasa ahí: un clic, la posición del cursor, el scroll. Esos llevan
 `'use client'` en la primera línea.
 
-En este proyecto solo hay **tres** componentes de cliente:
+El contenido se renderiza en el servidor. Los componentes de cliente se reservan a interacciones:
 
-- `site-header.tsx` — cambia de aspecto al hacer scroll
+- `site-header.tsx` — navegación y aspecto al hacer scroll
 - `pointer-parallax.tsx` — sigue el cursor
 - `scroll-reveal.tsx` — detecta qué entró en pantalla
+- `konami.tsx` — escucha el código del huevo de pascua
 
 Todo lo demás es de servidor, incluida la portada completa con todas sus animaciones.
 
@@ -326,6 +330,21 @@ Son estáticas y comiteadas a propósito: WhatsApp y LinkedIn cachean la vista p
 forma muy agresiva, así que una imagen generada al vuelo produce previsualizaciones
 desincronizadas. Si hay que corregir una, lo único fiable es **renombrar el archivo**.
 
+La foto y los textos de la vista previa de DSC HACK salen del mismo contenido que su
+página. Para regenerarla después de un cambio:
+
+```bash
+pnpm assets:recap
+```
+
+Las fotos del evento están en `public/dsc-hack/`, ya orientadas y convertidas a WebP.
+Conserva los originales y las notas de selección en el archivo interno; sirve solo las
+versiones optimizadas. En `lib/site-config.ts`, `recapDscHack` reúne proyectos y fotos.
+Cada integrante conserva su nombre aunque no tenga LinkedIn, y cada ficha muestra solo
+los recursos disponibles. Para añadir una foto o video a un proyecto, usa su campo
+opcional `medios` con el contrato de `lib/dsc-hack/types.ts`: foto con alt/encuadre,
+o video con portada y descripción (y subtítulos para entrevistas).
+
 > **Por qué así y no dejar que Next optimice las imágenes**: al pre-generarlas, el
 > servidor no necesita la librería `sharp` en producción. Una pieza menos que instalar y
 > que se pueda romper en la MV. El detalle está en `next.config.mjs`.
@@ -381,5 +400,5 @@ Luego abres un Pull Request en GitHub y alguien lo revisa antes de que entre a `
 - [ ] Se ve bien en móvil (F12 → icono de celular en el navegador)
 - [ ] No metí ningún color suelto: cero `#hex` fuera de `globals.css`
 - [ ] No metí ningún texto suelto: está en `lib/site-config.ts`
-- [ ] No añadí nada de eventos (fechas, ponentes, agenda) — ver `AGENTS.md` §2.2
+- [ ] La agenda sigue leyendo Sheets; el recap histórico solo publica campos curados — ver `AGENTS.md` §2.2
 - [ ] Si toqué algo que la documentación describe, actualicé la documentación

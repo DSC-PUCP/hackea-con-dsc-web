@@ -28,6 +28,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
+      url: `${urlDelSitio}/dsc-hack`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.9,
+    },
+    {
       url: `${urlDelSitio}/agenda`,
       lastModified: new Date(),
       // La que más cambia del sitio: cada evento nuevo en la hoja la altera, y eso pasa

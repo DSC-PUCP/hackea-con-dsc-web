@@ -1,8 +1,9 @@
-import { ArrowDown, MessageCircle } from 'lucide-react'
+import { ArrowDown, ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 import { Chevron } from '@/components/brand/icons'
-import { cintaPalabras, copy, links, site } from '@/lib/site-config'
+import { cintaPalabras, copy, resultadosPrograma, site } from '@/lib/site-config'
 import { assetPublico } from '@/lib/site-url'
 
 /**
@@ -27,7 +28,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative isolate flex min-h-[100svh] flex-col justify-center overflow-hidden pt-28 pb-0 lg:pt-24"
+      className="relative isolate flex min-h-[100svh] flex-col justify-center overflow-hidden pt-36 pb-0 md:pt-28 lg:pt-24"
     >
       {/* ── Fondo ───────────────────────────────────────────────────────────── */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
@@ -106,28 +107,37 @@ export function Hero() {
 
           <div
             style={{ '--enter-delay': '340ms' } as React.CSSProperties}
-            className="enter mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center lg:justify-start"
+            className="enter mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center lg:justify-start"
           >
-            <a
-              href={links.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-brand inline-flex items-center justify-center gap-2.5 rounded-full px-7 py-3.5 font-subtitle text-base font-semibold"
+            <Link
+              href="/dsc-hack"
+              className="btn-brand inline-flex shrink-0 items-center justify-center gap-2.5 rounded-full px-5 py-3.5 font-subtitle text-base font-semibold whitespace-nowrap"
             >
-              <MessageCircle className="size-5" aria-hidden />
+              <ArrowUpRight className="size-5 shrink-0" aria-hidden />
               {copy.hero.ctaPrimario}
-            </a>
+            </Link>
 
             <a
               href="#que-es"
-              className="group inline-flex items-center justify-center gap-2.5 rounded-full border border-input bg-card/50 px-7 py-3.5 font-subtitle text-base font-semibold backdrop-blur-sm transition-colors hover:border-brand-purple/50 hover:bg-card"
+              className="group inline-flex shrink-0 items-center justify-center gap-2.5 rounded-full border border-input bg-card/50 px-5 py-3.5 font-subtitle text-base font-semibold whitespace-nowrap backdrop-blur-sm transition-colors hover:border-brand-purple/50 hover:bg-card"
             >
               {copy.hero.ctaSecundario}
               <ArrowDown
-                className="size-4 transition-transform duration-300 group-hover:translate-y-0.5"
+                className="size-4 shrink-0 transition-transform duration-300 group-hover:translate-y-0.5"
                 aria-hidden
               />
             </a>
+          </div>
+          <div className="enter mx-auto mt-9 max-w-xl border-t border-border pt-5 text-left lg:mx-0">
+            <dl aria-label={copy.hero.resultadosAria} className="grid grid-cols-3 gap-4">
+              {resultadosPrograma.map((resultado) => (
+                <div key={resultado.etiqueta} className="flex flex-col">
+                  <dt className="order-2 mt-1 font-subtitle text-[0.65rem] leading-snug text-muted-foreground sm:text-xs">{resultado.etiqueta}</dt>
+                  <dd className="order-1 font-display text-3xl font-extrabold tracking-tight">{resultado.valor}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-3 text-[0.6rem] leading-relaxed text-muted-foreground sm:text-[0.65rem]">{copy.hero.resultadosNota}</p>
           </div>
         </div>
 

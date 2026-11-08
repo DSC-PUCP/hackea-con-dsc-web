@@ -7,12 +7,14 @@ Google Sheets —`/sponsors` o `/agenda`—, la §3 es tu documento.
 
 ## 1. Estado actual
 
-**Dos páginas**, las dos pre-generadas:
+**Cuatro páginas**, pre-generadas:
 
 | Ruta | Qué es | De dónde sale su contenido |
 | --- | --- | --- |
-| `/` | La portada: `Hero` + "Qué es Hack with DSC" | del repo (`lib/site-config.ts`) |
-| `/sponsors` | La página de patrocinio, que sustituye al deck de ventas | de Google Sheets, con respaldo en el repo |
+| `/` | Cierre de 2026, resultados y explicación del programa | del repo (`lib/site-config.ts`) |
+| `/dsc-hack` | Recap histórico del evento final, con proyectos y fotos | del repo (`lib/site-config.ts`), sin CMS |
+| `/agenda` | Agenda del programa | de Google Sheets, sin contenido de reserva |
+| `/sponsors` | Resultados y futuras colaboraciones | de Google Sheets, con respaldo en el repo |
 
 ```
 Navegador
@@ -98,8 +100,8 @@ encaja con el requisito central del proyecto: **los colores existen en un solo l
 bloque `:root` de `globals.css`, y todo lo demás se deriva con `color-mix()`. Cambiar los
 6 tokens de marca repinta el sitio entero.
 
-**Solo tres componentes de cliente.** `site-header`, `pointer-parallax` y `scroll-reveal`.
-Los dos últimos no renderizan nada: publican estado (posición del cursor en variables CSS;
+**Movimiento separado del contenido.** `site-header` controla la navegación y el scroll;
+`pointer-parallax`, `scroll-reveal` y `konami` no renderizan nada: publican estado (posición del cursor en variables CSS;
 un atributo `data-visible`) y el CSS decide qué se mueve. Así toda la portada, con sus
 animaciones, sigue siendo un componente de servidor. Es el patrón que hay que mantener.
 
@@ -122,14 +124,14 @@ pnpm instalados: solo Docker.
 Bugle está iluminado para oscuro. En un tema claro habría que recalibrar toda la paleta
 para un resultado peor. Un solo set de tokens, sin `prefers-color-scheme`.
 
-### Por qué los eventos no se escriben en el repo
+### Por qué la agenda se lee de Sheets
 
 Decisión de producto, no limitación técnica. El programa se planifica en una hoja de
 cálculo que se mueve cada semana: fechas tentativas, lugares por confirmar, ponentes sin
 cerrar. Publicar eso y luego cambiarlo quema credibilidad, y mantenerlo a mano en el
 código garantiza que se desincronice.
 
-Así que la web solo dice de eventos lo que puede decir leyendo la hoja. Nada de fechas
+Así que la agenda solo dice de eventos lo que puede decir leyendo la hoja. Nada de fechas
 cableadas, y **nada de contenido de reserva** para la agenda: si la hoja no se puede leer,
 la lista no se pinta. Una fecha vieja es peor que ninguna fecha, y el canal de anuncios de
 respaldo sigue siendo el grupo de WhatsApp, que es a donde apuntan todos los CTA.
@@ -144,6 +146,23 @@ Lo que sí es incierto y **no se publica** es el lugar: la hoja lo guarda como r
 interna («Pabellón V o A o donde sea») porque eso se decide tarde y se actualiza mejor en
 la propia página de Luma del evento. La web da nombre, tipo, cuándo, de qué va, quién
 participa y el botón para inscribirse.
+
+### Recap histórico de DSC HACK
+
+Al cerrar la edición 2026, el recap se publica en `/dsc-hack` con contenido curado y
+estable en `lib/site-config.ts`. Es la excepción aprobada a la regla de eventos:
+la agenda sigue leyendo Sheets. Los proyectos aparecen una sola vez, con sus premios,
+integrantes y recursos públicos verificados; no se importan hojas ni notas privadas.
+Las fuentes y la conciliación quedan en `internals/dsc-hack/`, ignorado por Git y Docker.
+
+Las fotos se sirven optimizadas desde `public/dsc-hack/`. Los medios de proyectos son
+opcionales: añadir una foto o video no exige duplicar la ficha ni deja huecos cuando falta.
+Las cifras del programa se usan en portada y patrocinio; las del evento final, en su
+recap. Las inscripciones aprobadas se rotulan como tales, sin convertirlas en asistencia.
+
+Patrocinio conserva lector, esquemas y caché. Las pestañas `Niveles` y `Beneficios`
+representan modalidades abiertas de colaboración, con alcance sujeto a coordinación;
+el nombre técnico de las pestañas se conserva para mantener el contrato del CMS.
 
 ---
 
@@ -252,8 +271,9 @@ fondo blanco, son de baja resolución y ese enlace puede desaparecer cualquier d
   el servidor: ocultar header, pie y CTAs, forzar fondo claro, `break-inside: avoid` en
   las tarjetas de nivel y mostrar el correo de contacto en el pie impreso. Cero
   JavaScript.
-- **Fotos de ediciones anteriores**: la galería existe y está vacía. Se llena agregando
-  archivos a `public/sponsors/` y entradas a `galeriaSponsors` en `lib/site-config.ts`.
+
+La galería de patrocinio usa tres referencias a las fotos curadas de DSC HACK 2026,
+definidas una sola vez en `site-config.ts` y servidas desde `public/dsc-hack/`.
 
 ### 3.1 El problema (eventos)
 
