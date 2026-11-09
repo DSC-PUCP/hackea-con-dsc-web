@@ -15,7 +15,7 @@ import { contactoDsc, copy, links, navegacionPie, redesDsc, site } from '@/lib/s
  * Se filtran las que estén en `null`: mientras no exista una, no aparece su enlace.
  */
 const comunidad = [
-  { url: links.whatsapp, label: copy.hero.ctaPrimario, Icono: MessageCircle },
+  { url: links.whatsapp, label: copy.footer.whatsapp, Icono: MessageCircle },
   { url: contactoDsc.web, label: copy.footer.web, Icono: Globe },
   { url: `mailto:${contactoDsc.correo}`, label: copy.footer.correo, Icono: Mail },
 ].filter((enlace): enlace is typeof enlace & { url: string } => Boolean(enlace.url))

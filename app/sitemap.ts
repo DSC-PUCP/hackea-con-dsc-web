@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 
+import { organizacion } from '@/lib/site-config'
 import { urlDelSitio } from '@/lib/site-url'
 
 /**
@@ -20,12 +21,24 @@ import { urlDelSitio } from '@/lib/site-url'
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
+      url: `${urlDelSitio}${organizacion.ruta}`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.7,
+    },
+    {
       url: urlDelSitio,
       // Se evalúa al compilar, así que refleja la fecha del último despliegue. Es lo que
       // se quiere: un sitemap que dice "cambié" cada vez que de verdad se publicó algo.
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 1,
+    },
+    {
+      url: `${urlDelSitio}/dsc-hack`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.9,
     },
     {
       url: `${urlDelSitio}/agenda`,

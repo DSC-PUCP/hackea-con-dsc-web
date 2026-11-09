@@ -299,20 +299,35 @@ el resultado.
 
 ### Las imágenes de Open Graph
 
-Es lo que se ve cuando alguien comparte un link por WhatsApp. Hay **una por página**:
+Es lo que se ve cuando alguien comparte un link por WhatsApp. Estas son las
+previsualizaciones específicas; Agenda conserva la del programa:
 
 | Archivo | Ruta | Cómo se distingue |
 | --- | --- | --- |
 | `public/og.jpg` | `/` | halos azul + rojo + morado |
 | `public/og-sponsors.jpg` | `/sponsors` | halos morado + verde, y el rótulo «PATROCINIO» |
+| `public/og-dsc-hack-2026.jpg` | `/dsc-hack` | foto del cierre, panel tinta y edición 2026 |
+| `public/og-organizacion.jpg` | `/organizacion` | foto del staff, panel tinta y rótulo «EL EQUIPO» |
 
-Las dos se componen con el logotipo y con Bugle sobre el degradado de marca. El wordmark
+Las de portada y patrocinio se componen con el logotipo y con Bugle sobre el degradado de marca. El wordmark
 va **como imagen**, no como texto, así que no dependen de las tipografías comerciales.
 
 La única excepción es el rótulo «PATROCINIO» de la segunda, que sí es texto renderizado
 con una pila de fuentes genéricas: es una palabra en versalitas, hace falta para que las
 dos previsualizaciones no se confundan en el mismo chat, y como el JPEG se comitea, el
 resultado no depende de qué fuentes tenga la máquina que corra `pnpm assets`.
+
+El recap combina la marca con fotos reales de DSC HACK. Su imagen social se regenera
+con `pnpm assets:recap` (`scripts/prepare-recap-og.mjs`): lee los seis tokens de CSS y
+la foto/textos públicos de `site-config.ts`, para conservar una sola fuente de verdad.
+Los originales y el manifiesto de procedencia quedan internos; los WebP optimizados,
+sin metadatos EXIF, viven en `public/dsc-hack/`.
+
+Organización reutiliza la foto curada del staff, sin presentarla como el equipo completo.
+Su imagen social se regenera con `pnpm assets:organizacion` y conserva la foto entera.
+En la página, las menciones especiales tienen superficie tinta y borde morado; el resto
+del equipo usa fichas compactas separadas por filetes. No suma un bloque morado a la
+portada: el acceso es una sección sobre tinta, después del llamado a la comunidad.
 
 ### El grano
 
@@ -363,15 +378,15 @@ Todos los textos están en [`lib/site-config.ts`](../lib/site-config.ts), en `co
 - **Los títulos son frases cortas con punto, no rótulos.** «Las reglas de la casa.», no
   «Nuestros pilares». Es la diferencia entre una página que habla y una que enumera.
 - **Directo y técnico.** «Del localhost al link», no «sinergias disruptivas».
-- **Los hechos no se inventan.** Todo lo que se afirma sale de `docs/esencia.md` o de las
-  piezas publicadas. La voz cambia cómo se dice, no qué se promete: nada de números
-  inventados ni de promesas que el programa no hace.
+- **Los hechos no se inventan.** El propósito sale de `docs/esencia.md` o de las
+  piezas publicadas. Los resultados históricos de 2026 salen del informe final y las
+  evidencias curadas autorizadas. La voz cambia cómo se dice, no qué se promete.
 
 Las frases de las piezas se pueden **reescribir** para la web, siempre que conserven su
 sentido. El cierre de la portada es el ejemplo: la pieza 2 dice *«Un programa. Muchos
 eventos. Una comunidad que crece contigo.»* y la web dice *«Un programa. **Muchos
-eventos.** Un solo grupo.»*, porque ahí el botón lleva al grupo de WhatsApp. «Muchos
-eventos» sigue en verde, igual que en la pieza.
+eventos.** Una comunidad.»*, porque el cierre lleva al grupo general de DSC PUCP.
+«Muchos eventos» sigue en verde, igual que en la pieza.
 
 `/sponsors` es la excepción de tono: la lee una empresa, así que su contenido (que sale de
 la hoja) es sobrio, y de la voz nueva solo lleva la micro-copia y una dosis baja de los

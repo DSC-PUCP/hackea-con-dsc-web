@@ -8,9 +8,47 @@
  * El equivalente para COLOR y tipografía es el bloque `:root` de `app/globals.css`
  * (6 tokens de marca). Ver docs/identidad-visual.md.
  *
- * Lo que NO va acá: la información de los eventos (fechas, ponentes, lugares). Eso
- * se leerá desde Google Sheets. Ver docs/arquitectura.md y lib/eventos/types.ts.
+ * La agenda se lee desde Google Sheets. El recap histórico de DSC HACK es la
+ * excepción aprobada: sus campos públicos curados se conservan acá.
  */
+
+import type { FotoRecap, ProyectoRecap } from './dsc-hack/types.ts'
+
+/** Reseñas históricas públicas por ID. La pertenencia y las identidades las decide Sheets. */
+export const aportesOrganizacion: Record<string, { aporte: string; reconocimiento?: string }> = {
+  GIANO: { aporte: 'Coordinación del programa', reconocimiento: 'Por impulsar el programa y acompañar al equipo de principio a fin.' },
+  PAMELA: { aporte: 'Organización y diseño', reconocimiento: 'Por unirse tanto en organización como en diseño para darle forma al programa.' },
+  FABI: { aporte: 'Organización y comunicación', reconocimiento: 'Por su iniciativa de apoyar cuando más se necesitaba.' },
+  LEO: { aporte: 'Organización y apoyo al equipo', reconocimiento: 'Por estar presente y sumar al equipo a lo largo del programa.' },
+  SAMIR: { aporte: 'Organización y difusión', reconocimiento: 'Por impulsar varios eventos.' },
+  FABIOLA: { aporte: 'Organización, diseño y difusión', reconocimiento: 'Por sumar desde la organización, la diligencia y el trabajo en equipo.' },
+  ANGIE: { aporte: 'Organización y comunicación', reconocimiento: 'Por su dedicación a la organización y a mantener conectada a la comunidad.' },
+  PIERO: { aporte: 'Organización y comunicación', reconocimiento: 'Por su compromiso y buena chamba en los encuentros y su comunicación.' },
+  MATIAS_RIOS: { aporte: 'Fotografía' },
+  KEYLA_BRAVO: { aporte: 'Apoyo logístico' },
+  LEANDRO: { aporte: 'Apoyo en los encuentros' },
+  FERNANDO: { aporte: 'Desarrollo web y apoyo en los encuentros' },
+  BRYCE_HUAQUI: { aporte: 'Apoyo y difusión' },
+  FREDJUN: { aporte: 'Organización y logística' },
+  CARLOS_ESTRADA: { aporte: 'Diseño y difusión' },
+  ARIADNA_FLOREZ: { aporte: 'Contenido audiovisual' },
+  BREIGZON_TURCO: { aporte: 'Apoyo en alianzas' },
+  FREDY: { aporte: 'Apoyo en alianzas' },
+  ANTHONY_LOPEZ: { aporte: 'Apoyo y difusión' },
+  ALVARO_VARGAS: { aporte: 'Apoyo logístico' },
+  RENZO_AREVALO: { aporte: 'Apoyo en los encuentros' },
+  REBECA_HINOJOSA: { aporte: 'Apoyo y diseño' },
+  VICTOR_CCOSI: { aporte: 'Apoyo al equipo' },
+}
+
+export const seoOrganizacion = {
+  title: 'Organización — Hack with DSC 2026',
+  description: 'Conoce al equipo de voluntarios de DSC PUCP que hizo posible Hack with DSC 2026 y los aportes que sumaron al programa.',
+  ogImagen: '/og-organizacion.jpg',
+  ogAlt: 'El equipo detrás de Hack with DSC 2026.',
+  ogTitulo: 'EL EQUIPO',
+  ogResumen: 'La chamba tiene nombres.',
+} as const
 
 // ═════════════════════════════════════════════════════════════════════════════════
 // Identidad del sitio
@@ -31,11 +69,10 @@ export const site = {
    */
 
   seo: {
-    title: 'Hack with DSC, menos diapositivas, más código que corre',
+    title: 'Hack with DSC 2026 — del apunte al deploy',
     description:
-      'El programa de talleres, ponencias y hackathons del Developer Student Club PUCP. ' +
-      'Aprende haciendo, construye software con estándares profesionales y crece con una ' +
-      'comunidad de estudiantes que codean.',
+      'La edición 2026 de Hack with DSC cerró con 15 actividades. Conoce el programa ' +
+      'del Developer Student Club PUCP y los diez proyectos del cierre DSC HACK.',
     keywords: [
       'Hack with DSC',
       'DSC PUCP',
@@ -61,20 +98,20 @@ export const themeColor = '#0f0d1c'
 /**
  * Enlaces externos.
  *
- * `whatsapp` es el canal principal: es donde se anuncian los eventos, así que es el
- * destino de todas las llamadas a la acción mientras la web todavía no muestre la
- * agenda.
+ * `whatsapp` lleva a la comunidad general de DSC PUCP: nuevas iniciativas y
+ * conversaciones de tecnología, también después del cierre de Hack with DSC.
  *
  * Los que están en `null` se ocultan solos en la interfaz — no hay que borrar código
  * para esconderlos. Cuando exista la cuenta, se pone la URL acá y aparece.
  */
 export const links = {
   /**
-   * El grupo de la comunidad. Es de **Hack with DSC**: es a donde apuntan todos los CTA
-   * del sitio y donde se anuncian los eventos antes que en ninguna parte.
+   * El grupo pertenece a DSC PUCP; no es un canal exclusivo de este programa.
    */
-  whatsapp: 'https://chat.whatsapp.com/LTtmzZ6LkEpFYX6w6OFhrJ?s=cl&p=a&mlu=4&ilr=4',
+  whatsapp: 'https://chat.whatsapp.com/LwF4C37MnBkIpm9J0QIjar?s=cl&p=a&iam=2',
   instagram: 'https://www.instagram.com/dsc.pucp/',  
+  albumDscHack: 'https://drive.google.com/drive/folders/1XI__YFq7X1q7BP6rehrd776fevibuvg1',
+  anuncioNttData: 'https://www.linkedin.com/feed/update/urn:li:activity:7521394275788591104',
 } as const
 
 /**
@@ -107,43 +144,10 @@ export const contactoDsc = {
 // ═════════════════════════════════════════════════════════════════════════════════
 
 /**
- * Enlaces del menú. Todavía no hay ninguna entrada de eventos a propósito: la web no
- * muestra agenda hasta que la lectura desde Google Sheets esté lista.
- *
- * ── Por qué el menú son SOLO páginas ────────────────────────────────────────────────
- * Antes había también un `#que-es`, y se quitó por dos razones. La primera: no aportaba.
- * La portada tiene exactamente dos secciones, y el hero ya ofrece ese mismo destino dos
- * veces (el botón secundario y la señal de scroll); un enlace de menú a la segunda
- * sección de una página de dos secciones es decoración. La segunda: desde `/sponsors` te
- * navegaba y te soltaba a media portada, saltándose el hero.
- *
- * Que el menú signifique una sola cosa —«sitios a los que puedes ir»— es además lo que
- * permite que quepa en un teléfono sin desplegable. Cuando mezclaba anclas y rutas estaba
- * oculto por debajo de 640 px, y `/sponsors` era inalcanzable desde un móvil.
- *
- * ── El presupuesto de ancho, que ya está gastado ────────────────────────────────────
- * Hoy son DOS entradas, y a 390 px la barra va justa: logotipo + Agenda + Patrocinio + el
- * botón de WhatsApp en modo icono suman algo más de lo que hay. Es una decisión tomada,
- * no un descuido: **se prefiere que el logotipo se recorte** —tiene `min-w-0 truncate`
- * justo para eso, ver components/site-header.tsx— antes que esconder un destino y volver
- * a dejar una página sin camino desde el móvil. El recorte es cosmético; un destino
- * inalcanzable no.
- *
- * Una TERCERA entrada ya no entra, y no se arregla apretando espacios: toca desplegable,
- * con todo lo que eso trae (primer componente de cliente con estado, foco, Escape).
- *
- * Aun así admite los dos tipos de destino, por si algún día hace falta:
- *
- *   · anclas de la portada — `'#que-es'`, SIEMPRE sin la barra inicial. El header le pone
- *     el `/` delante solo cuando hace falta (o sea, cuando no estás en la portada);
- *   · rutas del sitio — `'/sponsors'`, tal cual.
- *
- * La lógica está en `resolverDestino`, dentro de components/site-header.tsx.
+ * Solo Agenda y Patrocinio en el header para conservar una fila también en móvil.
+ * El recap se descubre desde el hero y el pie. Las anclas siguen admitiéndose.
  */
 export const navegacion = [
-  // Primero la agenda: es lo que viene a buscar un estudiante, que es casi todo el
-  // tráfico. Patrocinio lo busca una empresa, y una empresa llega por un enlace directo
-  // que le mandó alguien del equipo, no explorando el menú.
   { href: '/agenda', label: 'Agenda' },
   { href: '/sponsors', label: 'Patrocinio' },
 ] as const
@@ -161,8 +165,10 @@ export const navegacion = [
 export const navegacionPie = [
   { href: '/', label: 'Inicio' },
   { href: '/#que-es', label: 'Qué es' },
+  { href: '/dsc-hack', label: 'DSC HACK' },
   { href: '/agenda', label: 'Agenda' },
   { href: '/sponsors', label: 'Patrocinio' },
+  { href: '/organizacion', label: 'Organización' },
 ] as const
 
 // ═════════════════════════════════════════════════════════════════════════════════
@@ -170,6 +176,28 @@ export const navegacionPie = [
 // ═════════════════════════════════════════════════════════════════════════════════
 
 export const copy = {
+  organizacion: {
+    eyebrow: 'Organización · Hack with DSC 2026',
+    titulo: 'La chamba tiene nombres.',
+    intro: 'Detrás de cada encuentro hubo un equipo de voluntarios de DSC PUCP. ' +
+      'Estas son las personas que hicieron posible Hack with DSC.',
+    fotoPie: 'Parte del equipo organizador en el cierre DSC HACK.',
+    destacadosTitulo: 'Una mención especial.',
+    destacadosIntro: 'Por la dedicación, la iniciativa y la buena chamba a lo largo del programa. Gracias por dar ese extra.',
+    equipoTitulo: 'Cada aporte cuenta.',
+    equipoIntro: 'Organización, diseño, difusión y apoyo en los encuentros. El programa se hizo en equipo.',
+    aporteGeneral: 'Equipo organizador',
+    linkedin: 'LinkedIn',
+    github: 'GitHub',
+    perfilAria: (red: string, nombre: string) => `${red} de ${nombre}`,
+    vacio: 'Estamos preparando las fichas del equipo. Mientras tanto, seguimos en la comunidad de DSC PUCP.',
+    portada: {
+      etiqueta: 'El equipo detrás',
+      titulo: 'Esto se hizo en comunidad.',
+      descripcion: 'Conoce a quienes pusieron tiempo, ideas y chamba para hacer posible Hack with DSC.',
+      boton: 'Conoce al equipo',
+    },
+  },
   header: {
     /**
      * Etiqueta accesible del botón de WhatsApp cuando se queda sin texto.
@@ -178,22 +206,71 @@ export const copy = {
      * son 350, y el logotipo más el enlace del menú más el botón con texto no caben. Sin
      * esta etiqueta, un lector de pantalla anunciaría «enlace» y nada más.
      */
-    comunidadAria: 'Únete a la comunidad en WhatsApp',
+    comunidadAria: 'Únete a la comunidad de DSC PUCP en WhatsApp',
+    comunidadLabel: 'Comunidad',
+    navegacionAria: 'Páginas del sitio',
+    inicioAria: 'ir al inicio',
   },
 
   hero: {
-    eyebrow: 'DSC PUCP presenta',
+    eyebrow: 'Edición 2026 · Cerramos construyendo',
     /** El título se parte en dos: la segunda mitad se pinta con el degradado de marca. */
-    titulo: { normal: 'Del código al', destacado: 'siguiente nivel' },
+    titulo: { normal: 'La edición cerró.', destacado: 'Los proyectos siguen' },
     descripcion:
-      'Talleres, ponencias y hackathons para que dejes de acumular teoría y empieces a ' +
-      'construir software de verdad: desplegado, defendible y hecho en equipo.',
-    ctaPrimario: 'Únete a la comunidad',
-    ctaSecundario: 'Qué es Hack with DSC',
+      'De los talleres al reto final. Así fue Hack with DSC 2026, el programa del ' +
+      'Developer Student Club PUCP. En DSC HACK, diez equipos entregaron sus proyectos. ' +
+      'Conoce lo que construyeron y a quienes lo hicieron posible.',
+    ctaPrimario: 'Ver DSC HACK',
+    ctaSecundario: 'Conoce el programa',
     scrollCue: 'Conoce el programa',
     /** Texto alternativo de la mascota, para lectores de pantalla. */
     bugleAlt:
       'Bugle, la mascota de DSC PUCP: un ave con capucha y equipo cyberpunk, corriendo hacia adelante.',
+    resultadosAria: 'Resultados del programa Hack with DSC 2026',
+    resultadosNota: 'Edición 2026 · Registros de Luma en 14 actividades.',
+  },
+
+  dscHack: {
+    eyebrow: 'Hack with DSC · El gran cierre',
+    titulo: 'DSC HACK',
+    edicion: '2026',
+    lema: 'Lo que construimos juntos.',
+    intro: 'Cerramos el programa con una hackathon: ideas que se convirtieron en proyectos, decisiones que hubo que defender y una comunidad que las hizo posibles.',
+    fecha: 'Final presencial · 31 de octubre de 2026',
+    lugar: 'NTT DATA',
+    ctaProyectos: 'Explorar los proyectos',
+    ctaFotos: 'Así se vivió',
+    fotoPie: 'Código, presentaciones y comunidad para cerrar la edición.',
+    cifrasAria: 'Resultados de DSC HACK 2026',
+    cifrasNota: 'Integrantes de los equipos con entrega.',
+    proyectosTitulo: 'Del reto al proyecto.',
+    proyectosIntro: 'Diez equipos entregaron. Acá están sus propuestas, las personas detrás y los recursos que compartieron.',
+    catalogoEtiqueta: 'Proyectos · DSC HACK 2026',
+    equipo: 'Equipo',
+    integrantes: 'Quienes lo construyeron',
+    linkedinAria: 'en LinkedIn',
+    premios: {
+      primero: { etiqueta: 'Primer lugar', detalle: 'El primer puesto de DSC HACK 2026.' },
+      segundo: { etiqueta: 'Segundo lugar', detalle: 'El segundo puesto de DSC HACK 2026.' },
+      'chaotic-good': { etiqueta: 'Chaotic Good', detalle: 'Un reconocimiento con nombre propio.' },
+    },
+    enlaces: { demo: 'Ver demo', repositorio: 'Código', presentacion: 'Presentación', video: 'Ver video' },
+    enlaceAria: (recurso: string, proyecto: string, equipo: string) => `${recurso}: ${proyecto}, equipo ${equipo}`,
+    galeriaTitulo: 'Fuera del localhost.',
+    galeriaIntro: 'Presentar, responder preguntas, celebrar. Algunos momentos de la final presencial.',
+    album: 'Ver el álbum completo',
+    ampliarFoto: 'Abrir foto en tamaño completo en una nueva pestaña',
+    galeriaAria: 'Fotos de la final de DSC HACK',
+    aliadoEtiqueta: 'Sponsor oficial y sede de la final',
+    aliadoNombre: 'NTT DATA',
+    aliadoTitulo: 'Un espacio para hacerlo real.',
+    aliadoDescripcion: 'Gracias a NTT DATA por acompañar DSC HACK como sponsor oficial y recibir la final presencial en sus instalaciones.',
+    aliadoEnlace: 'Conoce la colaboración',
+    cierreTitulo: 'La edición terminó. La comunidad sigue.',
+    cierreIntro: 'Nos seguimos encontrando en la comunidad de DSC PUCP. Entérate de nuevas iniciativas, comparte lo que construyes y conversa sobre los temas tech que te interesan.',
+    cierreCta: 'Únete a DSC PUCP',
+    bugleAlt: 'Bugle, la mascota de DSC PUCP, señalando hacia el enlace de su comunidad.',
+    subtitulos: 'Español',
   },
 
   /*
@@ -222,19 +299,18 @@ export const copy = {
     pilaresTitulo: 'Las reglas de la casa.',
     pilaresIntro: 'Cuatro ideas que sostienen todo el programa. Las vas a escuchar seguido.',
     /**
-     * Cierre de la sección: va en el bloque morado, en letra de póster. `destacado` se
-     * marca con el rotulador verde. Reescribe la frase de la pieza 2 ("Una comunidad que
-     * crece contigo") para que desemboque en el grupo, que es a donde lleva el botón.
+     * La frase de la pieza 2 desemboca ahora en la comunidad general de DSC PUCP,
+     * que continúa después del cierre del programa.
      */
     cierre: {
       antes: 'Un programa.',
       destacado: 'Muchos eventos.',
-      despues: 'Un solo grupo.',
+      despues: 'Una comunidad.',
     },
     /** Texto alternativo de Bugle asomándose junto a los formatos. */
     bugleAsomadoAlt: 'Bugle, la mascota, asomándose por el borde con cara de travesura.',
     /** Texto alternativo de Bugle señalando el botón del bloque morado. */
-    bugleSenalandoAlt: 'Bugle, la mascota, señalando hacia el botón del grupo de WhatsApp.',
+    bugleSenalandoAlt: 'Bugle, la mascota, señalando hacia el grupo comunitario de DSC PUCP.',
   },
 
   /**
@@ -289,7 +365,7 @@ export const copy = {
     /** Cuando el evento está confirmado pero el enlace de Luma todavía no existe. */
     proximamente: 'Inscripción próximamente',
     /** En los eventos ya pasados, donde «Inscribirme» sería mentira. */
-    verEnLuma: 'Ver en Luma',
+    verEnLuma: 'Ver evento',
     /** `aria-label` del botón de compartir: va seguido de «: <nombre del evento>». */
     compartir: 'Compartir evento',
     /*
@@ -323,23 +399,24 @@ export const copy = {
      * grupo de WhatsApp.
      */
     vacio: {
-      titulo: 'La agenda se está cocinando',
+      titulo: 'No hay eventos publicados.',
       descripcion:
-        'Todavía no hay eventos publicados. Los anunciamos primero en el grupo de la ' +
-        'comunidad, así que entra ahí y te enteras apenas se confirmen.',
+        'Mientras tanto, conoce las nuevas iniciativas de DSC PUCP y conversa sobre ' +
+        'tecnología en su grupo comunitario.',
     },
   },
 
   cta: {
-    titulo: 'Las fechas caen primero en el grupo.',
+    titulo: 'Sigue conectado con DSC PUCP.',
     descripcion:
-      'Cada taller, ponencia y hackathon se anuncia en el WhatsApp de la comunidad antes que ' +
-      'en cualquier otro lado, incluida esta web. Entra para enterarte primero.',
-    boton: 'Entrar al grupo de WhatsApp',
-    nota: 'Abierto a toda la comunidad universitaria',
+      'Cerramos la edición 2026 y seguimos en la comunidad general de DSC PUCP. ' +
+      'Entérate de nuevas iniciativas y conversa sobre cualquier tema tech que te interese.',
+    boton: 'Únete a DSC PUCP',
+    nota: 'El grupo comunitario de DSC PUCP en WhatsApp',
   },
 
   footer: {
+    whatsapp: 'WhatsApp de DSC PUCP',
     tagline: 'Del apunte al deploy Talleres, ponencias y hackathons del DSC PUCP',
     credito: 'Hecho con ⚡ por y para estudiantes',
     /** Rótulos de las dos columnas de enlaces. Sin ellos se leen como una sola lista. */
@@ -378,7 +455,7 @@ export const copy = {
   consola: [
     '❰ Hack with DSC ❱',
     '¿Inspeccionando el código? Ya eres de los nuestros.',
-    'Los talleres, ponencias y hackathons se anuncian primero en el grupo:',
+    'Nuevas iniciativas y conversaciones tech en la comunidad de DSC PUCP:',
   ],
 
   /** El código Konami (↑↑↓↓←→←→BA): Bugle cruza corriendo la pantalla. */
@@ -398,13 +475,13 @@ export const copy = {
   sponsors: {
     /** Etiquetas accesibles de las secciones que no traen título desde la hoja. */
     metricasAria: 'El programa en números',
-    galeriaAria: 'Fotos de ediciones anteriores',
+    galeriaAria: 'Fotos de DSC HACK 2026',
     /**
      * Llamada secundaria de la portada. Hay dos porque la sección a la que baja depende
      * de lo que la hoja tenga publicado: si los niveles todavía están en `mostrable=NO`,
      * esa sección no existe en el documento y el enlace no llevaría a ninguna parte.
      */
-    verNiveles: 'Ver los niveles de alianza',
+    verNiveles: 'Ver formas de colaborar',
     verOferta: 'Ver qué ofrecemos',
     /**
      * Destino preferente del botón secundario: la presentación de Canva con el detalle
@@ -439,12 +516,11 @@ export const copy = {
  * eslogan.
  */
 export const seoSponsors = {
-  title: 'Patrocina Hack with DSC — DSC PUCP',
+  title: 'Colabora con Hack with DSC — DSC PUCP',
   description:
-    'Programa de talleres, ponencias y hackathons del Developer Student Club PUCP. ' +
-    'Formatos de alianza para empresas que quieren estar donde los estudiantes de ' +
-    'tecnología construyen software de verdad.',
-  ogAlt: 'Hack with DSC — información de patrocinio para empresas',
+    'Conoce los resultados de Hack with DSC 2026 y conversemos sobre patrocinio, sede, ' +
+    'mentoría o actividades conjuntas con la comunidad tecnológica estudiantil de DSC PUCP.',
+  ogAlt: 'Hack with DSC — resultados de 2026 y formas de colaborar',
 } as const
 
 /**
@@ -462,24 +538,6 @@ export const seoAgenda = {
     'Developer Student Club PUCP. Fechas, de qué va cada uno y dónde inscribirte.',
   ogAlt: 'Hack with DSC — agenda de talleres, ponencias y hackathons',
 } as const
-
-/**
- * Fotos de ediciones anteriores para la galería de `/sponsors`.
- *
- * Viven en el repo (`public/sponsors/`) y no en la hoja porque son assets, no contenido
- * editable. La lista es explícita —y no un listado del directorio— porque cada foto
- * necesita su texto alternativo, y eso no se deduce de un nombre de archivo.
- *
- * Vacía = la sección no aparece. Es el estado correcto mientras no haya fotos propias:
- * una galería con imágenes de archivo le miente al que la lee.
- */
-export const galeriaSponsors = [] as ReadonlyArray<{
-  /** Ruta dentro de `public/`. Ej.: `/sponsors/vibecoding-2026-01.webp` */
-  src: string
-  alt: string
-  width: number
-  height: number
-}>
 
 // ═════════════════════════════════════════════════════════════════════════════════
 // Datos de la sección "Qué es Hack with DSC"
@@ -582,3 +640,483 @@ export type Formato = (typeof formatos)[number]
 export type Pilar = (typeof pilares)[number]
 export type BrandColor = Formato['color']
 export type ColorDeSticker = Pilar['color']
+
+
+// Resultados y medios públicos del cierre 2026. Las fuentes privadas no se importan.
+export const resultadosPrograma = [
+  { valor: '15', etiqueta: 'actividades en 2026' },
+  { valor: '579', etiqueta: 'personas con inscripción aprobada' },
+  { valor: '803', etiqueta: 'inscripciones aprobadas' },
+] as const
+
+export const seoDscHack = {
+  title: 'DSC HACK 2026 — proyectos y comunidad | Hack with DSC',
+  description: 'Diez equipos entregaron sus proyectos en el cierre de Hack with DSC 2026. Conoce las propuestas, sus integrantes, los reconocimientos y las fotos de la final en NTT DATA.',
+  ogAlt: 'DSC HACK 2026: proyectos, reconocimientos y comunidad en el cierre de Hack with DSC',
+  ogTitulo: 'DSC HACK',
+  ogEdicion: '2026',
+  ogResumen: '10 equipos. Código y comunidad.',
+  ogImagen: '/og-dsc-hack-2026.jpg',
+} as const
+
+const fotosDscHack: FotoRecap[] = [
+  {
+    tipo: 'foto',
+    src: '/dsc-hack/cierre-comunidad.webp',
+    alt: 'Foto de grupo del cierre de DSC HACK, con la bandera de DSC PUCP y el reconocimiento al primer puesto.',
+    width: 1800,
+    height: 1350,
+    encuadre: '50% 65%',
+  },
+  {
+    tipo: 'foto',
+    src: '/dsc-hack/sala-final.webp',
+    alt: 'Participantes con sus laptops frente a la pantalla de Hack with DSC en la sede de NTT DATA.',
+    width: 1400,
+    height: 1050,
+    encuadre: '50% 58%',
+  },
+  {
+    tipo: 'foto',
+    src: '/dsc-hack/presentacion-prototipo.webp',
+    alt: 'Presentación de un prototipo educativo ante el jurado durante la final.',
+    width: 1400,
+    height: 1050,
+    encuadre: '50% 55%',
+  },
+  {
+    tipo: 'foto',
+    src: '/dsc-hack/jurado.webp',
+    alt: 'Jurado siguiendo las presentaciones con sus laptops durante DSC HACK.',
+    width: 1050,
+    height: 1400,
+    encuadre: '50% 60%',
+  },
+  {
+    tipo: 'foto',
+    src: '/dsc-hack/premiacion.webp',
+    alt: 'Entrega del reconocimiento al primer puesto de DSC HACK.',
+    width: 1400,
+    height: 1050,
+    encuadre: '50% 50%',
+  },
+  {
+    tipo: 'foto',
+    src: '/dsc-hack/bandera-comunidad.webp',
+    alt: 'Tres personas sostienen la bandera de DSC PUCP al cierre del evento.',
+    width: 1400,
+    height: 1050,
+    encuadre: '50% 50%',
+  },
+  {
+    tipo: 'foto',
+    src: '/dsc-hack/equipo-organizador.webp',
+    alt: 'Integrantes del staff de DSC HACK muestran sus credenciales al terminar la jornada.',
+    width: 1400,
+    height: 1050,
+    encuadre: '50% 45%',
+  },
+  {
+    tipo: 'foto',
+    src: '/dsc-hack/defensa-proyecto.webp',
+    alt: 'Un equipo responde preguntas junto a la presentación de su proyecto durante la final.',
+    width: 1050,
+    height: 1400,
+    encuadre: '50% 65%',
+  },
+  {
+    tipo: 'foto',
+    src: '/dsc-hack/stickers.webp',
+    alt: 'Stickers de programación y tecnología sobre una laptop durante DSC HACK.',
+    width: 1050,
+    height: 788,
+    encuadre: '50% 50%',
+  },
+]
+
+export const organizacion = {
+  ruta: '/organizacion',
+  foto: fotosDscHack[6],
+} as const
+
+export const recapDscHack: {
+  fotoPortada: FotoRecap
+  fotos: FotoRecap[]
+  proyectos: ProyectoRecap[]
+  cifras: { valor: string; etiqueta: string }[]
+} = {
+  fotoPortada: fotosDscHack[0],
+  fotos: fotosDscHack.slice(1),
+  cifras: [
+    { valor: '10', etiqueta: 'equipos entregaron' },
+    { valor: '39', etiqueta: 'integrantes en esos equipos' },
+    { valor: '3', etiqueta: 'reconocimientos' },
+  ],
+  proyectos: [
+    {
+      id: 'cuyriosos',
+      nombre: 'Cuyriosos',
+      equipo: 'Javalimos',
+      descripcion: 'Convierte materiales de clase en minijuegos para practicar lo aprendido. Los docentes pueden cargar sus contenidos y los estudiantes recorrer retos por curso. Una propuesta para llevar el juego al aula universitaria.',
+      premio: 'primero',
+      integrantes: [
+        {
+          nombre: 'Juan Diego Padilla Vigo',
+          linkedin: 'https://www.linkedin.com/in/jdpadillavigo/',
+        },
+        {
+          nombre: 'Luis Angelo Arce Cabanillas',
+          linkedin: 'https://www.linkedin.com/in/luis-arce-cabanillas-998885296/',
+        },
+        {
+          nombre: 'Sebastian Rodrigo Huerta Felipa',
+          linkedin: 'https://www.linkedin.com/in/sebastian-rodrigo-huerta-felipa-9950942b4/',
+        },
+        {
+          nombre: 'William He Wang',
+          linkedin: 'https://www.linkedin.com/in/william-he-wang-4684b42b3/',
+        },
+      ],
+      enlaces: [
+        {
+          tipo: 'demo',
+          url: 'https://dsc-hack-beige.vercel.app/demo',
+        },
+        {
+          tipo: 'presentacion',
+          url: 'https://docs.google.com/presentation/d/1cHmJb483jH8XuNgnGjkCABSkhjPfJAsJ/edit',
+        },
+      ],
+    },
+    {
+      id: 'skillproof',
+      nombre: 'SkillProof',
+      equipo: 'Assemblers',
+      descripcion: 'Propone demostrar habilidades con desafíos técnicos, entregables y criterios de evaluación. Las evidencias se reúnen en un pasaporte compartible para que estudiantes que buscan su primera oportunidad puedan mostrar lo que saben hacer.',
+      premio: 'segundo',
+      integrantes: [
+        {
+          nombre: 'Mayerli Fátima Lozano Mendoza',
+          linkedin: 'https://www.linkedin.com/in/mayerly-fatima-l-8a6750302/',
+        },
+        {
+          nombre: 'Patrick Alexander Limaylla Torraka',
+          linkedin: 'https://www.linkedin.com/in/patrick-l-b51470406/',
+        },
+        {
+          nombre: 'Sebastian Jhoe Noa Castro',
+          linkedin: 'https://www.linkedin.com/in/jhoe-noa-castro-8b4584335/',
+        },
+        {
+          nombre: 'Nicole Beatriz Alessandra Chang Gonzales',
+          linkedin: 'https://www.linkedin.com/in/nicolechangg/',
+        },
+      ],
+      enlaces: [
+        {
+          tipo: 'demo',
+          url: 'https://skillproof-beta.vercel.app/',
+        },
+        {
+          tipo: 'repositorio',
+          url: 'https://github.com/jnoa-dev/skillproof',
+        },
+      ],
+    },
+    {
+      id: 'cognicheck',
+      nombre: 'CogniCheck',
+      equipo: 'Menu Criollo',
+      descripcion: 'Combina un tutor socrático con evaluaciones antes y después de la práctica. El estudiante recibe preguntas y pistas; luego resuelve sin IA para contrastar qué logró comprender y qué necesita reforzar.',
+      premio: 'chaotic-good',
+      integrantes: [
+        {
+          nombre: 'Amira Paola Rodriguez Almora',
+          linkedin: 'https://www.linkedin.com/in/amirarodriguez/',
+        },
+        {
+          nombre: 'Fernando Jaime Ramírez La Torre',
+          linkedin: 'https://www.linkedin.com/in/fernandoramcsec/',
+        },
+        {
+          nombre: 'Frank Daniel Chuctaya Quispe',
+          linkedin: 'https://www.linkedin.com/in/frank-chuctaya/',
+        },
+        {
+          nombre: 'Lincoln Haziel Chagua Bustos',
+          linkedin: 'https://www.linkedin.com/in/lincoln-haziel-chagua-bustos-87b851302/',
+        },
+      ],
+      enlaces: [
+        {
+          tipo: 'repositorio',
+          url: 'https://github.com/linkold/confidence-to-curiosity',
+        },
+        {
+          tipo: 'presentacion',
+          url: 'https://www.canva.com/design/DAHZm9RSTD4/q8ClCugspE_HXi7HyYwg8A/view',
+        },
+      ],
+    },
+    {
+      id: 'aula-evidente',
+      nombre: 'Aula Evidente',
+      equipo: 'npm-devs',
+      descripcion: 'Propone convertir la grabación de una clase en evidencias que el docente pueda revisar: citas con minuto, preguntas e interacciones organizadas según rúbricas de observación. Su motor Espejo combina video y audio para apoyar la reflexión sobre la práctica docente.',
+      premio: null,
+      integrantes: [
+        {
+          nombre: 'Carlos Vasquez Morales',
+          linkedin: 'https://www.linkedin.com/in/carlos-vasquez-morales-bab701315/',
+        },
+        {
+          nombre: 'Kevin Eduardo Pinto Acevedo',
+          linkedin: 'https://www.linkedin.com/in/kevin-eduardo-pinto-acevedo-19301a306/',
+        },
+        {
+          nombre: 'Liz Elena Estefania Pineda Feijoo',
+          linkedin: 'https://www.linkedin.com/in/liz-pineda-334a28329/',
+        },
+        {
+          nombre: 'Lizbeth Santiago Ayala',
+          linkedin: 'https://www.linkedin.com/in/lizbeth-santiago-ayala-7922643a6/',
+        },
+      ],
+      enlaces: [
+        {
+          tipo: 'demo',
+          url: 'https://aula-evidente.vercel.app/',
+        },
+        {
+          tipo: 'repositorio',
+          url: 'https://github.com/CaVassM/espejo',
+        },
+        {
+          tipo: 'presentacion',
+          url: 'https://www.canva.com/design/DAHZmObsato/3PqFYnl0mS482g-mnxIucQ/view',
+        },
+      ],
+    },
+    {
+      id: 'calibra',
+      nombre: 'CALIBRA',
+      equipo: 'Los testigos de Claude',
+      descripcion: 'Acompaña la preparación para el examen de admisión de San Marcos con práctica y un tutor conversacional. Busca que el estudiante explique su razonamiento, revise errores y compruebe su comprensión al resolver nuevas preguntas.',
+      premio: null,
+      integrantes: [
+        {
+          nombre: 'Axel Smith Mestanza Cabrera',
+          linkedin: 'https://www.linkedin.com/in/axelmestanza/',
+        },
+        {
+          nombre: 'Franco Shigueo Mendoza Higa',
+          linkedin: null,
+        },
+        {
+          nombre: 'Jairo Jhosimar Huaman Choque',
+          linkedin: 'https://www.linkedin.com/in/jairo-jhosimar-huaman-choque-5b2650385/',
+        },
+        {
+          nombre: 'Matias Javier Del Castillo Mendoza',
+          linkedin: 'https://www.linkedin.com/in/bktmatjv/',
+        },
+      ],
+      enlaces: [
+        {
+          tipo: 'demo',
+          url: 'https://calibra-admission-nine.vercel.app/aprender',
+        },
+        {
+          tipo: 'repositorio',
+          url: 'https://github.com/bktmatjv/Calibra-Admision',
+        },
+      ],
+    },
+    {
+      id: 'chaski',
+      nombre: 'Chaski',
+      equipo: 'G - LLM',
+      descripcion: 'Invierte los roles: el estudiante le enseña matemática a un mensajero de IA. Chaski resuelve según lo que entendió y puede equivocarse; quien aprende debe detectar el error y corregirlo. El prototipo incluye una vista para docentes.',
+      premio: null,
+      integrantes: [
+        {
+          nombre: 'Geraldin Nuñez Vasquez',
+          linkedin: 'https://www.linkedin.com/in/geraldin-nunez-vasquez/',
+        },
+        {
+          nombre: 'Luis Alberto Leiva Grajales',
+          linkedin: 'https://www.linkedin.com/in/leivadev/',
+        },
+        {
+          nombre: 'Luis Angel Santiago Ayala',
+          linkedin: 'https://www.linkedin.com/in/luis-santiago-10a02g07m/',
+        },
+        {
+          nombre: 'Miguel Angel Luyo Daga',
+          linkedin: 'https://www.linkedin.com/in/miguelluyodaga/',
+        },
+      ],
+      enlaces: [
+        {
+          tipo: 'demo',
+          url: 'https://chaski.pages.dev/',
+        },
+        {
+          tipo: 'repositorio',
+          url: 'https://github.com/Mian-droid/chaski',
+        },
+        {
+          tipo: 'presentacion',
+          url: 'https://drive.google.com/file/d/1N4xkRRW-_DKVKseXTgJeVaY8V2V9yhlP/view',
+        },
+      ],
+    },
+    {
+      id: 'defiendelo-digpro',
+      nombre: 'Defiéndelo',
+      equipo: 'Digpro',
+      descripcion: 'El estudiante le enseña su propio trabajo a Carlos, un compañero de IA que plantea dudas y comete errores a propósito. La conversación busca que explique sus decisiones con sus palabras y entrega al docente un mapa visual de lo que pudo sustentar.',
+      premio: null,
+      integrantes: [
+        {
+          nombre: 'Andre Jeremie Céspedes Cubas',
+          linkedin: 'https://www.linkedin.com/in/andré-céspedes-1033692b6/',
+        },
+        {
+          nombre: 'Javier Armando Bonilla Flores',
+          linkedin: 'https://www.linkedin.com/in/bonijaviere/',
+        },
+        {
+          nombre: 'William Roberto Nuñez Huamani',
+          linkedin: 'https://www.linkedin.com/in/williamrnunez/',
+        },
+        {
+          nombre: 'Yoe Sebastian Castro Gomez',
+          linkedin: 'https://www.linkedin.com/in/yoe-sebastian-castro-gomez-9540423a6/',
+        },
+      ],
+      enlaces: [
+        {
+          tipo: 'demo',
+          url: 'https://defiendelo-six.vercel.app/',
+        },
+        {
+          tipo: 'repositorio',
+          url: 'https://github.com/YoeCastroGomez/Defiendelo',
+        },
+        {
+          tipo: 'presentacion',
+          url: 'https://www.canva.com/design/DAHZm0H8U4o/P9Fts9JvnacfMhl8BTOwBg/view',
+        },
+      ],
+    },
+    {
+      id: 'defiendelo-phi',
+      nombre: 'Defiéndelo',
+      equipo: 'Phi',
+      descripcion: 'Ayuda al docente a rediseñar tareas para un contexto en el que los alumnos pueden usar IA. La entrega se acompaña de preguntas sobre las decisiones del estudiante, una defensa y evidencias para que el docente decida la evaluación.',
+      premio: null,
+      integrantes: [
+        {
+          nombre: 'Divano Estefano Perez Nina',
+          linkedin: 'https://www.linkedin.com/in/divano-estefano-perez-nina/',
+        },
+        {
+          nombre: 'Jack Johann Mendoza Muñoz',
+          linkedin: 'https://www.linkedin.com/in/jack-mendoza-mu%C3%B1oz-813035243/',
+        },
+        {
+          nombre: 'Jhamil Brijan Peña Cardenas',
+          linkedin: 'https://www.linkedin.com/in/jhamilpcardenas/',
+        },
+        {
+          nombre: 'Shirley Franshesca Huaringa Alvan',
+          linkedin: 'https://www.linkedin.com/in/shirley-h-4316a532b/',
+        },
+      ],
+      enlaces: [
+        {
+          tipo: 'demo',
+          url: 'https://defiendelo.vercel.app/',
+        },
+        {
+          tipo: 'repositorio',
+          url: 'https://github.com/Jaed69/defiendelo',
+        },
+        {
+          tipo: 'presentacion',
+          url: 'https://docs.google.com/presentation/d/1DgL5T4Dwu2TDAz6p-e07r0oFC3XJYtrJ/edit',
+        },
+      ],
+    },
+    {
+      id: 'escalon-cero',
+      nombre: 'Escalón Cero',
+      equipo: 'Anomalía04',
+      descripcion: 'Un espacio para practicar con casos de trabajo junior antes del primer empleo. El estudiante sigue una ruta, desarrolla un proyecto y recibe retroalimentación sobre su entrega; las evidencias conectan la práctica con oportunidades de postulación.',
+      premio: null,
+      integrantes: [
+        {
+          nombre: 'Emyr Ioseff Vasquez Riofrio',
+          linkedin: 'https://www.linkedin.com/in/emyr-vasquez-riofrio-37861835a/',
+        },
+        {
+          nombre: 'Gustavo Marcelo Monge Tovar',
+          linkedin: 'https://www.linkedin.com/in/marcelo-monge-tovar/',
+        },
+        {
+          nombre: 'Jhon Mejia Quispe',
+          linkedin: 'https://www.linkedin.com/in/jhon-mejia-39a080311/',
+        },
+      ],
+      enlaces: [
+        {
+          tipo: 'demo',
+          url: 'https://escalon-cero-seven.vercel.app/',
+        },
+        {
+          tipo: 'repositorio',
+          url: 'https://github.com/EmyrVasquez/escalon-cero',
+        },
+      ],
+    },
+    {
+      id: 'teachforge',
+      nombre: 'TeachForge',
+      equipo: 'Team MagIA',
+      descripcion: 'Recoge experiencias de docentes con trayectoria y las convierte en casos que ellos mismos revisan y validan. Quienes se están formando pueden practicar con alumnos simulados y recibir retroalimentación sobre sus decisiones pedagógicas.',
+      premio: null,
+      integrantes: [
+        {
+          nombre: 'Jorge Adriano Navarro Guevara',
+          linkedin: 'https://www.linkedin.com/in/jorge-adriano-navarro-guevara/',
+        },
+        {
+          nombre: 'Nick Sebastián Bazán Camavilca',
+          linkedin: 'https://www.linkedin.com/in/nick-bazán-camavilca-13a954412/',
+        },
+        {
+          nombre: 'Santiago Alfredo Chumpitaz Torres',
+          linkedin: 'https://www.linkedin.com/in/santiagochumpitaz/',
+        },
+        {
+          nombre: 'Yamile Del Aguila Valera',
+          linkedin: 'https://www.linkedin.com/in/yamile-del-aguila-valera-aa57a9402/',
+        },
+      ],
+      enlaces: [
+        {
+          tipo: 'demo',
+          url: 'https://teachforge-silk.vercel.app/',
+        },
+        {
+          tipo: 'presentacion',
+          url: 'https://www.canva.com/design/DAHZnc8LDus/SvTNvj6Jh5r2zZKTIl0haw/view',
+        },
+      ],
+    },
+  ],
+}
+
+/** Patrocinio comparte las mismas fotos curadas; no hay una segunda lista editorial. */
+export const galeriaSponsors = [fotosDscHack[1], fotosDscHack[2], fotosDscHack[0]]

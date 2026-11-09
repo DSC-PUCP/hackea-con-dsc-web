@@ -14,7 +14,7 @@
 import { leerRangos } from '../sheets/cliente.ts'
 import { aFilas } from '../sheets/filas.ts'
 
-import { eventosDesdeFilas, personasDesdeFilas } from './esquemas.ts'
+import { equipoDesdeFilas, eventosDesdeFilas, personasDesdeFilas } from './esquemas.ts'
 import type { ContenidoEventos } from './types.ts'
 
 /**
@@ -60,9 +60,12 @@ export async function leerEventosDesdeSheets(): Promise<ContenidoEventos | null>
 
   try {
     const [eventos, personas] = await leerRangos(idHoja, RANGOS)
+    const fichas = aFilas(personas)
+    const indicePersonas = personasDesdeFilas(fichas)
 
     return {
-      eventos: eventosDesdeFilas(aFilas(eventos), personasDesdeFilas(aFilas(personas))),
+      eventos: eventosDesdeFilas(aFilas(eventos), indicePersonas),
+      equipo: equipoDesdeFilas(fichas, indicePersonas),
     }
   } catch (error) {
     console.error('[eventos] no se pudo leer la hoja; la agenda no se muestra:', error)
