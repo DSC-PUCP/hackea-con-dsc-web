@@ -378,8 +378,8 @@ Todos los textos están en [`lib/site-config.ts`](../lib/site-config.ts), en `co
 Las frases de las piezas se pueden **reescribir** para la web, siempre que conserven su
 sentido. El cierre de la portada es el ejemplo: la pieza 2 dice *«Un programa. Muchos
 eventos. Una comunidad que crece contigo.»* y la web dice *«Un programa. **Muchos
-eventos.** Un solo grupo.»*, porque ahí el botón lleva al grupo de WhatsApp. «Muchos
-eventos» sigue en verde, igual que en la pieza.
+eventos.** Una comunidad.»*, porque el cierre lleva al grupo general de DSC PUCP.
+«Muchos eventos» sigue en verde, igual que en la pieza.
 
 `/sponsors` es la excepción de tono: la lee una empresa, así que su contenido (que sale de
 la hoja) es sobrio, y de la voz nueva solo lleva la micro-copia y una dosis baja de los

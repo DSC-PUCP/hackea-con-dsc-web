@@ -134,7 +134,7 @@
   html {
     scroll-behavior: smooth;
     /* Compensa el header sticky cuando se navega con anclas (#que-es). */
-    scroll-padding-top: 8rem;
+    scroll-padding-top: 5.5rem;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -153,13 +153,6 @@
   :focus-visible {
     outline: 2px solid var(--brand-purple);
     outline-offset: 3px;
-  }
-}
-
-/* La segunda fila de navegación solo ocupa espacio en teléfonos. */
-@media (min-width: 768px) {
-  html {
-    scroll-padding-top: 5.5rem;
   }
 }
 

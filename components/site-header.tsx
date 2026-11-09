@@ -13,7 +13,7 @@ import { copy, links, navegacion, site } from '@/lib/site-config'
  * las dos ramas del render (ancla y ruta) y tienen que verse idénticas.
  */
 const CLASE_ENLACE =
-  'inline-flex min-h-10 items-center whitespace-nowrap font-subtitle text-sm text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:text-brand-green'
+  'font-subtitle text-sm text-muted-foreground transition-colors hover:text-foreground'
 
 /**
  * Barra superior. La comparten todas las páginas (se monta en app/layout.tsx).
@@ -52,45 +52,49 @@ export function SiteHeader() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         conScroll
-          ? 'border-border bg-background/95 backdrop-blur-xl'
-          : 'border-border/50 bg-background/90 md:border-transparent md:bg-transparent'
+          ? 'border-b border-border bg-background/80 backdrop-blur-xl'
+          : 'border-b border-transparent bg-transparent'
       }`}
     >
-      {/* Dos filas en móvil mantienen los tres destinos visibles sin desplegable ni JS. */}
-      <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 px-5 pt-3 md:flex md:justify-between md:gap-7 md:px-6 md:py-3.5">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-3.5 sm:gap-4 md:px-6">
         <LogoEnlace destino={enLaPortada ? '#top' : '/'} />
-        <a
-          href={links.whatsapp}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={copy.header.comunidadAria}
-          title={copy.header.comunidadAria}
-          className="btn-brand col-start-2 row-start-1 inline-flex min-h-10 items-center gap-2 rounded-full px-3 py-2 font-subtitle text-xs font-semibold md:order-last md:px-4 md:text-sm"
-        >
-          <MessageCircle className="size-4" aria-hidden />
-          <span>{copy.header.comunidadLabel}</span>
-        </a>
-        <nav aria-label={copy.header.navegacionAria} className="col-span-2 mt-2 flex min-w-0 items-center justify-between gap-3 border-t border-border py-2 md:mt-0 md:ml-auto md:justify-end md:gap-6 md:border-t-0 md:py-0">
-          {navegacion.map((enlace) => {
-            const destino = resolverDestino(enlace.href)
-            return destino.startsWith('#') ? (
-              <a key={enlace.href} href={destino} className={CLASE_ENLACE}>
-                {enlace.label}
-              </a>
-            ) : (
-              <Link
-                key={enlace.href}
-                href={destino}
-                aria-current={ruta === destino ? 'page' : undefined}
-                className={CLASE_ENLACE}
-              >
-                {enlace.label}
-              </Link>
-            )
-          })}
-        </nav>
+
+        <div className="flex shrink-0 items-center gap-2.5 sm:gap-5">
+          {/* Dos destinos caben en una fila; el recap se descubre desde el hero y el pie. */}
+          <nav aria-label={copy.header.navegacionAria} className="flex items-center gap-3.5 sm:gap-5">
+            {navegacion.map((enlace) => {
+              const destino = resolverDestino(enlace.href)
+              return destino.startsWith('#') ? (
+                <a key={enlace.href} href={destino} className={CLASE_ENLACE}>
+                  {enlace.label}
+                </a>
+              ) : (
+                <Link
+                  key={enlace.href}
+                  href={destino}
+                  aria-current={ruta === destino ? 'page' : undefined}
+                  className={CLASE_ENLACE}
+                >
+                  {enlace.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          <a
+            href={links.whatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={copy.header.comunidadAria}
+            title={copy.header.comunidadAria}
+            className="btn-brand inline-flex items-center gap-2 rounded-full px-2.5 py-2 font-subtitle text-sm font-semibold sm:px-4"
+          >
+            <MessageCircle className="size-4" aria-hidden />
+            <span className="hidden sm:inline">{copy.header.comunidadLabel}</span>
+          </a>
+        </div>
       </div>
     </header>
   )

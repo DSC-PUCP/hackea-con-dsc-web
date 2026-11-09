@@ -11,7 +11,8 @@ archivos, y varias de ellas se han tomado a propósito.
 Web pública de **Hack with DSC**, el programa de eventos del *Developer Student Club
 PUCP*: talleres, ponencias y hackathons para estudiantes de tecnología. La web es la
 cara pública del programa; su trabajo es que alguien entienda de qué va en 15 segundos
-y termine en el grupo de WhatsApp de la comunidad.
+y termine en el grupo comunitario general de **DSC PUCP**, para conocer nuevas
+iniciativas y conversar sobre tecnología. El grupo ya no es exclusivo de Hack with DSC.
 
 El "por qué" del programa está en [`docs/esencia.md`](docs/esencia.md). Es la fuente
 para cualquier texto sobre propósito, pilares o tono. **No inventes claims** sobre el
@@ -202,6 +203,13 @@ atributo existe.
 
 **Mantén ese patrón.** Antes de añadir `'use client'` a una sección, pregúntate si el
 efecto se puede lograr con una variable CSS o un atributo puesto desde fuera.
+
+### Navegación compacta
+
+El header conserva solo Agenda y Patrocinio, en una fila también en móvil, sin color
+verde para el enlace activo. DSC HACK se descubre desde el hero de portada y el pie.
+Las páginas secundarias pueden tener acceso desde secciones de portada y el pie;
+añadir una ruta no obliga a incorporarla al header.
 
 ### Añadir una página nueva
 

@@ -62,19 +62,17 @@ export const themeColor = '#0f0d1c'
 /**
  * Enlaces externos.
  *
- * `whatsapp` es el canal principal: es donde se anuncian los eventos, así que es el
- * destino de todas las llamadas a la acción mientras la web todavía no muestre la
- * agenda.
+ * `whatsapp` lleva a la comunidad general de DSC PUCP: nuevas iniciativas y
+ * conversaciones de tecnología, también después del cierre de Hack with DSC.
  *
  * Los que están en `null` se ocultan solos en la interfaz — no hay que borrar código
  * para esconderlos. Cuando exista la cuenta, se pone la URL acá y aparece.
  */
 export const links = {
   /**
-   * El grupo de la comunidad. Es de **Hack with DSC**: es a donde apuntan todos los CTA
-   * del sitio y donde se anuncian los eventos antes que en ninguna parte.
+   * El grupo pertenece a DSC PUCP; no es un canal exclusivo de este programa.
    */
-  whatsapp: 'https://chat.whatsapp.com/LTtmzZ6LkEpFYX6w6OFhrJ?s=cl&p=a&mlu=4&ilr=4',
+  whatsapp: 'https://chat.whatsapp.com/LwF4C37MnBkIpm9J0QIjar?s=cl&p=a&iam=2',
   instagram: 'https://www.instagram.com/dsc.pucp/',  
   albumDscHack: 'https://drive.google.com/drive/folders/1XI__YFq7X1q7BP6rehrd776fevibuvg1',
   anuncioNttData: 'https://www.linkedin.com/feed/update/urn:li:activity:7521394275788591104',
@@ -110,12 +108,10 @@ export const contactoDsc = {
 // ═════════════════════════════════════════════════════════════════════════════════
 
 /**
- * El recap abre la navegación al cerrar 2026. En móvil el header reparte marca y
- * comunidad en una fila, y estos tres destinos en otra: todos quedan accesibles sin JS.
- * Las anclas siguen admitiéndose para enlaces dentro de la portada.
+ * Solo Agenda y Patrocinio en el header para conservar una fila también en móvil.
+ * El recap se descubre desde el hero y el pie. Las anclas siguen admitiéndose.
  */
 export const navegacion = [
-  { href: '/dsc-hack', label: 'DSC HACK' },
   { href: '/agenda', label: 'Agenda' },
   { href: '/sponsors', label: 'Patrocinio' },
 ] as const
@@ -151,7 +147,7 @@ export const copy = {
      * son 350, y el logotipo más el enlace del menú más el botón con texto no caben. Sin
      * esta etiqueta, un lector de pantalla anunciaría «enlace» y nada más.
      */
-    comunidadAria: 'Únete a la comunidad en WhatsApp',
+    comunidadAria: 'Únete a la comunidad de DSC PUCP en WhatsApp',
     comunidadLabel: 'Comunidad',
     navegacionAria: 'Páginas del sitio',
     inicioAria: 'ir al inicio',
@@ -212,9 +208,9 @@ export const copy = {
     aliadoDescripcion: 'Gracias a NTT DATA por acompañar DSC HACK como sponsor oficial y recibir la final presencial en sus instalaciones.',
     aliadoEnlace: 'Conoce la colaboración',
     cierreTitulo: 'La edición terminó. La comunidad sigue.',
-    cierreIntro: 'Nos seguimos encontrando en el grupo de Hack with DSC. Comparte lo que estás construyendo y conecta con la comunidad.',
-    cierreCta: 'Únete a la comunidad',
-    bugleAlt: 'Bugle, la mascota de DSC PUCP, señalando hacia el enlace de la comunidad.',
+    cierreIntro: 'Nos seguimos encontrando en la comunidad de DSC PUCP. Entérate de nuevas iniciativas, comparte lo que construyes y conversa sobre los temas tech que te interesan.',
+    cierreCta: 'Únete a DSC PUCP',
+    bugleAlt: 'Bugle, la mascota de DSC PUCP, señalando hacia el enlace de su comunidad.',
     subtitulos: 'Español',
   },
 
@@ -244,19 +240,18 @@ export const copy = {
     pilaresTitulo: 'Las reglas de la casa.',
     pilaresIntro: 'Cuatro ideas que sostienen todo el programa. Las vas a escuchar seguido.',
     /**
-     * Cierre de la sección: va en el bloque morado, en letra de póster. `destacado` se
-     * marca con el rotulador verde. Reescribe la frase de la pieza 2 ("Una comunidad que
-     * crece contigo") para que desemboque en el grupo, que es a donde lleva el botón.
+     * La frase de la pieza 2 desemboca ahora en la comunidad general de DSC PUCP,
+     * que continúa después del cierre del programa.
      */
     cierre: {
       antes: 'Un programa.',
       destacado: 'Muchos eventos.',
-      despues: 'Un solo grupo.',
+      despues: 'Una comunidad.',
     },
     /** Texto alternativo de Bugle asomándose junto a los formatos. */
     bugleAsomadoAlt: 'Bugle, la mascota, asomándose por el borde con cara de travesura.',
     /** Texto alternativo de Bugle señalando el botón del bloque morado. */
-    bugleSenalandoAlt: 'Bugle, la mascota, señalando hacia el botón del grupo de WhatsApp.',
+    bugleSenalandoAlt: 'Bugle, la mascota, señalando hacia el grupo comunitario de DSC PUCP.',
   },
 
   /**
@@ -311,7 +306,7 @@ export const copy = {
     /** Cuando el evento está confirmado pero el enlace de Luma todavía no existe. */
     proximamente: 'Inscripción próximamente',
     /** En los eventos ya pasados, donde «Inscribirme» sería mentira. */
-    verEnLuma: 'Ver en Luma',
+    verEnLuma: 'Ver evento',
     /** `aria-label` del botón de compartir: va seguido de «: <nombre del evento>». */
     compartir: 'Compartir evento',
     /*
@@ -345,24 +340,24 @@ export const copy = {
      * grupo de WhatsApp.
      */
     vacio: {
-      titulo: 'La agenda se está cocinando',
+      titulo: 'No hay eventos publicados.',
       descripcion:
-        'Todavía no hay eventos publicados. Los anunciamos primero en el grupo de la ' +
-        'comunidad, así que entra ahí y te enteras apenas se confirmen.',
+        'Mientras tanto, conoce las nuevas iniciativas de DSC PUCP y conversa sobre ' +
+        'tecnología en su grupo comunitario.',
     },
   },
 
   cta: {
-    titulo: 'La comunidad sigue en el grupo.',
+    titulo: 'Sigue conectado con DSC PUCP.',
     descripcion:
-      'Cerramos la edición 2026 y seguimos conectados. Entra al WhatsApp de Hack with DSC ' +
-      'para compartir lo que construyes y conversar con la comunidad.',
-    boton: 'Entrar al grupo de WhatsApp',
-    nota: 'Abierto a toda la comunidad universitaria',
+      'Cerramos la edición 2026 y seguimos en la comunidad general de DSC PUCP. ' +
+      'Entérate de nuevas iniciativas y conversa sobre cualquier tema tech que te interese.',
+    boton: 'Únete a DSC PUCP',
+    nota: 'El grupo comunitario de DSC PUCP en WhatsApp',
   },
 
   footer: {
-    whatsapp: 'Grupo de WhatsApp',
+    whatsapp: 'WhatsApp de DSC PUCP',
     tagline: 'Del apunte al deploy Talleres, ponencias y hackathons del DSC PUCP',
     credito: 'Hecho con ⚡ por y para estudiantes',
     /** Rótulos de las dos columnas de enlaces. Sin ellos se leen como una sola lista. */
@@ -401,7 +396,7 @@ export const copy = {
   consola: [
     '❰ Hack with DSC ❱',
     '¿Inspeccionando el código? Ya eres de los nuestros.',
-    'Los talleres, ponencias y hackathons se anuncian primero en el grupo:',
+    'Nuevas iniciativas y conversaciones tech en la comunidad de DSC PUCP:',
   ],
 
   /** El código Konami (↑↑↓↓←→←→BA): Bugle cruza corriendo la pantalla. */

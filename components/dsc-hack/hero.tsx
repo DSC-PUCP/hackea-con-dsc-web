@@ -6,7 +6,7 @@ import { copy, recapDscHack } from '@/lib/site-config'
 
 export function HeroDscHack() {
   return (
-    <section id="top" className="relative isolate overflow-hidden pt-36 pb-8 md:pt-32 lg:pt-36">
+    <section id="top" className="relative isolate overflow-hidden pt-28 pb-8 md:pt-32 lg:pt-36">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="bg-brand-grid absolute inset-0 opacity-60" />
         <div className="glow-purple absolute top-[-20rem] left-[-20rem] size-[60rem]" />

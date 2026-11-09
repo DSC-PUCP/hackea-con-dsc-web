@@ -134,7 +134,8 @@ código garantiza que se desincronice.
 Así que la agenda solo dice de eventos lo que puede decir leyendo la hoja. Nada de fechas
 cableadas, y **nada de contenido de reserva** para la agenda: si la hoja no se puede leer,
 la lista no se pinta. Una fecha vieja es peor que ninguna fecha, y el canal de anuncios de
-respaldo sigue siendo el grupo de WhatsApp, que es a donde apuntan todos los CTA.
+respaldo es la comunidad general de DSC PUCP en WhatsApp, donde se comparten nuevas
+iniciativas y se conversa sobre tecnología.
 
 Ojo con la diferencia entre sección y página, porque cambia lo que hay que construir: una
 sección que se queda sin datos devuelve `null` y desaparece, y con eso basta. **Una ruta
@@ -163,6 +164,29 @@ recap. Las inscripciones aprobadas se rotulan como tales, sin convertirlas en as
 Patrocinio conserva lector, esquemas y caché. Las pestañas `Niveles` y `Beneficios`
 representan modalidades abiertas de colaboración, con alcance sujeto a coordinación;
 el nombre técnico de las pestañas se conserva para mantener el contrato del CMS.
+
+### Navegación y comunidad
+
+El header muestra Agenda y Patrocinio en una sola fila, también en móvil. El enlace
+actual conserva `aria-current` sin resaltado verde. DSC HACK tiene acceso desde el
+hero de portada y desde el pie; no necesita una entrada en el header.
+
+`links.whatsapp` es el grupo general de DSC PUCP, compartido por todas las llamadas a
+la comunidad. Los textos presentan nuevas iniciativas y conversaciones de tecnología,
+sin prometer un canal exclusivo de Hack with DSC ni anuncios de eventos en primicia.
+El contacto comercial de patrocinio sigue siendo un destino distinto, gestionado en su CMS.
+
+La página de Organización queda para una siguiente sesión: voluntarios y aportes,
+con acceso previsto desde una sección breve al final de la portada y desde el pie.
+Mientras esa página no exista, no se publica una sección ni un enlace vacío.
+
+Las identidades del equipo ya se guardan en `Info Personas (Web)`, en la misma hoja
+de eventos. `Equipo organizador` es una casilla de pertenencia al roster y `Rol en el
+programa` conserva su rol de organización, separado del cargo profesional. Estas dos
+columnas todavía no forman parte del objeto público `Persona`: la agenda sigue
+extrayendo solo sus campos explícitos. La futura página debe reutilizar esos IDs y
+curar los aportes individuales antes de publicarlos. Los roles de mentor y jurado
+pertenecen al evento, en las columnas respectivas de `Info Eventos (Web)`.
 
 ---
 

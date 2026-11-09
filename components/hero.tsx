@@ -28,7 +28,7 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative isolate flex min-h-[100svh] flex-col justify-center overflow-hidden pt-36 pb-0 md:pt-28 lg:pt-24"
+      className="relative isolate flex min-h-[100svh] flex-col justify-center overflow-hidden pt-28 pb-0 lg:pt-24"
     >
       {/* ── Fondo ───────────────────────────────────────────────────────────── */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
