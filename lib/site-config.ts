@@ -14,6 +14,42 @@
 
 import type { FotoRecap, ProyectoRecap } from './dsc-hack/types.ts'
 
+/** Reseñas históricas públicas por ID. La pertenencia y las identidades las decide Sheets. */
+export const aportesOrganizacion: Record<string, { aporte: string; reconocimiento?: string }> = {
+  GIANO: { aporte: 'Coordinación del programa', reconocimiento: 'Por impulsar el programa y acompañar al equipo de principio a fin.' },
+  PAMELA: { aporte: 'Organización y diseño', reconocimiento: 'Por unir organización y diseño para darle forma al programa.' },
+  FABI: { aporte: 'Organización y comunicación', reconocimiento: 'Por su iniciativa para organizar encuentros y conectar con la comunidad.' },
+  LEO: { aporte: 'Organización y apoyo al equipo', reconocimiento: 'Por estar presente y sumar al equipo a lo largo del programa.' },
+  SAMIR: { aporte: 'Organización y difusión', reconocimiento: 'Por sacar adelante encuentros y ayudar a que llegaran a más personas.' },
+  FABIOLA: { aporte: 'Organización, diseño y difusión', reconocimiento: 'Por sumar desde la organización, la creatividad y el trabajo en equipo.' },
+  ANGIE: { aporte: 'Organización y comunicación', reconocimiento: 'Por su dedicación a la organización y a mantener conectada a la comunidad.' },
+  PIERO: { aporte: 'Organización y comunicación', reconocimiento: 'Por su compromiso y buena chamba en los encuentros y su comunicación.' },
+  MATIAS_RIOS: { aporte: 'Fotografía' },
+  KEYLA_BRAVO: { aporte: 'Apoyo logístico' },
+  LEANDRO: { aporte: 'Apoyo en los encuentros' },
+  FERNANDO: { aporte: 'Desarrollo web y apoyo en los encuentros' },
+  BRYCE_HUAQUI: { aporte: 'Apoyo y difusión' },
+  FREDJUN: { aporte: 'Organización y logística' },
+  CARLOS_ESTRADA: { aporte: 'Diseño y difusión' },
+  ARIADNA_FLOREZ: { aporte: 'Contenido audiovisual' },
+  BREIGZON_TURCO: { aporte: 'Apoyo en alianzas' },
+  FREDY: { aporte: 'Apoyo en alianzas' },
+  ANTHONY_LOPEZ: { aporte: 'Apoyo y difusión' },
+  ALVARO_VARGAS: { aporte: 'Apoyo logístico' },
+  RENZO_AREVALO: { aporte: 'Apoyo en los encuentros' },
+  REBECA_HINOJOSA: { aporte: 'Apoyo y diseño' },
+  VICTOR_CCOSI: { aporte: 'Apoyo al equipo' },
+}
+
+export const seoOrganizacion = {
+  title: 'Organización — Hack with DSC 2026',
+  description: 'Conoce al equipo de voluntarios de DSC PUCP que hizo posible Hack with DSC 2026 y los aportes que sumaron al programa.',
+  ogImagen: '/og-organizacion.jpg',
+  ogAlt: 'El equipo detrás de Hack with DSC 2026.',
+  ogTitulo: 'EL EQUIPO',
+  ogResumen: 'La chamba tiene nombres.',
+} as const
+
 // ═════════════════════════════════════════════════════════════════════════════════
 // Identidad del sitio
 // ═════════════════════════════════════════════════════════════════════════════════
@@ -132,6 +168,7 @@ export const navegacionPie = [
   { href: '/dsc-hack', label: 'DSC HACK' },
   { href: '/agenda', label: 'Agenda' },
   { href: '/sponsors', label: 'Patrocinio' },
+  { href: '/organizacion', label: 'Organización' },
 ] as const
 
 // ═════════════════════════════════════════════════════════════════════════════════
@@ -139,6 +176,28 @@ export const navegacionPie = [
 // ═════════════════════════════════════════════════════════════════════════════════
 
 export const copy = {
+  organizacion: {
+    eyebrow: 'Organización · Hack with DSC 2026',
+    titulo: 'La chamba tiene nombres.',
+    intro: 'Detrás de cada encuentro hubo un equipo de voluntarios de DSC PUCP. ' +
+      'Estas son las personas que hicieron posible Hack with DSC.',
+    fotoPie: 'Parte del equipo organizador en el cierre DSC HACK.',
+    destacadosTitulo: 'Una mención especial.',
+    destacadosIntro: 'Por la dedicación, la iniciativa y la buena chamba a lo largo del programa. Gracias por dar ese extra.',
+    equipoTitulo: 'Cada aporte cuenta.',
+    equipoIntro: 'Organización, diseño, difusión y apoyo en los encuentros. El programa se hizo en equipo.',
+    aporteGeneral: 'Equipo organizador',
+    linkedin: 'LinkedIn',
+    github: 'GitHub',
+    perfilAria: (red: string, nombre: string) => `${red} de ${nombre}`,
+    vacio: 'Estamos preparando las fichas del equipo. Mientras tanto, seguimos en la comunidad de DSC PUCP.',
+    portada: {
+      etiqueta: 'El equipo detrás',
+      titulo: 'Esto se hizo en comunidad.',
+      descripcion: 'Conoce a quienes pusieron tiempo, ideas y chamba para hacer posible Hack with DSC.',
+      boton: 'Conoce al equipo',
+    },
+  },
   header: {
     /**
      * Etiqueta accesible del botón de WhatsApp cuando se queda sin texto.
@@ -674,6 +733,11 @@ const fotosDscHack: FotoRecap[] = [
     encuadre: '50% 50%',
   },
 ]
+
+export const organizacion = {
+  ruta: '/organizacion',
+  foto: fotosDscHack[6],
+} as const
 
 export const recapDscHack: {
   fotoPortada: FotoRecap

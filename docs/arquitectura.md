@@ -7,7 +7,7 @@ Google Sheets —`/sponsors` o `/agenda`—, la §3 es tu documento.
 
 ## 1. Estado actual
 
-**Cuatro páginas**, pre-generadas:
+**Cinco páginas**, pre-generadas:
 
 | Ruta | Qué es | De dónde sale su contenido |
 | --- | --- | --- |
@@ -15,6 +15,7 @@ Google Sheets —`/sponsors` o `/agenda`—, la §3 es tu documento.
 | `/dsc-hack` | Recap histórico del evento final, con proyectos y fotos | del repo (`lib/site-config.ts`), sin CMS |
 | `/agenda` | Agenda del programa | de Google Sheets, sin contenido de reserva |
 | `/sponsors` | Resultados y futuras colaboraciones | de Google Sheets, con respaldo en el repo |
+| `/organizacion` | Equipo de voluntarios y menciones especiales | identidades de Sheets; reseñas generales históricas por ID en el repo |
 
 ```
 Navegador
@@ -176,17 +177,30 @@ la comunidad. Los textos presentan nuevas iniciativas y conversaciones de tecnol
 sin prometer un canal exclusivo de Hack with DSC ni anuncios de eventos en primicia.
 El contacto comercial de patrocinio sigue siendo un destino distinto, gestionado en su CMS.
 
-La página de Organización queda para una siguiente sesión: voluntarios y aportes,
-con acceso previsto desde una sección breve al final de la portada y desde el pie.
-Mientras esa página no exista, no se publica una sección ni un enlace vacío.
+La página `/organizacion` reconoce a los voluntarios, con acceso desde una sección
+breve al final de portada y desde el pie. El header conserva sus dos enlaces.
 
 Las identidades del equipo ya se guardan en `Info Personas (Web)`, en la misma hoja
 de eventos. `Equipo organizador` es una casilla de pertenencia al roster y `Rol en el
 programa` conserva su rol de organización, separado del cargo profesional. Estas dos
-columnas todavía no forman parte del objeto público `Persona`: la agenda sigue
-extrayendo solo sus campos explícitos. La futura página debe reutilizar esos IDs y
-curar los aportes individuales antes de publicarlos. Los roles de mentor y jurado
+columnas se usan solo en el servidor para seleccionar al equipo; `Rol en el programa`
+no se envía al frontend. La página reutiliza los IDs y las fichas públicas validadas
+de la agenda. Los roles de mentor y jurado
 pertenecen al evento, en las columnas respectivas de `Info Eventos (Web)`.
+
+`ContenidoEventos.equipo` comparte lectura, caché de una hora y etiqueta `eventos` con
+la agenda. Tanto `Mostrable` como `Equipo organizador` deben ser afirmativos. Solo
+Sheets decide pertenencia, nombre, retrato y perfiles. `aportesOrganizacion`, en
+`site-config.ts`, añade áreas generales y agradecimientos históricos por ID; no es un
+segundo roster: una entrada sin ficha publicable nunca se muestra, y una ficha nueva
+sin reseña recibe el rótulo general de equipo organizador. La curación parte del
+registro de tareas ejecutadas aportado por el dueño; las fuentes y el detalle permanecen
+en `internals/organizacion/`. Las ocho menciones fueron confirmadas por el dueño.
+
+Sin credenciales, con hoja vacía o en un arranque sin datos disponibles, la ruta mantiene
+cabecera, foto y un estado vacío con salida a la comunidad. La portada conserva su
+invitación estática. No se añade una copia local de las identidades ni se escribe en el
+CMS al preparar la página para revisión. Los retratos pendientes usan iniciales.
 
 ---
 

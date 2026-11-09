@@ -34,7 +34,7 @@ import { hayCredencialesDeGoogle } from '../sheets/cliente.ts'
 
 import { hoyEnLima, yaPaso } from './fechas.ts'
 import { leerEventosDesdeSheets } from './sheets.ts'
-import type { Evento } from './types.ts'
+import type { Evento, Persona } from './types.ts'
 
 /**
  * La etiqueta de caché de la agenda. Se exporta para que `/api/revalidate` la use en su
@@ -47,6 +47,13 @@ const leerConCache = unstable_cache(leerEventosDesdeSheets, ['eventos'], {
   revalidate: 3600,
   tags: [ETIQUETA_EVENTOS],
 })
+
+/** Comparte lectura, fichas y revalidación con la agenda; no mantiene otro roster. */
+export async function obtenerEquipoOrganizador(): Promise<Persona[]> {
+  if (!hayCredencialesDeGoogle()) return []
+  const contenido = await leerConCache()
+  return contenido?.equipo ?? []
+}
 
 /** La agenda partida en dos, que es como la pinta la página. */
 export type Agenda = {

@@ -81,7 +81,8 @@ export type Evento = {
   permiteExternos: boolean | null
 }
 
-/** Todo lo que la sección de agenda necesita para renderizarse. */
+/** Datos públicos de la hoja compartida por Agenda y Organización. */
 export type ContenidoEventos = {
   eventos: Evento[]
+  equipo: Persona[]
 }

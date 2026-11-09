@@ -60,9 +60,15 @@ Corolarios prácticos:
 
 ### 2.2 Agenda en Sheets; recap histórico curado en el repo
 
-El sitio tiene **cuatro páginas**: la portada (cierre de 2026, resultados y explicación
+El sitio tiene **cinco páginas**: la portada (cierre de 2026, resultados y explicación
 del programa), `/dsc-hack` (recap del evento final), `/agenda` y `/sponsors`
-(resultados y futuras colaboraciones).
+(resultados y futuras colaboraciones), y `/organizacion` (equipo y reconocimientos).
+
+Organización reutiliza las identidades de `Info Personas (Web)`: `Mostrable` y
+`Equipo organizador` determinan quién aparece. Los aportes históricos públicos y las
+menciones aprobadas viven por ID en `lib/site-config.ts` → `aportesOrganizacion`.
+Publicar solo áreas generales y agradecimientos breves; el detalle de tareas permanece
+interno. Sin credenciales se muestra un estado vacío, sin duplicar el roster en el repo.
 
 La agenda estuvo un tiempo en la portada y se movió a su propia ruta: es contenido que
 crece y que se comparte por su cuenta, y al final de la portada obligaba a recorrer el
@@ -119,11 +125,12 @@ app/
   layout.tsx            tipografías, metadatos, clase `js`, y el ARMAZÓN COMÚN:
                         header, pie, PointerParallax, ScrollReveal y los huevos de
                         pascua (Konami + KonamiEscena)
-  page.tsx              la portada `/`: solo su <main> con Hero + QueEs
+  page.tsx              portada: Hero + QueEs + acceso breve a Organización
   agenda/page.tsx       la agenda `/agenda`: lee la hoja UNA vez y reparte entre las
                         dos listas, con el aviso del grupo (barra de póster) en medio.
                         Tiene estado vacío porque una ruta no se esconde
   dsc-hack/page.tsx     recap histórico 2026: proyectos, resultados, fotos y reconocimiento
+  organizacion/page.tsx equipo de voluntarios y menciones, con identidades de Sheets
   sponsors/page.tsx     la página de patrocinio `/sponsors`: solo su <main>
   not-found.tsx         la 404: Bugle perdido, con el «404» puesto encima como texto
   globals.css           SISTEMA DE DISEÑO (colores, utilidades, animaciones)
@@ -148,6 +155,7 @@ components/
                         enlace a LinkedIn
   dsc-hack/             recap de servidor: catálogo único y medios opcionales; las fotos
                         se amplían con enlaces nativos, sin depender de JavaScript
+  organizacion/         fichas públicas y menciones del equipo (servidor)
   site-header.tsx       barra superior (cliente: cambia al hacer scroll)
   site-footer.tsx       pie, rematado por el mural ❰ HACK WITH DSC ❱
   pointer-parallax.tsx  cliente: publica la posición del cursor en variables CSS
@@ -207,7 +215,8 @@ efecto se puede lograr con una variable CSS o un atributo puesto desde fuera.
 ### Navegación compacta
 
 El header conserva solo Agenda y Patrocinio, en una fila también en móvil, sin color
-verde para el enlace activo. DSC HACK se descubre desde el hero de portada y el pie.
+verde para el enlace activo. DSC HACK se descubre desde el hero de portada y el pie;
+Organización, desde el cierre de portada y el pie.
 Las páginas secundarias pueden tener acceso desde secciones de portada y el pie;
 añadir una ruta no obliga a incorporarla al header.
 

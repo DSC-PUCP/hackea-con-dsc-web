@@ -102,6 +102,7 @@ En Next.js moderno la estructura de carpetas de `app/` **es** el mapa de rutas:
 
 - `app/page.tsx` → `/` (la portada)
 - `app/dsc-hack/page.tsx` → `/dsc-hack` (recap de la edición 2026)
+- `app/organizacion/page.tsx` → `/organizacion` (equipo desde Sheets y reconocimientos generales)
 - `app/agenda/page.tsx` → `/agenda` (contenido de Sheets)
 - `app/sponsors/page.tsx` → `/sponsors` (colaboraciones, contenido de Sheets)
 - `app/api/health/route.ts` → `/api/health`

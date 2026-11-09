@@ -307,6 +307,7 @@ previsualizaciones específicas; Agenda conserva la del programa:
 | `public/og.jpg` | `/` | halos azul + rojo + morado |
 | `public/og-sponsors.jpg` | `/sponsors` | halos morado + verde, y el rótulo «PATROCINIO» |
 | `public/og-dsc-hack-2026.jpg` | `/dsc-hack` | foto del cierre, panel tinta y edición 2026 |
+| `public/og-organizacion.jpg` | `/organizacion` | foto del staff, panel tinta y rótulo «EL EQUIPO» |
 
 Las de portada y patrocinio se componen con el logotipo y con Bugle sobre el degradado de marca. El wordmark
 va **como imagen**, no como texto, así que no dependen de las tipografías comerciales.
@@ -321,6 +322,12 @@ con `pnpm assets:recap` (`scripts/prepare-recap-og.mjs`): lee los seis tokens de
 la foto/textos públicos de `site-config.ts`, para conservar una sola fuente de verdad.
 Los originales y el manifiesto de procedencia quedan internos; los WebP optimizados,
 sin metadatos EXIF, viven en `public/dsc-hack/`.
+
+Organización reutiliza la foto curada del staff, sin presentarla como el equipo completo.
+Su imagen social se regenera con `pnpm assets:organizacion` y conserva la foto entera.
+En la página, las menciones especiales tienen superficie tinta y borde morado; el resto
+del equipo usa fichas compactas separadas por filetes. No suma un bloque morado a la
+portada: el acceso es una sección sobre tinta, después del llamado a la comunidad.
 
 ### El grano
 

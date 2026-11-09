@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "assets": "node scripts/prepare-assets.mjs",
     "assets:recap": "node --experimental-strip-types scripts/prepare-recap-og.mjs",
+    "assets:organizacion": "node --experimental-strip-types scripts/prepare-organizacion-og.mjs",
     "probar:sponsors": "node --experimental-strip-types --env-file-if-exists=.env scripts/probar-sponsors.mjs",
     "probar:eventos": "node --experimental-strip-types --env-file-if-exists=.env scripts/probar-eventos.mjs"
   },
