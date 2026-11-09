@@ -62,28 +62,10 @@ export function SiteHeader() {
         <LogoEnlace destino={enLaPortada ? '#top' : '/'} />
 
         <div className="flex shrink-0 items-center gap-2.5 sm:gap-5">
-          {/*
-            Visible SIEMPRE, también en móvil. Antes era `hidden sm:flex` y por debajo de
-            640 px el menú entero desaparecía: `/sponsors` no tenía ni un solo camino
-            desde un teléfono. Cabe porque el menú son solo rutas — ver `navegacion` en
-            lib/site-config.ts.
-
-            Los espacios se aprietan en móvil (`gap-3.5` en vez de `gap-5`) desde que el
-            menú tiene DOS entradas. A 390 px la barra va justa: logotipo + Agenda +
-            Patrocinio + el botón de WhatsApp en modo icono. Si hiciera falta una tercera
-            entrada, ya no cabe y toca desplegable — no se resuelve apretando más.
-          */}
-          <nav aria-label="Páginas del sitio" className="flex items-center gap-3.5 sm:gap-5">
+          {/* Dos destinos caben en una fila; el recap se descubre desde el hero y el pie. */}
+          <nav aria-label={copy.header.navegacionAria} className="flex items-center gap-3.5 sm:gap-5">
             {navegacion.map((enlace) => {
               const destino = resolverDestino(enlace.href)
-
-              /*
-               * Las anclas puras se dejan como `<a>`, para que el salto sea scroll suave
-               * en el mismo documento. Lo que navega pasa por `next/link`, que además es
-               * quien aplica el `basePath` cuando el sitio vive en un subdirectorio: un
-               * `<a href="/sponsors">` a pelo apuntaría a la raíz del dominio compartido
-               * y daría 404. Ver `assetPublico()` en lib/site-url.ts, mismo problema.
-               */
               return destino.startsWith('#') ? (
                 <a key={enlace.href} href={destino} className={CLASE_ENLACE}>
                   {enlace.label}
@@ -92,9 +74,6 @@ export function SiteHeader() {
                 <Link
                   key={enlace.href}
                   href={destino}
-                  // Marca en qué página estás. Con dos entradas importa más que con una:
-                  // «Agenda» y «Patrocinio» juntas sin ninguna señal de cuál está activa
-                  // dejan al lector sin saber dónde aterrizó.
                   aria-current={ruta === destino ? 'page' : undefined}
                   className={CLASE_ENLACE}
                 >
@@ -113,13 +92,7 @@ export function SiteHeader() {
             className="btn-brand inline-flex items-center gap-2 rounded-full px-2.5 py-2 font-subtitle text-sm font-semibold sm:px-4"
           >
             <MessageCircle className="size-4" aria-hidden />
-            {/*
-              El texto solo desde 640 px. En móvil el botón se queda con el icono: no es
-              una pérdida real, porque el hero trae el mismo destino en un botón grande a
-              media pantalla de distancia, y es lo que libera el sitio que necesita el
-              menú. La etiqueta accesible la pone el `aria-label` de arriba.
-            */}
-            <span className="hidden sm:inline">{copy.hero.ctaPrimario}</span>
+            <span className="hidden sm:inline">{copy.header.comunidadLabel}</span>
           </a>
         </div>
       </div>
@@ -158,7 +131,7 @@ function LogoEnlace({ destino }: { destino: string }) {
   )
 
   const clase = 'group flex min-w-0 items-center gap-2'
-  const etiqueta = `${site.name} — ir al inicio`
+  const etiqueta = `${site.name} — ${copy.header.inicioAria}`
 
   return destino.startsWith('#') ? (
     <a href={destino} aria-label={etiqueta} className={clase}>

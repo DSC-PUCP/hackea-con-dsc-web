@@ -1,10 +1,11 @@
 import { Hero } from '@/components/hero'
 import { QueEs } from '@/components/que-es'
+import { AccesoOrganizacion } from '@/components/portada/equipo'
 
 /**
  * Portada del sitio, en `/`.
  *
- * A propósito solo hay DOS secciones: la portada y "Qué es Hack with DSC". La agenda
+ * La portada reúne el hero, "Qué es Hack with DSC" y el acceso al equipo. La agenda
  * vivió acá un rato y se movió a su propia página (`/agenda`), por la misma razón que
  * `/sponsors` es una página y no una sección: es contenido que crece —doce eventos y
  * subiendo, más los que ya pasaron— y que se comparte por su cuenta. Enterrado al final
@@ -22,6 +23,7 @@ export default function Page() {
     <main>
       <Hero />
       <QueEs />
+      <AccesoOrganizacion />
     </main>
   )
 }

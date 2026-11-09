@@ -106,6 +106,24 @@ function normalizarId(valor: string): string {
   return valor.trim().toUpperCase()
 }
 
+/** Reutiliza la ficha pública y deja el rol interno fuera del objeto de persona. */
+export function equipoDesdeFilas(pestana: Pestana, personas: Map<string, Persona>): Persona[] {
+  const equipo: Persona[] = []
+  const vistos = new Set<string>()
+
+  for (const fila of pestana.filas) {
+    const id = normalizarId(fila.id_persona ?? '')
+    if (vistos.has(id)) continue
+    vistos.add(id)
+
+    if (!esMostrable(fila) || !esMostrable({ mostrable: fila.equipo_organizador })) continue
+    const persona = personas.get(id)
+    if (persona) equipo.push(persona)
+  }
+
+  return equipo
+}
+
 // ═════════════════════════════════════════════════════════════════════════════════════
 // Eventos
 // ═════════════════════════════════════════════════════════════════════════════════════

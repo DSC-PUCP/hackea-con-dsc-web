@@ -7,7 +7,7 @@ import type { Nivel, Textos } from '@/lib/sponsors/types'
 import { cn } from '@/lib/utils'
 
 /**
- * Niveles de alianza.
+ * Modalidades abiertas de colaboración; el contrato del CMS conserva el nombre Niveles.
  *
  * Dos cosas que el diseño tiene que respetar sí o sí:
  *
@@ -41,7 +41,7 @@ export function Niveles({ niveles, textos }: { niveles: Nivel[]; textos: Textos 
         disposicion="dividido"
       />
 
-      <ul className="mt-12 grid items-start gap-6 md:grid-cols-2 lg:mt-14 lg:grid-cols-3">
+      <ul className="mt-12 grid items-start gap-6 md:grid-cols-2 lg:mt-14 lg:grid-cols-2">
         {niveles.map((nivel, indice) => {
           const destacado = nivel.destacado
 

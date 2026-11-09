@@ -7,12 +7,15 @@ Google Sheets —`/sponsors` o `/agenda`—, la §3 es tu documento.
 
 ## 1. Estado actual
 
-**Dos páginas**, las dos pre-generadas:
+**Cinco páginas**, pre-generadas:
 
 | Ruta | Qué es | De dónde sale su contenido |
 | --- | --- | --- |
-| `/` | La portada: `Hero` + "Qué es Hack with DSC" | del repo (`lib/site-config.ts`) |
-| `/sponsors` | La página de patrocinio, que sustituye al deck de ventas | de Google Sheets, con respaldo en el repo |
+| `/` | Cierre de 2026, resultados y explicación del programa | del repo (`lib/site-config.ts`) |
+| `/dsc-hack` | Recap histórico del evento final, con proyectos y fotos | del repo (`lib/site-config.ts`), sin CMS |
+| `/agenda` | Agenda del programa | de Google Sheets, sin contenido de reserva |
+| `/sponsors` | Resultados y futuras colaboraciones | de Google Sheets, con respaldo en el repo |
+| `/organizacion` | Equipo de voluntarios y menciones especiales | identidades de Sheets; reseñas generales históricas por ID en el repo |
 
 ```
 Navegador
@@ -98,8 +101,8 @@ encaja con el requisito central del proyecto: **los colores existen en un solo l
 bloque `:root` de `globals.css`, y todo lo demás se deriva con `color-mix()`. Cambiar los
 6 tokens de marca repinta el sitio entero.
 
-**Solo tres componentes de cliente.** `site-header`, `pointer-parallax` y `scroll-reveal`.
-Los dos últimos no renderizan nada: publican estado (posición del cursor en variables CSS;
+**Movimiento separado del contenido.** `site-header` controla la navegación y el scroll;
+`pointer-parallax`, `scroll-reveal` y `konami` no renderizan nada: publican estado (posición del cursor en variables CSS;
 un atributo `data-visible`) y el CSS decide qué se mueve. Así toda la portada, con sus
 animaciones, sigue siendo un componente de servidor. Es el patrón que hay que mantener.
 
@@ -122,17 +125,18 @@ pnpm instalados: solo Docker.
 Bugle está iluminado para oscuro. En un tema claro habría que recalibrar toda la paleta
 para un resultado peor. Un solo set de tokens, sin `prefers-color-scheme`.
 
-### Por qué los eventos no se escriben en el repo
+### Por qué la agenda se lee de Sheets
 
 Decisión de producto, no limitación técnica. El programa se planifica en una hoja de
 cálculo que se mueve cada semana: fechas tentativas, lugares por confirmar, ponentes sin
 cerrar. Publicar eso y luego cambiarlo quema credibilidad, y mantenerlo a mano en el
 código garantiza que se desincronice.
 
-Así que la web solo dice de eventos lo que puede decir leyendo la hoja. Nada de fechas
+Así que la agenda solo dice de eventos lo que puede decir leyendo la hoja. Nada de fechas
 cableadas, y **nada de contenido de reserva** para la agenda: si la hoja no se puede leer,
 la lista no se pinta. Una fecha vieja es peor que ninguna fecha, y el canal de anuncios de
-respaldo sigue siendo el grupo de WhatsApp, que es a donde apuntan todos los CTA.
+respaldo es la comunidad general de DSC PUCP en WhatsApp, donde se comparten nuevas
+iniciativas y se conversa sobre tecnología.
 
 Ojo con la diferencia entre sección y página, porque cambia lo que hay que construir: una
 sección que se queda sin datos devuelve `null` y desaparece, y con eso basta. **Una ruta
@@ -144,6 +148,59 @@ Lo que sí es incierto y **no se publica** es el lugar: la hoja lo guarda como r
 interna («Pabellón V o A o donde sea») porque eso se decide tarde y se actualiza mejor en
 la propia página de Luma del evento. La web da nombre, tipo, cuándo, de qué va, quién
 participa y el botón para inscribirse.
+
+### Recap histórico de DSC HACK
+
+Al cerrar la edición 2026, el recap se publica en `/dsc-hack` con contenido curado y
+estable en `lib/site-config.ts`. Es la excepción aprobada a la regla de eventos:
+la agenda sigue leyendo Sheets. Los proyectos aparecen una sola vez, con sus premios,
+integrantes y recursos públicos verificados; no se importan hojas ni notas privadas.
+Las fuentes y la conciliación quedan en `internals/dsc-hack/`, ignorado por Git y Docker.
+
+Las fotos se sirven optimizadas desde `public/dsc-hack/`. Los medios de proyectos son
+opcionales: añadir una foto o video no exige duplicar la ficha ni deja huecos cuando falta.
+Las cifras del programa se usan en portada y patrocinio; las del evento final, en su
+recap. Las inscripciones aprobadas se rotulan como tales, sin convertirlas en asistencia.
+
+Patrocinio conserva lector, esquemas y caché. Las pestañas `Niveles` y `Beneficios`
+representan modalidades abiertas de colaboración, con alcance sujeto a coordinación;
+el nombre técnico de las pestañas se conserva para mantener el contrato del CMS.
+
+### Navegación y comunidad
+
+El header muestra Agenda y Patrocinio en una sola fila, también en móvil. El enlace
+actual conserva `aria-current` sin resaltado verde. DSC HACK tiene acceso desde el
+hero de portada y desde el pie; no necesita una entrada en el header.
+
+`links.whatsapp` es el grupo general de DSC PUCP, compartido por todas las llamadas a
+la comunidad. Los textos presentan nuevas iniciativas y conversaciones de tecnología,
+sin prometer un canal exclusivo de Hack with DSC ni anuncios de eventos en primicia.
+El contacto comercial de patrocinio sigue siendo un destino distinto, gestionado en su CMS.
+
+La página `/organizacion` reconoce a los voluntarios, con acceso desde una sección
+breve al final de portada y desde el pie. El header conserva sus dos enlaces.
+
+Las identidades del equipo ya se guardan en `Info Personas (Web)`, en la misma hoja
+de eventos. `Equipo organizador` es una casilla de pertenencia al roster y `Rol en el
+programa` conserva su rol de organización, separado del cargo profesional. Estas dos
+columnas se usan solo en el servidor para seleccionar al equipo; `Rol en el programa`
+no se envía al frontend. La página reutiliza los IDs y las fichas públicas validadas
+de la agenda. Los roles de mentor y jurado
+pertenecen al evento, en las columnas respectivas de `Info Eventos (Web)`.
+
+`ContenidoEventos.equipo` comparte lectura, caché de una hora y etiqueta `eventos` con
+la agenda. Tanto `Mostrable` como `Equipo organizador` deben ser afirmativos. Solo
+Sheets decide pertenencia, nombre, retrato y perfiles. `aportesOrganizacion`, en
+`site-config.ts`, añade áreas generales y agradecimientos históricos por ID; no es un
+segundo roster: una entrada sin ficha publicable nunca se muestra, y una ficha nueva
+sin reseña recibe el rótulo general de equipo organizador. La curación parte del
+registro de tareas ejecutadas aportado por el dueño; las fuentes y el detalle permanecen
+en `internals/organizacion/`. Las ocho menciones fueron confirmadas por el dueño.
+
+Sin credenciales, con hoja vacía o en un arranque sin datos disponibles, la ruta mantiene
+cabecera, foto y un estado vacío con salida a la comunidad. La portada conserva su
+invitación estática. No se añade una copia local de las identidades ni se escribe en el
+CMS al preparar la página para revisión. Los retratos pendientes usan iniciales.
 
 ---
 
@@ -252,8 +309,9 @@ fondo blanco, son de baja resolución y ese enlace puede desaparecer cualquier d
   el servidor: ocultar header, pie y CTAs, forzar fondo claro, `break-inside: avoid` en
   las tarjetas de nivel y mostrar el correo de contacto en el pie impreso. Cero
   JavaScript.
-- **Fotos de ediciones anteriores**: la galería existe y está vacía. Se llena agregando
-  archivos a `public/sponsors/` y entradas a `galeriaSponsors` en `lib/site-config.ts`.
+
+La galería de patrocinio usa tres referencias a las fotos curadas de DSC HACK 2026,
+definidas una sola vez en `site-config.ts` y servidas desde `public/dsc-hack/`.
 
 ### 3.1 El problema (eventos)
 
