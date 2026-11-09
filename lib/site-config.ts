@@ -791,7 +791,7 @@ export const recapDscHack: {
     {
       id: 'skillproof',
       nombre: 'SkillProof',
-      equipo: 'Assemblers',
+      equipo: 'Assemblerss',
       descripcion: 'Propone demostrar habilidades con desafíos técnicos, entregables y criterios de evaluación. Las evidencias se reúnen en un pasaporte compartible para que estudiantes que buscan su primera oportunidad puedan mostrar lo que saben hacer.',
       premio: 'segundo',
       integrantes: [
