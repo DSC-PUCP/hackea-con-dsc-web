@@ -17,11 +17,11 @@ import type { FotoRecap, ProyectoRecap } from './dsc-hack/types.ts'
 /** Reseñas históricas públicas por ID. La pertenencia y las identidades las decide Sheets. */
 export const aportesOrganizacion: Record<string, { aporte: string; reconocimiento?: string }> = {
   GIANO: { aporte: 'Coordinación del programa', reconocimiento: 'Por impulsar el programa y acompañar al equipo de principio a fin.' },
-  PAMELA: { aporte: 'Organización y diseño', reconocimiento: 'Por unir organización y diseño para darle forma al programa.' },
-  FABI: { aporte: 'Organización y comunicación', reconocimiento: 'Por su iniciativa para organizar encuentros y conectar con la comunidad.' },
+  PAMELA: { aporte: 'Organización y diseño', reconocimiento: 'Por unirse tanto en organización como en diseño para darle forma al programa.' },
+  FABI: { aporte: 'Organización y comunicación', reconocimiento: 'Por su iniciativa de apoyar cuando más se necesitaba.' },
   LEO: { aporte: 'Organización y apoyo al equipo', reconocimiento: 'Por estar presente y sumar al equipo a lo largo del programa.' },
-  SAMIR: { aporte: 'Organización y difusión', reconocimiento: 'Por sacar adelante encuentros y ayudar a que llegaran a más personas.' },
-  FABIOLA: { aporte: 'Organización, diseño y difusión', reconocimiento: 'Por sumar desde la organización, la creatividad y el trabajo en equipo.' },
+  SAMIR: { aporte: 'Organización y difusión', reconocimiento: 'Por impulsar varios eventos.' },
+  FABIOLA: { aporte: 'Organización, diseño y difusión', reconocimiento: 'Por sumar desde la organización, la diligencia y el trabajo en equipo.' },
   ANGIE: { aporte: 'Organización y comunicación', reconocimiento: 'Por su dedicación a la organización y a mantener conectada a la comunidad.' },
   PIERO: { aporte: 'Organización y comunicación', reconocimiento: 'Por su compromiso y buena chamba en los encuentros y su comunicación.' },
   MATIAS_RIOS: { aporte: 'Fotografía' },
